@@ -16,7 +16,8 @@ Renvoie STRICTEMENT cet objet JSON :
   "origine": "d'où cela vient, mécanismes plausibles (2-3 phrases, en français)",
   "manifestation": "comment cela se manifeste concrètement (1-2 phrases)",
   "effets": ["principaux effets / conséquences (1 à 4 éléments)"],
-  "conseils": ["pistes concrètes pour l'éviter ou l'atténuer (1 à 5 éléments)"]
+  "conseils": ["pistes concrètes pour l'éviter ou l'atténuer (1 à 5 éléments)"],
+  "related": ["2 à 4 symptômes digestifs liés, en français (noms courts)"]
 }`;
 }
 
@@ -31,6 +32,7 @@ interface RawDetail {
   manifestation?: unknown;
   effets?: unknown;
   conseils?: unknown;
+  related?: unknown;
 }
 
 export function toSymptomInfo(raw: RawDetail, name: string, model: string): SymptomInfo {
@@ -41,6 +43,7 @@ export function toSymptomInfo(raw: RawDetail, name: string, model: string): Symp
     manifestation: typeof raw.manifestation === 'string' ? raw.manifestation.trim() : '',
     effets: strArray(raw.effets, 4),
     conseils: strArray(raw.conseils, 5),
+    related: strArray(raw.related, 4),
     model,
     updatedAt: new Date().toISOString(),
   };

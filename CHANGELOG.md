@@ -9,9 +9,11 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 ### Encyclopédie (Repères)
 - **Sous-onglets** « Repères » / « Encyclopédie » dans l'écran Repères (fiches regroupées au même endroit).
 - **Échelle de Bristol illustrée** (glyphes SVG par type + couleurs).
-- **Recherche** dans l'encyclopédie (par nom ou manifestation).
+- **Recherche** + **filtre par catégorie** dans l'encyclopédie.
 - **Socle statique enrichi** (~35 symptômes classés par catégorie).
 - **Symptômes du Journal cliquables** → ouvrent leur fiche détaillée (origine / manifestation / effets / conseils).
+- **Pré-génération en masse** des fiches manquantes (« Tout détailler », séquentiel + progression + arrêt).
+- **Liens croisés** : chaque fiche propose des « symptômes liés » cliquables (champ `related` de l'IA).
 
 ### Dépôt
 - Premier commit public sur https://github.com/nouhailler/digestor.

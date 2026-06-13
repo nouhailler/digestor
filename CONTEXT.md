@@ -142,6 +142,16 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   est cliquable → `SymptomDetailSheet`. `SymptomGrid` accepte `onInfo`, `MealEditor` `onSymptomInfo`,
   propagés depuis `DayCard`/`JournalView` (clé → libellé + repère statique).
 
+## v0.9.6 — encyclopédie : masse, liens croisés, filtre
+
+- **Pré-génération en masse** : bouton « Tout détailler (N) » dans l'encyclopédie → détaille via l'IA
+  toutes les fiches manquantes du périmètre affiché (séquentiel, progression, arrêt, confirmation >20).
+  Coche verte sur les symptômes déjà détaillés (`getAllSymptomInfos`).
+- **Liens croisés** : `SymptomInfo.related` (renvoyé par l'IA) → chips « Symptômes liés » cliquables
+  qui rouvrent la fiche correspondante (`onSelectRelated`, hint via `findManifestation`). `JournalView`
+  stocke désormais `{name, hint}` (au lieu d'une `SymptomKey`) pour gérer les liens arbitraires.
+- **Filtre par catégorie** (select) en plus de la recherche dans `EncyclopediaList`.
+
 ## Parcours d'import vérifié (bout en bout)
 
 Testé en navigateur avec un JSON réaliste « façon Claude Web » (prose + bloc ```json, 4 repas,

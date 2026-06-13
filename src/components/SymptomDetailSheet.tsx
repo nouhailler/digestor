@@ -1,4 +1,4 @@
-import { Activity, Leaf, Loader2, RefreshCw, Settings2, Sparkles, TriangleAlert } from 'lucide-react';
+import { Activity, Leaf, Link2, Loader2, RefreshCw, Settings2, Sparkles, TriangleAlert } from 'lucide-react';
 import { Sheet } from './Sheet';
 import { useAiConfig } from '../hooks/useAiConfig';
 import { useProfile } from '../hooks/useProfile';
@@ -11,6 +11,8 @@ interface SymptomDetailSheetProps {
   staticHint?: string; // repère statique affiché d'emblée
   onClose: () => void;
   onOpenAiSettings: () => void;
+  /** Ouvre la fiche d'un symptôme lié (liens croisés). */
+  onSelectRelated?: (name: string) => void;
 }
 
 export function SymptomDetailSheet({
@@ -19,6 +21,7 @@ export function SymptomDetailSheet({
   staticHint,
   onClose,
   onOpenAiSettings,
+  onSelectRelated,
 }: SymptomDetailSheetProps) {
   const { config, ready } = useAiConfig();
   const { profile } = useProfile();
@@ -51,6 +54,24 @@ export function SymptomDetailSheet({
             {info.conseils.length > 0 && (
               <Block icon={<Leaf size={15} style={{ color: 'var(--color-leger)' }} />} title="Que faire">
                 <List items={info.conseils} color="var(--color-leger)" />
+              </Block>
+            )}
+            {info.related.length > 0 && (
+              <Block icon={<Link2 size={15} className="text-muted" />} title="Symptômes liés">
+                <div className="flex flex-wrap gap-2">
+                  {info.related.map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => onSelectRelated?.(r)}
+                      disabled={!onSelectRelated}
+                      title={onSelectRelated ? `Ouvrir la fiche : ${r}` : undefined}
+                      className="rounded-full border border-border px-3 py-1 text-xs text-ink hover:border-leger disabled:opacity-70"
+                    >
+                      {r}
+                    </button>
+                  ))}
+                </div>
               </Block>
             )}
             <p className="border-t border-border/60 pt-3 text-xs text-muted">

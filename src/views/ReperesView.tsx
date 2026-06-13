@@ -3,6 +3,7 @@ import { BookOpen, Info, Table2 } from 'lucide-react';
 import { TipBanner } from '../components/TipBanner';
 import { SymptomDetailSheet } from '../components/SymptomDetailSheet';
 import { EncyclopediaList } from '../components/EncyclopediaList';
+import { findManifestation } from '../lib/encyclopedia';
 
 interface Cell {
   label: string;
@@ -147,6 +148,7 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
           setSelected(null);
           onOpenAiSettings();
         }}
+        onSelectRelated={(name) => setSelected({ label: name, hint: findManifestation(name) ?? '' })}
       />
     </div>
   );

@@ -145,6 +145,10 @@ export async function putSymptomInfo(info: SymptomInfo): Promise<void> {
   await db.symptomNotes.put(info);
 }
 
+export async function getAllSymptomInfos(): Promise<SymptomInfo[]> {
+  return db.symptomNotes.toArray();
+}
+
 export async function getEncyclopediaExtra(): Promise<EncyclopediaExtra | undefined> {
   const row = await db.meta.get(ENCYCLOPEDIA_KEY);
   return row?.value as EncyclopediaExtra | undefined;

@@ -148,6 +148,7 @@ export interface SymptomInfo {
   manifestation: string; // comment ça se manifeste
   effets: string[]; // effets / conséquences
   conseils: string[]; // que faire pour l'éviter / l'atténuer
+  related: string[]; // symptômes liés (liens croisés)
   model: string;
   updatedAt: string;
 }

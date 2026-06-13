@@ -81,3 +81,11 @@ export const ENCYCLOPEDIA: EncyclopediaCategory[] = [
 export function encyclopediaNames(): string[] {
   return ENCYCLOPEDIA.flatMap((c) => c.items.map((i) => i.name));
 }
+
+/** Manifestation d'un symptôme du socle, par nom (insensible à la casse/accents légers). */
+export function findManifestation(name: string): string | undefined {
+  const n = name.trim().toLowerCase();
+  for (const c of ENCYCLOPEDIA)
+    for (const i of c.items) if (i.name.toLowerCase() === n) return i.manifestation;
+  return undefined;
+}
