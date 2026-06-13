@@ -24,10 +24,12 @@ interface MealEditorProps {
   onRemove: () => void;
   /** En lecture, taper une chip ouvre l'analyse IA de l'aliment. */
   onFoodInfo?: (name: string) => void;
+  /** En lecture, taper un symptôme ouvre sa fiche (encyclopédie). */
+  onSymptomInfo?: (key: SymptomKey) => void;
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo }: MealEditorProps) {
   const [draft, setDraft] = useState('');
 
   function addFood() {
@@ -147,19 +149,34 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo }: Me
       ) : (
         activeSymptoms.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-1">
-            {activeSymptoms.map((k) => (
-              <span
-                key={k}
-                className="inline-flex items-center gap-1.5 text-xs text-ink"
-                title={`${SYMPTOM_LABELS[k]} — ${INTENSITY_LABEL[symptoms[k]]}`}
-              >
-                <span
-                  className="inline-block h-2 w-2 rounded-full"
-                  style={{ backgroundColor: INTENSITY_COLOR[symptoms[k]] }}
-                />
-                {SYMPTOM_LABELS[k]}
-              </span>
-            ))}
+            {activeSymptoms.map((k) => {
+              const dot = (
+                <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: INTENSITY_COLOR[symptoms[k]] }} />
+              );
+              const title = `${SYMPTOM_LABELS[k]} — ${INTENSITY_LABEL[symptoms[k]]}`;
+              if (onSymptomInfo) {
+                return (
+                  <button
+                    key={k}
+                    type="button"
+                    onClick={() => onSymptomInfo(k)}
+                    title={`${title}\nToucher pour la fiche détaillée.`}
+                    className="inline-flex items-center gap-1.5 text-xs text-ink"
+                  >
+                    {dot}
+                    <span className="underline decoration-dotted decoration-muted underline-offset-2">
+                      {SYMPTOM_LABELS[k]}
+                    </span>
+                  </button>
+                );
+              }
+              return (
+                <span key={k} className="inline-flex items-center gap-1.5 text-xs text-ink" title={title}>
+                  {dot}
+                  {SYMPTOM_LABELS[k]}
+                </span>
+              );
+            })}
           </div>
         )
       )}

@@ -131,6 +131,17 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   par catégorie (en évitant les doublons), fusionnés au socle et mis en cache (meta `encyclopediaExtra`).
 - Socle volontairement concis : « petite encyclopédie » à étoffer progressivement.
 
+## v0.9.5 — encyclopédie étoffée
+
+- Écran **Repères** réorganisé en **sous-onglets** : « Repères » (tableau discriminant) et
+  « Encyclopédie » (`EncyclopediaList` inline — remplace l'ancienne sheet modale).
+- **Échelle de Bristol illustrée** (`BristolScale` : glyphes SVG par type 1-7 + couleurs).
+- **Recherche** dans l'encyclopédie (nom ou manifestation), masque le schéma Bristol pendant la recherche.
+- Socle statique enrichi (~35 entrées, `lib/encyclopedia.ts`).
+- **Symptômes du Journal liés à leur fiche** : en lecture, un symptôme (zone par repas ou « hors repas »)
+  est cliquable → `SymptomDetailSheet`. `SymptomGrid` accepte `onInfo`, `MealEditor` `onSymptomInfo`,
+  propagés depuis `DayCard`/`JournalView` (clé → libellé + repère statique).
+
 ## Parcours d'import vérifié (bout en bout)
 
 Testé en navigateur avec un JSON réaliste « façon Claude Web » (prose + bloc ```json, 4 repas,

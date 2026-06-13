@@ -27,9 +27,11 @@ interface DayCardProps {
   defaultEditing?: boolean;
   /** Tap sur une chip d'aliment (mode lecture) → analyse IA. */
   onFoodInfo?: (name: string) => void;
+  /** Tap sur un symptôme (mode lecture) → fiche encyclopédie. */
+  onSymptomInfo?: (key: SymptomKey) => void;
 }
 
-export function DayCard({ day, update, defaultEditing = false, onFoodInfo }: DayCardProps) {
+export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
 
   const suggested = useMemo(() => suggestDayQuality(day), [day]);
@@ -107,6 +109,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo }: Day
               onChange={setMeal}
               onRemove={() => removeMeal(meal.id)}
               onFoodInfo={onFoodInfo}
+              onSymptomInfo={onSymptomInfo}
             />
           ))}
         </div>
@@ -143,7 +146,12 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo }: Day
             />
           )}
           {showGeneralSymptoms || editing ? (
-            <SymptomGrid symptoms={day.symptoms} editing={editing} onCycle={cycleSymptom} />
+            <SymptomGrid
+              symptoms={day.symptoms}
+              editing={editing}
+              onCycle={cycleSymptom}
+              onInfo={!editing ? onSymptomInfo : undefined}
+            />
           ) : (
             <p className="text-sm text-muted">Renseignés par repas ci-dessus.</p>
           )}

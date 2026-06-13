@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { BookOpen, Info, Sparkles } from 'lucide-react';
+import { BookOpen, Info, Table2 } from 'lucide-react';
 import { TipBanner } from '../components/TipBanner';
 import { SymptomDetailSheet } from '../components/SymptomDetailSheet';
-import { EncyclopediaSheet } from '../components/EncyclopediaSheet';
+import { EncyclopediaList } from '../components/EncyclopediaList';
 
 interface Cell {
   label: string;
@@ -67,72 +67,76 @@ interface ReperesViewProps {
   onOpenAiSettings: () => void;
 }
 
-export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
-  const [selected, setSelected] = useState<Cell | null>(null);
-  const [encyclopediaOpen, setEncyclopediaOpen] = useState(false);
-  const [autoEnrich, setAutoEnrich] = useState(false);
+type SubTab = 'reperes' | 'encyclopedie';
 
-  const openEncyclopedia = (enrich: boolean) => {
-    setAutoEnrich(enrich);
-    setEncyclopediaOpen(true);
-  };
+export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
+  const [tab, setTab] = useState<SubTab>('reperes');
+  const [selected, setSelected] = useState<Cell | null>(null);
 
   return (
     <div className="mx-auto max-w-3xl px-4 pt-4 pb-28">
-      <h2 className="mb-1 text-xl font-semibold text-ink">Repères</h2>
-      <p className="mb-4 text-sm text-muted">
-        Symptômes discriminants — touchez-en un pour sa fiche détaillée. Outil de repérage, non diagnostique.
-      </p>
+      <h2 className="mb-3 text-xl font-semibold text-ink">Repères</h2>
+
+      {/* Sous-onglets */}
+      <div className="mb-4 inline-flex rounded-full border border-border p-1 text-sm">
+        <SubTabButton active={tab === 'reperes'} onClick={() => setTab('reperes')} icon={<Table2 size={15} />}>
+          Repères
+        </SubTabButton>
+        <SubTabButton active={tab === 'encyclopedie'} onClick={() => setTab('encyclopedie')} icon={<BookOpen size={15} />}>
+          Encyclopédie
+        </SubTabButton>
+      </div>
 
       <TipBanner tab="reperes" />
 
-      <div className="overflow-hidden rounded-2xl border border-border">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="bg-surface-2 text-left">
-              <th className="w-1/2 border-b border-border px-4 py-3 font-semibold text-ink">Candidose</th>
-              <th className="w-1/2 border-b border-l border-border px-4 py-3 font-semibold text-ink">SIBO / SII</th>
-            </tr>
-          </thead>
-          <tbody>
-            {ROWS.map(([candida, sibo], i) => (
-              <tr key={i} className="align-top">
-                <SymptomCell cell={candida} dot="var(--color-severe)" onClick={() => setSelected(candida)} />
-                <SymptomCell cell={sibo} dot="var(--color-modere)" bordered onClick={() => setSelected(sibo)} />
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {tab === 'reperes' ? (
+        <>
+          <p className="mb-3 text-sm text-muted">
+            Symptômes discriminants — touchez-en un pour sa fiche détaillée. Outil de repérage, non diagnostique.
+          </p>
 
-      {/* Sous le tableau : encyclopédie + enrichissement IA */}
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          onClick={() => openEncyclopedia(false)}
-          title="Ouvre l'encyclopédie : tous les symptômes digestifs classés par catégorie."
-          className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
-          style={{ backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }}
-        >
-          <BookOpen size={15} /> Plus d'informations
-        </button>
-        <button
-          type="button"
-          onClick={() => openEncyclopedia(true)}
-          title="Demande à l'IA des symptômes supplémentaires, ajoutés à l'encyclopédie."
-          className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted hover:text-ink"
-        >
-          <Sparkles size={15} style={{ color: 'var(--color-leger)' }} /> Enrichir avec l'IA
-        </button>
-      </div>
+          <div className="overflow-hidden rounded-2xl border border-border">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-surface-2 text-left">
+                  <th className="w-1/2 border-b border-border px-4 py-3 font-semibold text-ink">Candidose</th>
+                  <th className="w-1/2 border-b border-l border-border px-4 py-3 font-semibold text-ink">SIBO / SII</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ROWS.map(([candida, sibo], i) => (
+                  <tr key={i} className="align-top">
+                    <SymptomCell cell={candida} dot="var(--color-severe)" onClick={() => setSelected(candida)} />
+                    <SymptomCell cell={sibo} dot="var(--color-modere)" bordered onClick={() => setSelected(sibo)} />
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
-      <button
-        type="button"
-        onClick={onAbout}
-        className="mt-6 inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted hover:text-ink"
-      >
-        <Info size={16} /> À propos & avertissement médical
-      </button>
+          <button
+            type="button"
+            onClick={() => setTab('encyclopedie')}
+            className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
+            style={{ backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }}
+          >
+            <BookOpen size={15} /> Plus d'informations
+          </button>
+
+          <button
+            type="button"
+            onClick={onAbout}
+            className="ml-2 mt-4 inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted hover:text-ink"
+          >
+            <Info size={16} /> À propos & avertissement médical
+          </button>
+        </>
+      ) : (
+        <EncyclopediaList
+          onOpenAiSettings={onOpenAiSettings}
+          onSelectSymptom={(name, hint) => setSelected({ label: name, hint })}
+        />
+      )}
 
       <SymptomDetailSheet
         open={selected !== null}
@@ -144,21 +148,34 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
           onOpenAiSettings();
         }}
       />
-
-      <EncyclopediaSheet
-        open={encyclopediaOpen}
-        autoEnrich={autoEnrich}
-        onClose={() => setEncyclopediaOpen(false)}
-        onOpenAiSettings={() => {
-          setEncyclopediaOpen(false);
-          onOpenAiSettings();
-        }}
-        onSelectSymptom={(name, hint) => {
-          setEncyclopediaOpen(false);
-          setSelected({ label: name, hint });
-        }}
-      />
     </div>
+  );
+}
+
+function SubTabButton({
+  active,
+  onClick,
+  icon,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"
+      style={{
+        backgroundColor: active ? 'var(--color-surface-2)' : 'transparent',
+        color: active ? 'var(--color-ink)' : 'var(--color-muted)',
+      }}
+    >
+      {icon}
+      {children}
+    </button>
   );
 }
 

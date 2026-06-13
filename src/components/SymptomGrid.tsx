@@ -1,3 +1,4 @@
+import { Info } from 'lucide-react';
 import type { Intensity, SymptomKey } from '../types';
 import {
   INTENSITY_COLOR,
@@ -12,13 +13,15 @@ interface SymptomGridProps {
   symptoms: Record<SymptomKey, Intensity>;
   editing: boolean;
   onCycle: (key: SymptomKey) => void;
+  /** En lecture : ouvre la fiche détaillée du symptôme (encyclopédie). */
+  onInfo?: (key: SymptomKey) => void;
 }
 
 /**
  * Grille 4 colonnes (desktop) / 2 colonnes (mobile) dans l'ordre exact.
  * En édition, taper une pastille fait cycler l'intensité.
  */
-export function SymptomGrid({ symptoms, editing, onCycle }: SymptomGridProps) {
+export function SymptomGrid({ symptoms, editing, onCycle, onInfo }: SymptomGridProps) {
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
       {SYMPTOM_ORDER.map((key) => {
@@ -33,6 +36,23 @@ export function SymptomGrid({ symptoms, editing, onCycle }: SymptomGridProps) {
         const baseHint = `${SYMPTOM_LABELS[key]} — ${SYMPTOM_HINTS[key]}`;
 
         if (!editing) {
+          if (onInfo) {
+            return (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onInfo(key)}
+                title={`${baseHint}\nToucher pour la fiche détaillée.`}
+                className="group flex items-start gap-2 text-left"
+              >
+                {dot}
+                <span className="text-sm leading-tight text-ink underline decoration-dotted decoration-muted underline-offset-4">
+                  {SYMPTOM_LABELS[key]}
+                </span>
+                <Info size={12} className="mt-1 shrink-0 text-muted opacity-0 group-hover:opacity-100" />
+              </button>
+            );
+          }
           return (
             <div key={key} className="flex items-start gap-2" title={`${baseHint} (${INTENSITY_LABEL[intensity]})`}>
               {dot}

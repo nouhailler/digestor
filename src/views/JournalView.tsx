@@ -8,12 +8,15 @@ import {
   ChevronUp,
   Sparkles,
 } from 'lucide-react';
+import type { SymptomKey } from '../types';
 import { useDay } from '../hooks/useDay';
 import { DayCard } from '../components/DayCard';
 import { FoodInsightSheet } from '../components/ai/FoodInsightSheet';
 import { DayAnalysisSheet } from '../components/ai/DayAnalysisSheet';
+import { SymptomDetailSheet } from '../components/SymptomDetailSheet';
 import { TipBanner } from '../components/TipBanner';
 import { dayHasContent } from '../lib/aggregates';
+import { SYMPTOM_HINTS, SYMPTOM_LABELS } from '../lib/constants';
 import { fromISODate, toISODate, todayISO } from '../lib/dates';
 
 interface JournalViewProps {
@@ -26,6 +29,7 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
   const { day, update } = useDay(date);
   const [foodInfo, setFoodInfo] = useState<string | null>(null);
   const [analysisOpen, setAnalysisOpen] = useState(false);
+  const [symptomInfo, setSymptomInfo] = useState<SymptomKey | null>(null);
 
   const go = (delta: number) => onDateChange(toISODate(addDays(fromISODate(date), delta)));
   const isToday = date === todayISO();
@@ -72,7 +76,7 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
 
       {day ? (
         <>
-          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} />
+          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} onSymptomInfo={setSymptomInfo} />
           {dayHasContent(day) && (
             <button
               type="button"
@@ -126,6 +130,17 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
         onClose={() => setAnalysisOpen(false)}
         onOpenAiSettings={() => {
           setAnalysisOpen(false);
+          onOpenAiSettings();
+        }}
+      />
+
+      <SymptomDetailSheet
+        open={symptomInfo !== null}
+        name={symptomInfo ? SYMPTOM_LABELS[symptomInfo] : ''}
+        staticHint={symptomInfo ? SYMPTOM_HINTS[symptomInfo] : undefined}
+        onClose={() => setSymptomInfo(null)}
+        onOpenAiSettings={() => {
+          setSymptomInfo(null);
           onOpenAiSettings();
         }}
       />

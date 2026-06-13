@@ -6,9 +6,17 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 
 ## [Non publié]
 
+### Encyclopédie (Repères)
+- **Sous-onglets** « Repères » / « Encyclopédie » dans l'écran Repères (fiches regroupées au même endroit).
+- **Échelle de Bristol illustrée** (glyphes SVG par type + couleurs).
+- **Recherche** dans l'encyclopédie (par nom ou manifestation).
+- **Socle statique enrichi** (~35 symptômes classés par catégorie).
+- **Symptômes du Journal cliquables** → ouvrent leur fiche détaillée (origine / manifestation / effets / conseils).
+
+### Dépôt
 - Premier commit public sur https://github.com/nouhailler/digestor.
 - Icône d'application (feuille verte sur fond sombre, accents de la palette) + `apple-touch-icon`.
-- `CHANGELOG.md` ajouté ; `README.md` / `CONTEXT.md` finalisés pour le dépôt.
+- `CHANGELOG.md`, `LICENSE` (MIT), CI GitHub Actions (build + tests), README enrichi (badges, captures).
 
 ## [0.9.4] — Encyclopédie des symptômes (Repères)
 
