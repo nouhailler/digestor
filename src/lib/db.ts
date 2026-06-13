@@ -16,6 +16,7 @@ const AI_CONFIG_KEY = 'aiConfig';
 const ONBOARDING_KEY = 'onboardingDone';
 const MEAL_SUGGESTIONS_KEY = 'mealSuggestions';
 const ENCYCLOPEDIA_KEY = 'encyclopediaExtra';
+const LAST_EXPORT_KEY = 'lastExportAt';
 
 class DigestorDB extends Dexie {
   days!: Table<DayEntry, string>; // clé primaire = date ISO
@@ -92,6 +93,17 @@ export async function isOnboardingDone(): Promise<boolean> {
 
 export async function setOnboardingDone(done: boolean): Promise<void> {
   await db.meta.put({ key: ONBOARDING_KEY, value: done });
+}
+
+// ---- Dernier export (pour le rappel de sauvegarde) ----
+
+export async function getLastExportAt(): Promise<string | undefined> {
+  const row = await db.meta.get(LAST_EXPORT_KEY);
+  return typeof row?.value === 'string' ? row.value : undefined;
+}
+
+export async function setLastExportAt(iso: string): Promise<void> {
+  await db.meta.put({ key: LAST_EXPORT_KEY, value: iso });
 }
 
 // ---- Cache des analyses d'aliments ----
@@ -198,10 +210,12 @@ export interface ExportPayload {
   symptomNotes?: SymptomInfo[]; // depuis v4 (fiches de symptômes)
   mealSuggestions?: MealSuggestionSet; // depuis v4
   encyclopediaExtra?: EncyclopediaExtra; // depuis v4
-  // NB : la clé/config IA (aiConfig) n'est volontairement JAMAIS exportée (secret).
+  // Réglages non sensibles (depuis v4). La CLÉ API n'y figure jamais (secret).
+  settings?: { modelId?: string | null; onboardingDone?: boolean };
 }
 
 export async function exportAll(): Promise<ExportPayload> {
+  const aiConfig = await getAiConfig();
   return {
     app: 'digestor',
     version: 4,
@@ -213,6 +227,8 @@ export async function exportAll(): Promise<ExportPayload> {
     symptomNotes: await getAllSymptomInfos(),
     mealSuggestions: await getMealSuggestions(),
     encyclopediaExtra: await getEncyclopediaExtra(),
+    // Réglages sans secret : on conserve le modèle choisi, pas la clé.
+    settings: { modelId: aiConfig.modelId, onboardingDone: await isOnboardingDone() },
   };
 }
 
@@ -239,7 +255,18 @@ export async function importAll(payload: ExportPayload): Promise<void> {
     if (payload.profile) await setProfile(payload.profile);
     if (payload.mealSuggestions) await setMealSuggestions(payload.mealSuggestions);
     if (payload.encyclopediaExtra) await setEncyclopediaExtra(payload.encyclopediaExtra);
-    // La clé/configuration IA (aiConfig) n'est ni exportée ni écrasée (secret local).
+
+    // Réglages : restaure le modèle (sans toucher à la clé déjà présente) + l'onboarding.
+    if (payload.settings) {
+      if (payload.settings.modelId !== undefined) {
+        const cfg = await getAiConfig();
+        await setAiConfig({ apiKey: cfg.apiKey, modelId: payload.settings.modelId });
+      }
+      if (typeof payload.settings.onboardingDone === 'boolean') {
+        await setOnboardingDone(payload.settings.onboardingDone);
+      }
+    }
+    // La clé API (aiConfig.apiKey) n'est ni exportée ni écrasée (secret local).
   });
 }
 

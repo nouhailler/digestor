@@ -9,6 +9,7 @@ import { ProfileSheet } from './components/ProfileSheet';
 import { HelpSheet } from './components/HelpSheet';
 import { Onboarding } from './components/Onboarding';
 import { ImportMealsSheet } from './components/ImportMealsSheet';
+import { BackupReminder } from './components/BackupReminder';
 import { JournalView } from './views/JournalView';
 import { WeekView } from './views/WeekView';
 import { AlimentsView } from './views/AlimentsView';
@@ -67,6 +68,10 @@ export default function App() {
   return (
     <div className="min-h-full">
       <Legend title={title} onMenu={() => setMenuOpen(true)} onHelp={() => setHelpOpen(true)} />
+
+      <div className="px-4">
+        <BackupReminder />
+      </div>
 
       <main>
         {tab === 'journal' && (

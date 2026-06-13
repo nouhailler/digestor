@@ -18,9 +18,12 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 ### Persistance & sauvegarde
 - **Stockage persistant** demandé au démarrage (`navigator.storage.persist()`) pour limiter
   l'effacement automatique des données locales (notamment l'éviction iOS/Safari).
-- **Export JSON complet** (v4) : inclut désormais aussi les **fiches de symptômes**, les **idées de
-  repas** et l'**encyclopédie enrichie**, en plus du journal / profil / fiches d'aliments / analyses.
-  La clé IA reste volontairement exclue (secret). L'import restaure l'ensemble.
+- **Export JSON complet** (v4) : journal, profil, fiches d'aliments, analyses, **fiches de symptômes**,
+  **idées de repas**, **encyclopédie enrichie** et **réglages** (modèle IA choisi + onboarding).
+  La clé API reste volontairement exclue (secret). L'import restaure l'ensemble.
+- **Bouton « Sauvegarder mes données » mis en avant** (vert) en tête du menu.
+- **Rappel de sauvegarde** : bannière discrète si des données existent et qu'aucun export n'a eu lieu
+  depuis 7 jours (bouton « Sauvegarder » intégré, masquable). Date du dernier export mémorisée.
 
 ### Dépôt
 - Premier commit public sur https://github.com/nouhailler/digestor.

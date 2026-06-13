@@ -161,6 +161,17 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   (secret local). Transaction d'import en forme tableau (Dexie limite le nb d'arguments).
 - À propos : mention du stockage persistant + de ce que contient l'export.
 
+## v0.9.8 — rappel de sauvegarde & export des réglages
+
+- `lib/backup.ts` : `downloadBackup()` (export + horodatage `lastExportAt`), `daysSince`,
+  `BACKUP_REMINDER_DAYS` (7).
+- **`BackupReminder`** (rendu sous l'en-tête) : bannière si données présentes (>2 jours, ou fiches
+  d'aliments/symptômes) et jamais exporté / > 7 jours. Bouton « Sauvegarder », masquable (session).
+- **MenuSheet** : bouton vert proéminent « Sauvegarder mes données (JSON) » en tête ; l'ancien
+  « Exporter JSON » du grid devient « Restaurer (JSON) » pour l'import.
+- **Export v4 + réglages** : `settings { modelId, onboardingDone }` (sans la clé API). L'import
+  restaure le modèle (sans écraser une clé déjà présente) et l'état d'onboarding.
+
 ## Parcours d'import vérifié (bout en bout)
 
 Testé en navigateur avec un JSON réaliste « façon Claude Web » (prose + bloc ```json, 4 repas,

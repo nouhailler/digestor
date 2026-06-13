@@ -1,19 +1,19 @@
 import { useRef, useState } from 'react';
 import {
-  Download,
   FileText,
   GraduationCap,
   Info,
   Mic,
   RotateCcw,
+  Save,
   Sparkles,
   Upload,
   UserCog,
 } from 'lucide-react';
 import { Sheet } from './Sheet';
-import { exportAll, importAll, type ExportPayload } from '../lib/db';
+import { importAll, type ExportPayload } from '../lib/db';
+import { downloadBackup } from '../lib/backup';
 import { loadSeed } from '../lib/seed';
-import { toISODate } from '../lib/dates';
 
 interface MenuSheetProps {
   open: boolean;
@@ -38,14 +38,8 @@ export function MenuSheet({
   const [msg, setMsg] = useState<string | null>(null);
 
   async function handleExport() {
-    const payload = await exportAll();
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `digestor-${toISODate(new Date())}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    await downloadBackup();
+    setMsg('Sauvegarde téléchargée. Conservez ce fichier en lieu sûr.');
   }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
@@ -72,6 +66,17 @@ export function MenuSheet({
   return (
     <Sheet open={open} title="Menu" onClose={onClose}>
       <div className="space-y-5">
+        {/* Sauvegarde mise en avant */}
+        <button
+          type="button"
+          onClick={handleExport}
+          title="Télécharge un fichier JSON contenant toutes vos données (sauf la clé IA). À conserver pour restaurer ou changer d'appareil."
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-medium"
+          style={{ backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }}
+        >
+          <Save size={17} /> Sauvegarder mes données (JSON)
+        </button>
+
         <button
           type="button"
           onClick={() => {
@@ -95,8 +100,7 @@ export function MenuSheet({
         </button>
 
         <div className="grid grid-cols-2 gap-3">
-          <MenuButton icon={<Download size={16} />} label="Exporter JSON" onClick={handleExport} />
-          <MenuButton icon={<Upload size={16} />} label="Importer JSON" onClick={() => fileRef.current?.click()} />
+          <MenuButton icon={<Upload size={16} />} label="Restaurer (JSON)" onClick={() => fileRef.current?.click()} />
           <MenuButton icon={<FileText size={16} />} label="Exporter PDF" onClick={() => window.print()} />
           <MenuButton icon={<RotateCcw size={16} />} label="Données de démo" onClick={handleReset} />
         </div>
