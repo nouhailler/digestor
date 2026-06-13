@@ -36,8 +36,11 @@ export function AboutSheet({ open, onClose }: { open: boolean; onClose: () => vo
 
         <p className="text-muted">
           🔒 Vos données sont <strong className="text-ink">stockées uniquement sur cet appareil</strong>{' '}
-          (IndexedDB). Le cœur de l'app fonctionne hors-ligne, sans serveur. Pensez à exporter régulièrement
-          votre journal en JSON pour le sauvegarder.
+          (IndexedDB). Le cœur de l'app fonctionne hors-ligne, sans serveur. L'app demande un
+          <strong className="text-ink"> stockage persistant</strong> pour limiter l'effacement automatique,
+          mais ce n'est pas garanti sur tous les navigateurs : pensez à <strong className="text-ink">exporter
+          régulièrement</strong> votre journal en JSON (menu ⋯). L'export inclut journal, profil, fiches
+          d'aliments, analyses, fiches de symptômes et idées de repas — <em>sauf la clé IA</em> (secret).
         </p>
 
         <p className="text-muted">

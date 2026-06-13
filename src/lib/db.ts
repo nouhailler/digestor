@@ -189,23 +189,30 @@ export async function getLatestActiveDate(): Promise<string | undefined> {
 
 export interface ExportPayload {
   app: 'digestor';
-  version: 1 | 2 | 3;
+  version: 1 | 2 | 3 | 4;
   exportedAt: string;
   profile: Profile;
   days: DayEntry[];
   foodInsights?: FoodInsight[]; // depuis v2
   dayAnalyses?: DayAnalysis[]; // depuis v3
+  symptomNotes?: SymptomInfo[]; // depuis v4 (fiches de symptômes)
+  mealSuggestions?: MealSuggestionSet; // depuis v4
+  encyclopediaExtra?: EncyclopediaExtra; // depuis v4
+  // NB : la clé/config IA (aiConfig) n'est volontairement JAMAIS exportée (secret).
 }
 
 export async function exportAll(): Promise<ExportPayload> {
   return {
     app: 'digestor',
-    version: 3,
+    version: 4,
     exportedAt: new Date().toISOString(),
     profile: await getProfile(),
     days: await getAllDays(),
     foodInsights: await getAllFoodInsights(),
     dayAnalyses: await db.dayAnalyses.toArray(),
+    symptomNotes: await getAllSymptomInfos(),
+    mealSuggestions: await getMealSuggestions(),
+    encyclopediaExtra: await getEncyclopediaExtra(),
   };
 }
 
@@ -213,19 +220,26 @@ export async function importAll(payload: ExportPayload): Promise<void> {
   if (payload?.app !== 'digestor' || !Array.isArray(payload.days)) {
     throw new Error('Fichier invalide : ce n’est pas un export Digestor.');
   }
-  await db.transaction('rw', db.days, db.meta, db.foodInsights, db.dayAnalyses, async () => {
-    await db.days.clear();
-    await db.days.bulkPut(payload.days);
+  await db.transaction(
+    'rw',
+    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes],
+    async () => {
+      await db.days.clear();
+      await db.days.bulkPut(payload.days);
+
     await db.foodInsights.clear();
-    if (Array.isArray(payload.foodInsights)) {
-      await db.foodInsights.bulkPut(payload.foodInsights);
-    }
+    if (Array.isArray(payload.foodInsights)) await db.foodInsights.bulkPut(payload.foodInsights);
+
     await db.dayAnalyses.clear();
-    if (Array.isArray(payload.dayAnalyses)) {
-      await db.dayAnalyses.bulkPut(payload.dayAnalyses);
-    }
+    if (Array.isArray(payload.dayAnalyses)) await db.dayAnalyses.bulkPut(payload.dayAnalyses);
+
+    await db.symptomNotes.clear();
+    if (Array.isArray(payload.symptomNotes)) await db.symptomNotes.bulkPut(payload.symptomNotes);
+
     if (payload.profile) await setProfile(payload.profile);
-    // La clé/configuration IA n'est volontairement pas exportée ni écrasée.
+    if (payload.mealSuggestions) await setMealSuggestions(payload.mealSuggestions);
+    if (payload.encyclopediaExtra) await setEncyclopediaExtra(payload.encyclopediaExtra);
+    // La clé/configuration IA (aiConfig) n'est ni exportée ni écrasée (secret local).
   });
 }
 

@@ -152,6 +152,15 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   stocke désormais `{name, hint}` (au lieu d'une `SymptomKey`) pour gérer les liens arbitraires.
 - **Filtre par catégorie** (select) en plus de la recherche dans `EncyclopediaList`.
 
+## v0.9.7 — persistance & export complet
+
+- **Stockage persistant** : `ensurePersistentStorage()` (`lib/storage.ts`) appelé au démarrage
+  (`App`) → `navigator.storage.persist()` (best-effort) pour réduire l'éviction (surtout iOS).
+- **Export/import complets** (payload v4) : ajout de `symptomNotes`, `mealSuggestions`,
+  `encyclopediaExtra` à `exportAll`/`importAll`. La config IA (`aiConfig`, clé) reste **exclue**
+  (secret local). Transaction d'import en forme tableau (Dexie limite le nb d'arguments).
+- À propos : mention du stockage persistant + de ce que contient l'export.
+
 ## Parcours d'import vérifié (bout en bout)
 
 Testé en navigateur avec un JSON réaliste « façon Claude Web » (prose + bloc ```json, 4 repas,

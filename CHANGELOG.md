@@ -15,6 +15,13 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 - **Pré-génération en masse** des fiches manquantes (« Tout détailler », séquentiel + progression + arrêt).
 - **Liens croisés** : chaque fiche propose des « symptômes liés » cliquables (champ `related` de l'IA).
 
+### Persistance & sauvegarde
+- **Stockage persistant** demandé au démarrage (`navigator.storage.persist()`) pour limiter
+  l'effacement automatique des données locales (notamment l'éviction iOS/Safari).
+- **Export JSON complet** (v4) : inclut désormais aussi les **fiches de symptômes**, les **idées de
+  repas** et l'**encyclopédie enrichie**, en plus du journal / profil / fiches d'aliments / analyses.
+  La clé IA reste volontairement exclue (secret). L'import restaure l'ensemble.
+
 ### Dépôt
 - Premier commit public sur https://github.com/nouhailler/digestor.
 - Icône d'application (feuille verte sur fond sombre, accents de la palette) + `apple-touch-icon`.

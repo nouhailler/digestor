@@ -22,6 +22,7 @@ const EvolutionView = lazy(() =>
 );
 import { isEmpty, isOnboardingDone, setOnboardingDone } from './lib/db';
 import { seedIfEmpty, SEED_DAYS } from './lib/seed';
+import { ensurePersistentStorage } from './lib/storage';
 import { fromISODate, todayISO, weekLabel } from './lib/dates';
 
 export default function App() {
@@ -38,6 +39,8 @@ export default function App() {
   const { profile } = useProfile();
 
   useEffect(() => {
+    // Demande un stockage persistant (limite l'éviction auto, surtout iOS).
+    void ensurePersistentStorage();
     (async () => {
       const wasEmpty = await isEmpty();
       await seedIfEmpty();
