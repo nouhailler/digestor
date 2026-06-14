@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.9 (symptômes par repas, badge 3 niveaux, Aliments enrichi, activité IA en arrière-plan, 92 tests)
+## État actuel — v0.9.10 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif, 92 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -190,6 +190,24 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
 - **Générations en masse** (`AlimentsView`, `EncyclopediaList`) : chaque item passe par `runAiTask`,
   donc visible dans le badge global (compteur).
 - Annexe outillage : `shot.mjs` + devDep `playwright-core` (utilitaire de capture d'écran, hors app).
+
+## v0.9.10 — guide illustré du système digestif (Repères)
+
+- Nouveau **3ᵉ sous-onglet « Système digestif »** dans l'écran Repères (à droite d'Encyclopédie,
+  `ReperesView` → `SubTab = 'reperes' | 'encyclopedie' | 'systeme'`, icône `HeartPulse`). Boutons de
+  découverte depuis l'onglet Repères (« Comprendre la digestion »).
+- Composant `components/DigestiveGuide.tsx`, **mélange image réelle + schémas SVG maison** :
+  - **Anatomie** : planche du tube digestif **embarquée localement** (`public/anatomy/digestive-system-fr.svg`,
+    303 ko), affichée sur un cartouche **fond blanc** (libellés noirs illisibles sur thème sombre).
+    Image **domaine public** : Mariana Ruiz (LadyofHats), Jmarchn, trad. fr. Moez — via Wikimedia Commons.
+    Attribution affichée en pied de section.
+  - **Transit étape par étape** : timeline verticale (bouche → œsophage → estomac → grêle → côlon →
+    rectum) avec durées indicatives et rôle de chaque organe (style cohérent avec `BristolScale`).
+  - **Microbiote** : 2 panneaux SVG comparant **eubiose** (pastilles vertes majoritaires) vs **dysbiose**
+    (rouges/ambre en excès) — pastilles placées par `gutDots()` (grille 6×4, permutation déterministe
+    `(i*11)%24`), légende + rôles + lien explicatif vers SIBO / Candida.
+- **100 % offline** : le SVG anatomique est précaché par le SW (précache 18 → 19 entrées, ~1018 → ~1323 ko).
+  Aucun appel réseau, pas d'IA. Composant purement présentationnel (pas de logique `lib/` → pas de test unitaire).
 
 ## Parcours d'import vérifié (bout en bout)
 

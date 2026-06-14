@@ -51,6 +51,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 - 🩺 **Repères / encyclopédie** — symptômes discriminants Candidose vs SIBO/SII ; chaque symptôme est
   **cliquable** pour une fiche détaillée (origine, manifestation, effets, conseils). **« Plus
   d'informations »** : encyclopédie classée par catégorie, **enrichissable par l'IA**.
+- 🫀 **Système digestif** *(illustré)* — guide hors-ligne du tube digestif : planche anatomique annotée
+  (Wikimedia, domaine public), transit étape par étape (durées + rôle des organes), et schéma du
+  **microbiote** (équilibre vs dysbiose, lien avec SIBO & Candida).
 - 🧠 **Analyse de journée** *(IA)* — verdict global, déclencheurs probables, pistes d'amélioration.
 - ⏳ **Analyses IA en arrière-plan** — une analyse lancée **continue même si vous changez d'écran** ;
   un indicateur global dans l'en-tête (sablier + secondes, puis ✓ vert) montre l'activité en cours.

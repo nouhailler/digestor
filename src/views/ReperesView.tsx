@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { BookOpen, Info, Table2 } from 'lucide-react';
+import { BookOpen, HeartPulse, Info, Table2 } from 'lucide-react';
 import { TipBanner } from '../components/TipBanner';
 import { SymptomDetailSheet } from '../components/SymptomDetailSheet';
 import { EncyclopediaList } from '../components/EncyclopediaList';
+import { DigestiveGuide } from '../components/DigestiveGuide';
 import { findManifestation } from '../lib/encyclopedia';
 
 interface Cell {
@@ -68,7 +69,7 @@ interface ReperesViewProps {
   onOpenAiSettings: () => void;
 }
 
-type SubTab = 'reperes' | 'encyclopedie';
+type SubTab = 'reperes' | 'encyclopedie' | 'systeme';
 
 export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
   const [tab, setTab] = useState<SubTab>('reperes');
@@ -85,6 +86,9 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
         </SubTabButton>
         <SubTabButton active={tab === 'encyclopedie'} onClick={() => setTab('encyclopedie')} icon={<BookOpen size={15} />}>
           Encyclopédie
+        </SubTabButton>
+        <SubTabButton active={tab === 'systeme'} onClick={() => setTab('systeme')} icon={<HeartPulse size={15} />}>
+          Système digestif
         </SubTabButton>
       </div>
 
@@ -115,28 +119,40 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
             </table>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setTab('encyclopedie')}
-            className="mt-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
-            style={{ backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }}
-          >
-            <BookOpen size={15} /> Plus d'informations
-          </button>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setTab('encyclopedie')}
+              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
+              style={{ backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }}
+            >
+              <BookOpen size={15} /> Plus d'informations
+            </button>
 
-          <button
-            type="button"
-            onClick={onAbout}
-            className="ml-2 mt-4 inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted hover:text-ink"
-          >
-            <Info size={16} /> À propos & avertissement médical
-          </button>
+            <button
+              type="button"
+              onClick={() => setTab('systeme')}
+              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted hover:text-ink"
+            >
+              <HeartPulse size={15} /> Comprendre la digestion
+            </button>
+
+            <button
+              type="button"
+              onClick={onAbout}
+              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm text-muted hover:text-ink"
+            >
+              <Info size={16} /> À propos & avertissement médical
+            </button>
+          </div>
         </>
-      ) : (
+      ) : tab === 'encyclopedie' ? (
         <EncyclopediaList
           onOpenAiSettings={onOpenAiSettings}
           onSelectSymptom={(name, hint) => setSelected({ label: name, hint })}
         />
+      ) : (
+        <DigestiveGuide />
       )}
 
       <SymptomDetailSheet
