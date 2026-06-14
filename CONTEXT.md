@@ -209,6 +209,23 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
 - **100 % offline** : le SVG anatomique est précaché par le SW (précache 18 → 19 entrées, ~1018 → ~1323 ko).
   Aucun appel réseau, pas d'IA. Composant purement présentationnel (pas de logique `lib/` → pas de test unitaire).
 
+## v0.9.11 — garde-fou de rendu (fini l'« écran noir »)
+
+- 🐞 **Symptôme** : clic sur l'onglet **Évolution** → écran noir. Cause la plus probable : `EvolutionView`
+  est chargé en **lazy** (chunk séparé) et n'était entouré que d'un `<Suspense>`, **sans error boundary**.
+  Si l'import du chunk échoue (chunk obsolète après un nouveau déploiement, le SW servant un index qui
+  pointe vers un ancien hash, ou coupure réseau), l'exception remonte et fait planter **toute**
+  l'arborescence React → page noire (pas seulement l'onglet).
+- ✅ **Correctif** : `components/ErrorBoundary.tsx` enveloppe le contenu de `<main>` dans `App.tsx`
+  (avec `key={tab}` → repart d'un état propre à chaque changement d'onglet). Affiche un repli lisible
+  + bouton « Recharger » au lieu de l'écran noir. Pour un échec de chargement de chunk
+  (`isChunkLoadError`), **recharge automatiquement une fois** (garde `sessionStorage` anti-boucle) pour
+  récupérer la version à jour.
+- Les fonctions d'agrégation (`severityByDay`, `categoryCountsByDay`, `hydrationByDay`, `topSymptoms`)
+  ont été revues : défensives (accès via `effectiveDaySymptoms`, au pire des `NaN`, pas de throw).
+- Tests : `ErrorBoundary.test.tsx` (RTL/jsdom) — repli affiché sur enfant qui throw, rendu normal sinon.
+  Total **94 tests**.
+
 ## Parcours d'import vérifié (bout en bout)
 
 Testé en navigateur avec un JSON réaliste « façon Claude Web » (prose + bloc ```json, 4 repas,

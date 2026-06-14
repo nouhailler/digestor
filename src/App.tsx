@@ -10,6 +10,7 @@ import { HelpSheet } from './components/HelpSheet';
 import { Onboarding } from './components/Onboarding';
 import { ImportMealsSheet } from './components/ImportMealsSheet';
 import { BackupReminder } from './components/BackupReminder';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { JournalView } from './views/JournalView';
 import { WeekView } from './views/WeekView';
 import { AlimentsView } from './views/AlimentsView';
@@ -74,6 +75,7 @@ export default function App() {
       </div>
 
       <main>
+        <ErrorBoundary key={tab}>
         {tab === 'journal' && (
           <JournalView date={date} onDateChange={setDate} onOpenAiSettings={() => setAiSettingsOpen(true)} />
         )}
@@ -107,6 +109,7 @@ export default function App() {
         {tab === 'reperes' && (
           <ReperesView onAbout={() => setAboutOpen(true)} onOpenAiSettings={() => setAiSettingsOpen(true)} />
         )}
+        </ErrorBoundary>
       </main>
 
       <InstallPrompt />
