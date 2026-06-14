@@ -4,8 +4,9 @@ import type { AiConfig, SymptomInfo } from '../types';
 import { getSymptomInfo, putSymptomInfo } from '../lib/db';
 import { normalize } from '../lib/foodClassifier';
 import { explainSymptom } from '../lib/ai/symptomInfo';
+import { runAiTask } from '../lib/ai/aiActivity';
 
-/** Fiche détaillée d'un symptôme (origine/manifestation/effets/conseils) + cache. */
+/** Fiche détaillée d'un symptôme + cache. Exécution en arrière-plan (runAiTask). */
 export function useSymptomInfo(name: string) {
   const key = normalize(name);
   const info = useLiveQuery(
@@ -14,25 +15,28 @@ export function useSymptomInfo(name: string) {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const abort = useRef<AbortController | null>(null);
+  const mounted = useRef(true);
 
   useEffect(() => setError(null), [key]);
-  useEffect(() => () => abort.current?.abort(), []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
 
   async function explain(config: AiConfig, profileContext?: string): Promise<void> {
     if (!key || loading) return;
     setLoading(true);
     setError(null);
-    abort.current?.abort();
-    abort.current = new AbortController();
     try {
-      const result = await explainSymptom(name, config, { profileContext, signal: abort.current.signal });
-      await putSymptomInfo(result);
+      await runAiTask(`Fiche · ${name}`, (signal) =>
+        explainSymptom(name, config, { profileContext, signal }).then(putSymptomInfo),
+      );
     } catch (e) {
-      if ((e as Error).name === 'AbortError') return;
-      setError(e instanceof Error ? e.message : "Échec de l'explication.");
+      if (mounted.current) setError(e instanceof Error ? e.message : "Échec de l'explication.");
     } finally {
-      setLoading(false);
+      if (mounted.current) setLoading(false);
     }
   }
 

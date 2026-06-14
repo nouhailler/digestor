@@ -1,6 +1,7 @@
 import { AlertTriangle, Lightbulb, Loader2, RefreshCw, Settings2, Sparkles } from 'lucide-react';
 import type { DayEntry } from '../../types';
 import { Sheet } from '../Sheet';
+import { AiBusy } from './AiBusy';
 import { VERDICT_COLOR, VERDICT_LABEL } from '../../lib/ai/insightFormat';
 import { dayLongLabel } from '../../lib/dates';
 import { dayHasContent } from '../../lib/aggregates';
@@ -90,8 +91,8 @@ export function DayAnalysisSheet({ open, day, onClose, onOpenAiSettings }: DayAn
             className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 font-medium disabled:opacity-60"
             style={{ backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }}
           >
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
-            {loading ? 'Analyse en cours…' : "Analyser ma journée"}
+            {loading ? <AiBusy active /> : <Sparkles size={16} />}
+            {loading ? 'Analyse…' : "Analyser ma journée"}
           </button>
           {error && <p style={{ color: 'var(--color-severe)' }}>{error}</p>}
         </div>

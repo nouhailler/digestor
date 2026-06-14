@@ -1,5 +1,6 @@
 import { HelpCircle, MoreHorizontal } from 'lucide-react';
 import { Chip } from './Chip';
+import { AiActivityBadge } from './ai/AiActivityBadge';
 import {
   CATEGORY_COLOR,
   CATEGORY_HINT,
@@ -26,6 +27,7 @@ export function Legend({ title, onMenu, onHelp }: LegendProps) {
         <div className="flex items-start justify-between gap-3">
           <h1 className="text-[15px] font-medium text-ink">{title}</h1>
           <div className="flex shrink-0 items-center gap-2">
+            <AiActivityBadge />
             <button
               type="button"
               onClick={onHelp}

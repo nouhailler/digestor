@@ -12,6 +12,7 @@ import {
   UtensilsCrossed,
 } from 'lucide-react';
 import { Sheet } from '../Sheet';
+import { AiBusy } from './AiBusy';
 import { Chip } from '../Chip';
 import { CATEGORY_COLOR } from '../../lib/constants';
 import { classifyFood } from '../../lib/foodClassifier';
@@ -159,7 +160,7 @@ export function MealSuggestionsSheet({
                 className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium disabled:opacity-60"
                 style={{ backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }}
               >
-                {loading && busyIndex === null ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                {loading && busyIndex === null ? <AiBusy active /> : <Sparkles size={16} />}
                 {loading && busyIndex === null
                   ? 'Génération…'
                   : set

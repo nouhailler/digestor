@@ -52,6 +52,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   **cliquable** pour une fiche détaillée (origine, manifestation, effets, conseils). **« Plus
   d'informations »** : encyclopédie classée par catégorie, **enrichissable par l'IA**.
 - 🧠 **Analyse de journée** *(IA)* — verdict global, déclencheurs probables, pistes d'amélioration.
+- ⏳ **Analyses IA en arrière-plan** — une analyse lancée **continue même si vous changez d'écran** ;
+  un indicateur global dans l'en-tête (sablier + secondes, puis ✓ vert) montre l'activité en cours.
 - 👤 **Profil santé** — âge, sexe, conditions, phase FODMAP, intolérances, allergies, antécédents,
   médicaments (champs facultatifs) ; pris en compte par l'IA (allergies signalées en priorité).
 - 🎙️ **Entrer un repas (voix → JSON)** — dictez votre journée à Claude Web, collez le JSON généré

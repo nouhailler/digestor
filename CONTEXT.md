@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9 (symptômes par repas, badge 3 niveaux, combobox selles, Aliments enrichi, 83 tests)
+## État actuel — v0.9.9 (symptômes par repas, badge 3 niveaux, Aliments enrichi, activité IA en arrière-plan, 92 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -171,6 +171,25 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   « Exporter JSON » du grid devient « Restaurer (JSON) » pour l'import.
 - **Export v4 + réglages** : `settings { modelId, onboardingDone }` (sans la clé API). L'import
   restaure le modèle (sans écraser une clé déjà présente) et l'état d'onboarding.
+
+## v0.9.9 — activité IA en arrière-plan & indicateur global
+
+- **Exécution en arrière-plan** : les analyses IA ne sont plus liées au cycle de vie des composants.
+  Un store global hors React (`lib/ai/aiActivity.ts`, `runAiTask(label, fn)`) lance le travail
+  (appel réseau + écriture en cache) qui **se poursuit même si l'utilisateur quitte l'écran** — fini
+  l'`AbortController` qui annulait tout au démontage. Les hooks (`useFoodInsight`, `useDayAnalysis`,
+  `useMealSuggestions`, `useSymptomInfo`) gardent un drapeau `mounted` pour ne mettre à jour leur état
+  local (loading/error) que s'ils sont encore montés ; le cache Dexie (`useLiveQuery`) se met à jour
+  tout seul au retour sur l'écran.
+- **Indicateur global d'en-tête** (`AiActivityBadge`, monté dans `Legend`) : sablier ambre qui tourne
+  + « IA » + décompte en secondes tant qu'au moins une tâche tourne (compteur ×N si plusieurs), puis
+  pastille verte « IA ✓ » pendant ~4 s à la réussite. S'appuie sur `useSyncExternalStore`
+  (`useAiActivity`) ; `useSecondTick` rafraîchit le décompte.
+- **Boutons CTA** : composant `AiBusy` (sablier + secondes) remplace le simple `Loader2` sur les
+  boutons « Analyser » des sheets (aliment, journée, repas, symptôme).
+- **Générations en masse** (`AlimentsView`, `EncyclopediaList`) : chaque item passe par `runAiTask`,
+  donc visible dans le badge global (compteur).
+- Annexe outillage : `shot.mjs` + devDep `playwright-core` (utilitaire de capture d'écran, hors app).
 
 ## Parcours d'import vérifié (bout en bout)
 

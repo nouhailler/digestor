@@ -7,6 +7,7 @@ import { useProfile } from '../hooks/useProfile';
 import { useEncyclopedia } from '../hooks/useEncyclopedia';
 import { getAllSymptomInfos, putSymptomInfo } from '../lib/db';
 import { explainSymptom } from '../lib/ai/symptomInfo';
+import { runAiTask } from '../lib/ai/aiActivity';
 import { buildProfileContext } from '../lib/profile';
 import { normalize } from '../lib/foodClassifier';
 
@@ -63,8 +64,9 @@ export function EncyclopediaList({ onSelectSymptom, onOpenAiSettings }: Encyclop
     for (let i = 0; i < missing.length; i++) {
       if (stopRef.current) break;
       try {
-        const info = await explainSymptom(missing[i].name, config, { profileContext: ctx });
-        await putSymptomInfo(info);
+        await runAiTask(`Fiche · ${missing[i].name}`, (signal) =>
+          explainSymptom(missing[i].name, config, { profileContext: ctx, signal }).then(putSymptomInfo),
+        );
       } catch (e) {
         setBulkError(`« ${missing[i].name} » : ${e instanceof Error ? e.message : 'échec'}`);
         break;

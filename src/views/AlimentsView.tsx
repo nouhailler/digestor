@@ -16,6 +16,7 @@ import { CATEGORY_COLOR } from '../lib/constants';
 import { FODMAP_LEVEL_COLOR, FODMAP_LEVEL_LABEL } from '../lib/ai/insightFormat';
 import { classifyFood, dictionaryFoods, normalize } from '../lib/foodClassifier';
 import { analyzeFood } from '../lib/ai/foodInsight';
+import { runAiTask } from '../lib/ai/aiActivity';
 import { buildProfileContext } from '../lib/profile';
 import { useAiConfig } from '../hooks/useAiConfig';
 import { useProfile } from '../hooks/useProfile';
@@ -105,8 +106,9 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
     for (let i = 0; i < targets.length; i++) {
       if (stopRef.current) break;
       try {
-        const insight = await analyzeFood(targets[i].name, config, { profileContext: ctx });
-        await putFoodInsight(insight);
+        await runAiTask(`Aliment · ${targets[i].name}`, (signal) =>
+          analyzeFood(targets[i].name, config, { profileContext: ctx, signal }).then(putFoodInsight),
+        );
       } catch (e) {
         setBulkError(`« ${targets[i].name} » : ${e instanceof Error ? e.message : 'échec'}`);
         break;
