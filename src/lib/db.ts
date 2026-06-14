@@ -6,6 +6,7 @@ import type {
   EncyclopediaExtra,
   FoodInsight,
   MealSuggestionSet,
+  OrganInfo,
   Profile,
   SymptomInfo,
 } from '../types';
@@ -24,6 +25,7 @@ class DigestorDB extends Dexie {
   foodInsights!: Table<FoodInsight, string>; // clé primaire = nom normalisé
   dayAnalyses!: Table<DayAnalysis, string>; // clé primaire = date ISO
   symptomNotes!: Table<SymptomInfo, string>; // clé primaire = nom normalisé
+  organNotes!: Table<OrganInfo, string>; // clé primaire = id d'organe
 
   constructor() {
     super('digestor');
@@ -52,6 +54,15 @@ class DigestorDB extends Dexie {
       foodInsights: '&key, name',
       dayAnalyses: '&date',
       symptomNotes: '&key',
+    });
+    // v5 : approfondissements IA des organes digestifs (guide « Système digestif »).
+    this.version(5).stores({
+      days: '&date',
+      meta: '&key',
+      foodInsights: '&key, name',
+      dayAnalyses: '&date',
+      symptomNotes: '&key',
+      organNotes: '&key',
     });
   }
 }
@@ -161,6 +172,21 @@ export async function getAllSymptomInfos(): Promise<SymptomInfo[]> {
   return db.symptomNotes.toArray();
 }
 
+// ---- Approfondissements d'organes (guide système digestif) ----
+
+export async function getOrganInfo(key: string): Promise<OrganInfo | undefined> {
+  if (!key) return undefined;
+  return db.organNotes.get(key);
+}
+
+export async function putOrganInfo(info: OrganInfo): Promise<void> {
+  await db.organNotes.put(info);
+}
+
+export async function getAllOrganInfos(): Promise<OrganInfo[]> {
+  return db.organNotes.toArray();
+}
+
 export async function getEncyclopediaExtra(): Promise<EncyclopediaExtra | undefined> {
   const row = await db.meta.get(ENCYCLOPEDIA_KEY);
   return row?.value as EncyclopediaExtra | undefined;
@@ -201,13 +227,14 @@ export async function getLatestActiveDate(): Promise<string | undefined> {
 
 export interface ExportPayload {
   app: 'digestor';
-  version: 1 | 2 | 3 | 4;
+  version: 1 | 2 | 3 | 4 | 5;
   exportedAt: string;
   profile: Profile;
   days: DayEntry[];
   foodInsights?: FoodInsight[]; // depuis v2
   dayAnalyses?: DayAnalysis[]; // depuis v3
   symptomNotes?: SymptomInfo[]; // depuis v4 (fiches de symptômes)
+  organNotes?: OrganInfo[]; // depuis v5 (approfondissements d'organes)
   mealSuggestions?: MealSuggestionSet; // depuis v4
   encyclopediaExtra?: EncyclopediaExtra; // depuis v4
   // Réglages non sensibles (depuis v4). La CLÉ API n'y figure jamais (secret).
@@ -218,13 +245,14 @@ export async function exportAll(): Promise<ExportPayload> {
   const aiConfig = await getAiConfig();
   return {
     app: 'digestor',
-    version: 4,
+    version: 5,
     exportedAt: new Date().toISOString(),
     profile: await getProfile(),
     days: await getAllDays(),
     foodInsights: await getAllFoodInsights(),
     dayAnalyses: await db.dayAnalyses.toArray(),
     symptomNotes: await getAllSymptomInfos(),
+    organNotes: await getAllOrganInfos(),
     mealSuggestions: await getMealSuggestions(),
     encyclopediaExtra: await getEncyclopediaExtra(),
     // Réglages sans secret : on conserve le modèle choisi, pas la clé.
@@ -238,7 +266,7 @@ export async function importAll(payload: ExportPayload): Promise<void> {
   }
   await db.transaction(
     'rw',
-    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes],
+    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes],
     async () => {
       await db.days.clear();
       await db.days.bulkPut(payload.days);
@@ -251,6 +279,9 @@ export async function importAll(payload: ExportPayload): Promise<void> {
 
     await db.symptomNotes.clear();
     if (Array.isArray(payload.symptomNotes)) await db.symptomNotes.bulkPut(payload.symptomNotes);
+
+    await db.organNotes.clear();
+    if (Array.isArray(payload.organNotes)) await db.organNotes.bulkPut(payload.organNotes);
 
     if (payload.profile) await setProfile(payload.profile);
     if (payload.mealSuggestions) await setMealSuggestions(payload.mealSuggestions);
@@ -271,10 +302,16 @@ export async function importAll(payload: ExportPayload): Promise<void> {
 }
 
 export async function clearAll(): Promise<void> {
-  await db.transaction('rw', db.days, db.meta, db.foodInsights, db.dayAnalyses, async () => {
-    await db.days.clear();
-    await db.foodInsights.clear();
-    await db.dayAnalyses.clear();
-    await db.meta.clear();
-  });
+  await db.transaction(
+    'rw',
+    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes],
+    async () => {
+      await db.days.clear();
+      await db.foodInsights.clear();
+      await db.dayAnalyses.clear();
+      await db.symptomNotes.clear();
+      await db.organNotes.clear();
+      await db.meta.clear();
+    },
+  );
 }

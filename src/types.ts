@@ -153,6 +153,19 @@ export interface SymptomInfo {
   updatedAt: string;
 }
 
+/** Approfondissement IA d'un organe digestif, mis en cache (clé = id de l'organe). */
+export interface OrganInfo {
+  key: string; // id de l'organe (clé primaire)
+  name: string;
+  apercu: string; // approfondissement du rôle de l'organe
+  pathologies: { name: string; description: string }[]; // pathologies détaillées
+  liens: string; // lien avec candidose / SIBO / SII
+  conseils: string[]; // comment prendre soin de cet organe
+  signesAlarme: string[]; // signes qui doivent amener à consulter
+  model: string;
+  updatedAt: string;
+}
+
 /** Entrée d'encyclopédie ajoutée par l'IA. */
 export interface EncyclopediaExtraItem {
   category: string;

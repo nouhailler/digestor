@@ -5,6 +5,10 @@
  * 100 % offline : l'image est embarquée dans `public/anatomy/`.
  */
 
+import { useState } from 'react';
+import { ChevronRight } from 'lucide-react';
+import { OrganDetailSheet } from './OrganDetailSheet';
+
 type Tone = 'severe' | 'modere' | 'leger';
 
 const TONE: Record<Tone, string> = {
@@ -17,6 +21,7 @@ const TONE: Record<Tone, string> = {
 
 interface Stage {
   n: number;
+  organId: string;
   organ: string;
   duration: string;
   tone: Tone;
@@ -26,6 +31,7 @@ interface Stage {
 const STAGES: Stage[] = [
   {
     n: 1,
+    organId: 'bouche',
     organ: 'Bouche',
     duration: 'quelques minutes',
     tone: 'leger',
@@ -33,6 +39,7 @@ const STAGES: Stage[] = [
   },
   {
     n: 2,
+    organId: 'oesophage',
     organ: 'Œsophage',
     duration: '~10 secondes',
     tone: 'leger',
@@ -40,6 +47,7 @@ const STAGES: Stage[] = [
   },
   {
     n: 3,
+    organId: 'estomac',
     organ: 'Estomac',
     duration: '2 à 4 heures',
     tone: 'modere',
@@ -47,6 +55,7 @@ const STAGES: Stage[] = [
   },
   {
     n: 4,
+    organId: 'grele',
     organ: 'Intestin grêle',
     duration: '3 à 5 heures',
     tone: 'leger',
@@ -54,6 +63,7 @@ const STAGES: Stage[] = [
   },
   {
     n: 5,
+    organId: 'colon',
     organ: 'Gros intestin (côlon)',
     duration: '12 à 48 heures',
     tone: 'modere',
@@ -61,6 +71,7 @@ const STAGES: Stage[] = [
   },
   {
     n: 6,
+    organId: 'rectum',
     organ: 'Rectum & anus',
     duration: 'évacuation',
     tone: 'leger',
@@ -68,9 +79,9 @@ const STAGES: Stage[] = [
   },
 ];
 
-function TransitTimeline() {
+function TransitTimeline({ onSelect }: { onSelect: (organId: string) => void }) {
   return (
-    <ol className="relative ml-3 space-y-4">
+    <ol className="relative ml-3 space-y-3">
       {/* Ligne verticale reliant les étapes */}
       <span
         aria-hidden="true"
@@ -78,23 +89,35 @@ function TransitTimeline() {
         style={{ background: 'var(--color-border)' }}
       />
       {STAGES.map((s) => (
-        <li key={s.n} className="relative pl-8">
-          <span
-            className="absolute left-0 top-0 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold"
-            style={{ color: TONE[s.tone], border: `1.5px solid ${TONE[s.tone]}`, background: 'var(--color-bg)' }}
+        <li key={s.n} className="relative">
+          <button
+            type="button"
+            onClick={() => onSelect(s.organId)}
+            title={`En savoir plus sur : ${s.organ}`}
+            className="flex w-full items-start gap-3 rounded-xl border border-transparent pl-8 pr-2 py-1.5 text-left hover:border-border hover:bg-surface"
           >
-            {s.n}
-          </span>
-          <div className="flex flex-wrap items-baseline gap-x-2">
-            <span className="font-medium text-ink">{s.organ}</span>
             <span
-              className="rounded-full px-2 py-0.5 text-[11px]"
-              style={{ color: TONE[s.tone], border: `1px solid ${TONE[s.tone]}` }}
+              className="absolute left-0 top-1.5 flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold"
+              style={{ color: TONE[s.tone], border: `1.5px solid ${TONE[s.tone]}`, background: 'var(--color-bg)' }}
             >
-              {s.duration}
+              {s.n}
             </span>
-          </div>
-          <p className="mt-1 text-sm text-muted">{s.text}</p>
+            <span className="min-w-0 flex-1">
+              <span className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-medium text-ink underline decoration-dotted decoration-muted underline-offset-4">
+                  {s.organ}
+                </span>
+                <span
+                  className="rounded-full px-2 py-0.5 text-[11px]"
+                  style={{ color: TONE[s.tone], border: `1px solid ${TONE[s.tone]}` }}
+                >
+                  {s.duration}
+                </span>
+              </span>
+              <span className="mt-1 block text-sm text-muted">{s.text}</span>
+            </span>
+            <ChevronRight size={16} className="mt-1.5 shrink-0 text-muted" />
+          </button>
         </li>
       ))}
     </ol>
@@ -173,7 +196,8 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export function DigestiveGuide() {
+export function DigestiveGuide({ onOpenAiSettings }: { onOpenAiSettings: () => void }) {
+  const [organId, setOrganId] = useState<string | null>(null);
   return (
     <div>
       <p className="text-sm text-muted">
@@ -201,7 +225,8 @@ export function DigestiveGuide() {
       </Section>
 
       <Section title="Le transit, étape par étape">
-        <TransitTimeline />
+        <p className="mb-2 text-xs text-muted">Touchez une étape pour la fiche de l'organe (image, rôle, pathologies).</p>
+        <TransitTimeline onSelect={setOrganId} />
       </Section>
 
       <Section title="Le microbiote intestinal">
@@ -254,9 +279,20 @@ export function DigestiveGuide() {
       </Section>
 
       <p className="mt-6 border-t border-border pt-3 text-xs text-muted">
-        Schéma anatomique : Mariana Ruiz (LadyofHats), Jmarchn — traduction française Moez. Domaine public, via
-        Wikimedia Commons. Schémas du transit et du microbiote : Digestor. Contenu informatif, non diagnostique.
+        Schéma anatomique : Mariana Ruiz (LadyofHats), Jmarchn — traduction française Moez. Images des organes :
+        SEER Training Modules / U.S. National Cancer Institute. Domaine public, via Wikimedia Commons. Schémas du
+        transit et du microbiote : Digestor. Contenu informatif, non diagnostique.
       </p>
+
+      <OrganDetailSheet
+        open={organId !== null}
+        organId={organId}
+        onClose={() => setOrganId(null)}
+        onOpenAiSettings={() => {
+          setOrganId(null);
+          onOpenAiSettings();
+        }}
+      />
     </div>
   );
 }

@@ -53,7 +53,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   d'informations »** : encyclopédie classée par catégorie, **enrichissable par l'IA**.
 - 🫀 **Système digestif** *(illustré)* — guide hors-ligne du tube digestif : planche anatomique annotée
   (Wikimedia, domaine public), transit étape par étape (durées + rôle des organes), et schéma du
-  **microbiote** (équilibre vs dysbiose, lien avec SIBO & Candida).
+  **microbiote** (équilibre vs dysbiose, lien avec SIBO & Candida). Chaque étape du transit est
+  **cliquable** → fiche d'organe (image, rôle, pathologies fréquentes) avec **approfondissement IA**.
 - 🧠 **Analyse de journée** *(IA)* — verdict global, déclencheurs probables, pistes d'amélioration.
 - ⏳ **Analyses IA en arrière-plan** — une analyse lancée **continue même si vous changez d'écran** ;
   un indicateur global dans l'en-tête (sablier + secondes, puis ✓ vert) montre l'activité en cours.

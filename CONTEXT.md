@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.10 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif, 92 tests)
+## État actuel — v0.9.12 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, 94 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -225,6 +225,27 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   ont été revues : défensives (accès via `effectiveDaySymptoms`, au pire des `NaN`, pas de throw).
 - Tests : `ErrorBoundary.test.tsx` (RTL/jsdom) — repli affiché sur enfant qui throw, rendu normal sinon.
   Total **94 tests**.
+
+## v0.9.12 — fiches d'organes cliquables (guide système digestif)
+
+- Dans le guide **Système digestif**, chaque étape du transit (Bouche, Œsophage, Estomac, Intestin grêle,
+  Gros intestin, Rectum & anus) devient **cliquable** → `OrganDetailSheet` :
+  - **Image** de l'organe (illustrations **SEER / NCI**, domaine public, embarquées dans
+    `public/anatomy/organs/`, sur cartouche fond blanc).
+  - **Rôle dans la digestion** + **pathologies fréquentes** : contenu **statique** curé
+    (`lib/organs.ts`, `ORGANS[]`), affiché d'emblée, hors-ligne, non diagnostique.
+  - **Bouton IA « Approfondir avec l'IA »** → `OrganInfo` (aperçu, pathologies détaillées, lien
+    candidose/SIBO/SII, conseils, signes d'alarme). Cache **Dexie v5** (table `organNotes`, clé = id
+    d'organe). Mêmes garde-fous que les fiches de symptômes : repli sans clé, exécution en arrière-plan
+    (`runAiTask`), une fiche en cache reste consultable sans clé.
+- Couche : `types.ts` (`OrganInfo`), `lib/organs.ts` (catalogue + `getOrgan`), `lib/ai/organInfo.ts`
+  (`explainOrgan` + coercition), `hooks/useOrganInfo.ts`, `components/OrganDetailSheet.tsx`.
+  `DigestiveGuide` reçoit `onOpenAiSettings` (passé par `ReperesView`).
+- **DB v5** + **export/import** étendus (`organNotes` ajouté à `exportAll`/`importAll`/`clearAll`,
+  payload `version: 5`). Clé API toujours exclue de l'export.
+- **PWA** : `vite.config.ts` — `globPatterns` étendu à `jpg,jpeg` (sinon les 5 illustrations JPG
+  n'étaient **pas** précachées → indispo hors-ligne). Précache 19 → 25 entrées (~1,6 Mo).
+- 94 tests (inchangé : composant/UI, pas de logique `lib` nouvelle testable hors prompt).
 
 ## Parcours d'import vérifié (bout en bout)
 

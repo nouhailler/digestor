@@ -152,7 +152,7 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
           onSelectSymptom={(name, hint) => setSelected({ label: name, hint })}
         />
       ) : (
-        <DigestiveGuide />
+        <DigestiveGuide onOpenAiSettings={onOpenAiSettings} />
       )}
 
       <SymptomDetailSheet
