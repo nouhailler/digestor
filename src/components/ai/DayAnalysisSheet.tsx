@@ -1,5 +1,5 @@
 import { AlertTriangle, Lightbulb, Loader2, RefreshCw, Settings2, Sparkles } from 'lucide-react';
-import type { DayEntry } from '../../types';
+import type { DayEntry, DayImprovement } from '../../types';
 import { Sheet } from '../Sheet';
 import { AiBusy } from './AiBusy';
 import { VERDICT_COLOR, VERDICT_LABEL } from '../../lib/ai/insightFormat';
@@ -55,9 +55,7 @@ export function DayAnalysisSheet({ open, day, onClose, onOpenAiSettings }: DayAn
             </Block>
           )}
           {analysis.improvements.length > 0 && (
-            <Block icon={<Lightbulb size={15} style={{ color: 'var(--color-modere)' }} />} title="Pistes d'amélioration">
-              {analysis.improvements}
-            </Block>
+            <ImprovementsBlock improvements={analysis.improvements} />
           )}
 
           {hasHealthInfo(profile) && (
@@ -114,6 +112,36 @@ function Block({ icon, title, children }: { icon: React.ReactNode; title: string
             {t}
           </li>
         ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Tolère l'ancien format en cache (chaîne) en plus de `{ action, why }`. */
+function normalizeImprovement(imp: DayImprovement | string): DayImprovement {
+  return typeof imp === 'string' ? { action: imp, why: '' } : imp;
+}
+
+/** Pistes d'amélioration : chaque recommandation est suivie de sa justification. */
+function ImprovementsBlock({ improvements }: { improvements: (DayImprovement | string)[] }) {
+  return (
+    <div>
+      <h4 className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted">
+        <Lightbulb size={15} style={{ color: 'var(--color-modere)' }} /> Pistes d'amélioration
+      </h4>
+      <ul className="space-y-2.5">
+        {improvements.map((imp, i) => {
+          const { action, why } = normalizeImprovement(imp);
+          return (
+            <li key={i} className="flex items-start gap-2 text-ink">
+              <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-modere)]" />
+              <div>
+                <p>{action}</p>
+                {why && <p className="mt-0.5 text-xs leading-relaxed text-muted">Pourquoi : {why}</p>}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     </div>
   );

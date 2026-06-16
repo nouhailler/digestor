@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Plus, Trash2, X } from 'lucide-react';
 import type { FoodCategory, Meal, SymptomKey } from '../types';
 import { Chip } from './Chip';
@@ -11,7 +11,11 @@ import {
   SYMPTOM_ORDER,
 } from '../lib/constants';
 import { emptySymptoms, makeFood } from '../lib/factory';
+import { normalize } from '../lib/foodClassifier';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
+
+/** Nb de suggestions d'autocomplétion affichées au maximum. */
+const MAX_SUGGESTIONS = 6;
 
 function nextCategory(c: FoodCategory): FoodCategory {
   return CATEGORY_CYCLE[(CATEGORY_CYCLE.indexOf(c) + 1) % CATEGORY_CYCLE.length];
@@ -26,16 +30,32 @@ interface MealEditorProps {
   onFoodInfo?: (name: string) => void;
   /** En lecture, taper un symptôme ouvre sa fiche (encyclopédie). */
   onSymptomInfo?: (key: SymptomKey) => void;
+  /** Aliments déjà saisis ailleurs : proposés en autocomplétion (anti-doublon). */
+  knownFoods?: string[];
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [] }: MealEditorProps) {
   const [draft, setDraft] = useState('');
 
-  function addFood() {
-    const name = draft.trim();
-    if (!name) return;
-    onChange({ ...meal, foods: [...meal.foods, makeFood(name)] });
+  // Suggestions d'aliments déjà connus à partir de 3 caractères tapés,
+  // hors aliments déjà présents dans ce repas (rien à dupliquer).
+  const suggestions = useMemo(() => {
+    const q = normalize(draft);
+    if (q.length < 3) return [];
+    const inMeal = new Set(meal.foods.map((f) => normalize(f.name)));
+    return knownFoods
+      .filter((name) => {
+        const n = normalize(name);
+        return n.includes(q) && n !== q && !inMeal.has(n);
+      })
+      .slice(0, MAX_SUGGESTIONS);
+  }, [draft, knownFoods, meal.foods]);
+
+  function addFood(name = draft) {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    onChange({ ...meal, foods: [...meal.foods, makeFood(trimmed)] });
     setDraft('');
   }
 
@@ -114,7 +134,7 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
         ))}
 
         {editing && (
-          <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-1">
+          <span className="relative inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2 py-1">
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
@@ -128,9 +148,33 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
               title="Tapez un aliment puis Entrée. Sa catégorie (couleur) est devinée automatiquement, modifiable ensuite d'un toucher."
               className="w-36 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none"
             />
-            <button type="button" onClick={addFood} aria-label="Ajouter" className="text-muted hover:text-leger">
+            <button type="button" onClick={() => addFood()} aria-label="Ajouter" className="text-muted hover:text-leger">
               <Plus size={15} />
             </button>
+
+            {suggestions.length > 0 && (
+              <ul
+                className="absolute left-0 top-full z-10 mt-1 max-h-56 w-56 overflow-auto rounded-lg border border-border bg-surface-2 py-1 shadow-lg"
+                role="listbox"
+                aria-label="Aliments déjà saisis"
+              >
+                {suggestions.map((name) => (
+                  <li key={name}>
+                    <button
+                      type="button"
+                      // onMouseDown : agir avant le blur de l'input.
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        addFood(name);
+                      }}
+                      className="block w-full px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
+                    >
+                      {name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </span>
         )}
       </div>

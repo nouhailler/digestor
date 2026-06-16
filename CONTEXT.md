@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.12 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, 94 tests)
+## État actuel — v0.9.13 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, 95 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -246,6 +246,24 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
 - **PWA** : `vite.config.ts` — `globPatterns` étendu à `jpg,jpeg` (sinon les 5 illustrations JPG
   n'étaient **pas** précachées → indispo hors-ligne). Précache 19 → 25 entrées (~1,6 Mo).
 - 94 tests (inchangé : composant/UI, pas de logique `lib` nouvelle testable hors prompt).
+
+## v0.9.13 — autocomplétion d'aliments & pistes d'amélioration justifiées
+
+- **Autocomplétion d'aliments (anti-doublon)** : nouveau hook `hooks/useKnownFoods.ts` — `useLiveQuery`
+  sur `db.days`, collecte tous les noms d'aliments dédupliqués par forme **normalisée** (`normalize`
+  de `foodClassifier`, on garde la 1ʳᵉ orthographe vue), triés alpha. `JournalView` le calcule une
+  fois et le passe en prop `knownFoods` → `DayCard` → `MealEditor`. Dans `MealEditor`, dès **3 lettres**
+  saisies, suggestions filtrées (sous-chaîne normalisée, hors aliments déjà dans le repas, max 6),
+  rendues en menu déroulant ; sélection via `onMouseDown` (avant le blur de l'input) → `addFood(name)`.
+  But explicite : réutiliser une orthographe/casse existante au lieu de créer des doublons.
+- **Pistes d'amélioration justifiées (analyse de journée IA)** : `DayAnalysis.improvements` n'est plus
+  `string[]` mais `DayImprovement[]` (`{ action, why }`, nouveau type dans `types.ts`). Le prompt
+  (`lib/ai/dayAnalysis.ts`) demande un objet par piste avec un `why` **non vide** (bénéfice attendu /
+  mécanisme FODMAP/sucres) ; nouvelle coercition `coerceImprovements` **tolérante** (objet attendu,
+  mais aussi simple chaîne ou ancien cache → `why` vide). `DayAnalysisSheet` rend un `ImprovementsBlock`
+  dédié : action + ligne « Pourquoi : … » atténuée ; `normalizeImprovement` gère l'ancien format en
+  cache (pas de plantage, mais sans justification → « Réanalyser » régénère la version expliquée).
+  Tests `dayAnalysis.test.ts` mis à jour (format objet + tolérance chaîne). Total **95 tests**.
 
 ## Parcours d'import vérifié (bout en bout)
 

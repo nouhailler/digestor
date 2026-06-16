@@ -1,4 +1,4 @@
-import type { AiConfig, DayAnalysis, DayEntry, Verdict } from '../../types';
+import type { AiConfig, DayAnalysis, DayEntry, DayImprovement, Verdict } from '../../types';
 import { INTENSITY_LABEL, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../constants';
 import { chatJSON } from './openrouter';
 
@@ -43,8 +43,14 @@ Renvoie STRICTEMENT cet objet JSON :
   "verdict": "favorable | attention | eviter",
   "summary": "synthèse de la journée en 1 à 2 phrases, en français",
   "likelyTriggers": ["aliments ou combinaisons probablement en cause (0 à 4 éléments)"],
-  "improvements": ["pistes d'amélioration concrètes (1 à 4 éléments)"]
-}`;
+  "improvements": [
+    {
+      "action": "piste d'amélioration concrète",
+      "why": "pourquoi tu la proposes : effet attendu sur les symptômes ou mécanisme (FODMAP, sucres, etc.), en 1 phrase claire et accessible"
+    }
+  ]
+}
+La clé "improvements" contient 1 à 4 éléments. Chaque "why" doit être renseigné et expliquer le bénéfice recherché ; ne laisse jamais "why" vide.`;
 }
 
 function coerceVerdict(v: unknown): Verdict {
@@ -56,6 +62,31 @@ function coerceStringArray(v: unknown, max: number): string[] {
   return v
     .map((x) => (typeof x === 'string' ? x.trim() : ''))
     .filter(Boolean)
+    .slice(0, max);
+}
+
+/**
+ * Coerce les pistes d'amélioration. Tolère :
+ * - le format objet attendu `{ action, why }` ;
+ * - une simple chaîne (modèles capricieux ou ancien cache) → `why` vide.
+ */
+function coerceImprovements(v: unknown, max: number): DayImprovement[] {
+  if (!Array.isArray(v)) return [];
+  return v
+    .map((x): DayImprovement | null => {
+      if (typeof x === 'string') {
+        const action = x.trim();
+        return action ? { action, why: '' } : null;
+      }
+      if (x && typeof x === 'object') {
+        const o = x as Record<string, unknown>;
+        const action = typeof o.action === 'string' ? o.action.trim() : '';
+        const why = typeof o.why === 'string' ? o.why.trim() : '';
+        return action ? { action, why } : null;
+      }
+      return null;
+    })
+    .filter((x): x is DayImprovement => x !== null)
     .slice(0, max);
 }
 
@@ -72,7 +103,7 @@ export function toDayAnalysis(raw: RawDayAnalysis, date: string, model: string):
     verdict: coerceVerdict(raw.verdict),
     summary: typeof raw.summary === 'string' ? raw.summary.trim() : '',
     likelyTriggers: coerceStringArray(raw.likelyTriggers, 4),
-    improvements: coerceStringArray(raw.improvements, 4),
+    improvements: coerceImprovements(raw.improvements, 4),
     model,
     updatedAt: new Date().toISOString(),
   };

@@ -29,9 +29,11 @@ interface DayCardProps {
   onFoodInfo?: (name: string) => void;
   /** Tap sur un symptôme (mode lecture) → fiche encyclopédie. */
   onSymptomInfo?: (key: SymptomKey) => void;
+  /** Aliments déjà saisis : proposés en autocomplétion (anti-doublon). */
+  knownFoods?: string[];
 }
 
-export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo }: DayCardProps) {
+export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
 
   const suggested = useMemo(() => suggestDayQuality(day), [day]);
@@ -110,6 +112,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
               onRemove={() => removeMeal(meal.id)}
               onFoodInfo={onFoodInfo}
               onSymptomInfo={onSymptomInfo}
+              knownFoods={knownFoods}
             />
           ))}
         </div>

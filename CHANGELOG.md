@@ -4,6 +4,19 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.9.13] — Autocomplétion d'aliments & pistes d'amélioration justifiées
+
+- **Autocomplétion des aliments (anti-doublon)** : dans le Journal, en saisissant un aliment, dès
+  **3 caractères** une liste propose les aliments **déjà saisis** ailleurs dans le journal
+  (dédup. par forme normalisée, hors aliments déjà dans le repas). Un clic les ajoute — on réutilise
+  la même orthographe/casse au lieu de créer des variantes (« Tomate » / « tomates »). Source live
+  via le hook `useKnownFoods`.
+- **Pistes d'amélioration expliquées (IA)** : l'analyse de journée justifie désormais chaque piste.
+  `DayAnalysis.improvements` passe de `string[]` à `{ action, why }[]` ; le prompt et la coercition
+  imposent un **« Pourquoi »** (bénéfice attendu / mécanisme), affiché sous chaque recommandation.
+  Coercition tolérante (chaîne simple ou ancien cache → `why` vide) ; les analyses déjà en cache
+  s'affichent sans planter, « Réanalyser » régénère la version justifiée.
+
 ## [Non publié]
 
 ### Encyclopédie (Repères)

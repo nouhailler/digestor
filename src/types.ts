@@ -115,13 +115,19 @@ export interface FoodInsight {
   updatedAt: string; // ISO
 }
 
+/** Une piste d'amélioration : la recommandation + pourquoi on la propose. */
+export interface DayImprovement {
+  action: string; // la recommandation concrète
+  why: string; // justification (effet attendu / mécanisme)
+}
+
 /** Analyse IA d'une journée complète (repas + symptômes). Clé = date. */
 export interface DayAnalysis {
   date: string; // clé primaire
   verdict: Verdict; // appréciation globale
   summary: string;
   likelyTriggers: string[]; // aliments/combinaisons suspects
-  improvements: string[]; // pistes d'amélioration
+  improvements: DayImprovement[]; // pistes d'amélioration (avec justification)
   model: string;
   updatedAt: string;
 }

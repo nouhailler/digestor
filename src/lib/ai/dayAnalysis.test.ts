@@ -33,7 +33,7 @@ describe('toDayAnalysis', () => {
         verdict: 'attention',
         summary: 'Journée moyenne.',
         likelyTriggers: ['pain blanc', '', 'vin'],
-        improvements: ['plus de légumes'],
+        improvements: [{ action: 'plus de légumes', why: 'apport de fibres bien tolérées' }],
       },
       '2025-06-09',
       'modele/x:free',
@@ -41,7 +41,16 @@ describe('toDayAnalysis', () => {
     expect(a.verdict).toBe('attention');
     expect(a.date).toBe('2025-06-09');
     expect(a.likelyTriggers).toEqual(['pain blanc', 'vin']); // chaîne vide filtrée
+    expect(a.improvements).toEqual([{ action: 'plus de légumes', why: 'apport de fibres bien tolérées' }]);
     expect(a.model).toBe('modele/x:free');
+  });
+
+  it('tolère une piste fournie en simple chaîne (why vide)', () => {
+    const a = toDayAnalysis({ improvements: ['boire plus d’eau', '', { action: 'fractionner', why: '' }] }, '2025-06-09', 'm');
+    expect(a.improvements).toEqual([
+      { action: 'boire plus d’eau', why: '' },
+      { action: 'fractionner', why: '' },
+    ]);
   });
 
   it('retombe sur des valeurs sûres si la réponse est incohérente', () => {

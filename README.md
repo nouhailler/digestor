@@ -38,8 +38,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 
 - 📓 **Journal** — saisie jour par jour : repas (chips d'aliments auto-classés 🔴/🟢/⚪, catégorie
   modifiable d'un tap) avec **une zone de symptômes par repas** (pastilles d'intensité), notes,
-  transit & hydratation (sélecteur de selles sur l'échelle de Bristol). Badge « qualité de journée »
-  🟢→🟠→🔴 selon le cumul de symptômes, surchargeable. Infobulles d'aide au survol. Sauvegarde auto.
+  transit & hydratation (sélecteur de selles sur l'échelle de Bristol). **Autocomplétion** des
+  aliments déjà saisis (dès 3 lettres) pour éviter les doublons d'orthographe. Badge « qualité de
+  journée » 🟢→🟠→🔴 selon le cumul de symptômes, surchargeable. Infobulles d'aide. Sauvegarde auto.
 - 🗓️ **Semaine** — **agenda cliquable** des 7 jours (couleur = qualité, clic → ouvre le jour) +
   récapitulatif calculé en direct (jours difficiles, ballonnements sévères, diarrhée, jours sans sucre
   ajouté, hydratation moyenne, score énergie) + **corrélations** aliment → symptôme.
@@ -55,7 +56,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   (Wikimedia, domaine public), transit étape par étape (durées + rôle des organes), et schéma du
   **microbiote** (équilibre vs dysbiose, lien avec SIBO & Candida). Chaque étape du transit est
   **cliquable** → fiche d'organe (image, rôle, pathologies fréquentes) avec **approfondissement IA**.
-- 🧠 **Analyse de journée** *(IA)* — verdict global, déclencheurs probables, pistes d'amélioration.
+- 🧠 **Analyse de journée** *(IA)* — verdict global, déclencheurs probables, pistes d'amélioration
+  **justifiées** (chaque recommandation explique le bénéfice recherché).
 - ⏳ **Analyses IA en arrière-plan** — une analyse lancée **continue même si vous changez d'écran** ;
   un indicateur global dans l'en-tête (sablier + secondes, puis ✓ vert) montre l'activité en cours.
 - 👤 **Profil santé** — âge, sexe, conditions, phase FODMAP, intolérances, allergies, antécédents,
