@@ -9,7 +9,7 @@ import {
   Sparkles,
   UtensilsCrossed,
 } from 'lucide-react';
-import type { DayEntry, DayQuality, Meal, SymptomKey } from '../types';
+import type { DayEntry, DayQuality, FoodInsight, Meal, SymptomKey } from '../types';
 import { dayLongLabel } from '../lib/dates';
 import { makeMeal } from '../lib/factory';
 import { DEFAULT_MEAL_TIMES, SYMPTOM_ORDER } from '../lib/constants';
@@ -31,9 +31,11 @@ interface DayCardProps {
   onSymptomInfo?: (key: SymptomKey) => void;
   /** Aliments déjà saisis : proposés en autocomplétion (anti-doublon). */
   knownFoods?: string[];
+  /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
+  insights?: Map<string, FoodInsight>;
 }
 
-export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods }: DayCardProps) {
+export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, insights }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
 
   const suggested = useMemo(() => suggestDayQuality(day), [day]);
@@ -113,6 +115,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
               onFoodInfo={onFoodInfo}
               onSymptomInfo={onSymptomInfo}
               knownFoods={knownFoods}
+              insights={insights}
             />
           ))}
         </div>

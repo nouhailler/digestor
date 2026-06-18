@@ -9,6 +9,7 @@ import { buildProfileContext, hasHealthInfo } from '../../lib/profile';
 import { useAiConfig } from '../../hooks/useAiConfig';
 import { useProfile } from '../../hooks/useProfile';
 import { useDayAnalysis } from '../../hooks/useDayAnalysis';
+import { useFoodInsightMap } from '../../hooks/useFoodInsightMap';
 
 interface DayAnalysisSheetProps {
   open: boolean;
@@ -22,8 +23,9 @@ export function DayAnalysisSheet({ open, day, onClose, onOpenAiSettings }: DayAn
   const { config, ready } = useAiConfig();
   const { profile } = useProfile();
   const { analysis, loading, error, analyze } = useDayAnalysis(day?.date ?? '');
+  const insights = useFoodInsightMap();
 
-  const runAnalyze = () => day && config && analyze(day, config, buildProfileContext(profile));
+  const runAnalyze = () => day && config && analyze(day, config, buildProfileContext(profile), insights);
   const empty = !day || !dayHasContent(day);
 
   return (

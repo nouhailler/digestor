@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import type { AiConfig, DayAnalysis, DayEntry } from '../types';
+import type { AiConfig, DayAnalysis, DayEntry, FoodInsight } from '../types';
 import { getDayAnalysis, putDayAnalysis } from '../lib/db';
 import { analyzeDay } from '../lib/ai/dayAnalysis';
 import { runAiTask } from '../lib/ai/aiActivity';
@@ -20,13 +20,18 @@ export function useDayAnalysis(date: string) {
     };
   }, []);
 
-  async function analyze(day: DayEntry, config: AiConfig, profileContext?: string): Promise<void> {
+  async function analyze(
+    day: DayEntry,
+    config: AiConfig,
+    profileContext?: string,
+    insights?: Map<string, FoodInsight>,
+  ): Promise<void> {
     if (loading) return;
     setLoading(true);
     setError(null);
     try {
       await runAiTask(`Journée · ${day.date}`, (signal) =>
-        analyzeDay(day, config, { profileContext, signal }).then(putDayAnalysis),
+        analyzeDay(day, config, { profileContext, signal, insights }).then(putDayAnalysis),
       );
     } catch (e) {
       if (mounted.current) setError(e instanceof Error ? e.message : "Échec de l'analyse.");

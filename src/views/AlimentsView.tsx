@@ -20,6 +20,7 @@ import { runAiTask } from '../lib/ai/aiActivity';
 import { buildProfileContext } from '../lib/profile';
 import { useAiConfig } from '../hooks/useAiConfig';
 import { useProfile } from '../hooks/useProfile';
+import { useAiActivity } from '../hooks/useAiActivity';
 import { FoodInsightSheet } from '../components/ai/FoodInsightSheet';
 import { MealSuggestionsSheet } from '../components/ai/MealSuggestionsSheet';
 import { TipBanner } from '../components/TipBanner';
@@ -41,11 +42,15 @@ function prettyName(key: string): string {
   return key.charAt(0).toUpperCase() + key.slice(1);
 }
 
+/** Préfixe des libellés de tâche IA pour une analyse d'aliment (cf. runAiTask). */
+const FOOD_TASK_PREFIX = 'Aliment · ';
+
 export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsViewProps) {
   const { config, ready } = useAiConfig();
   const { profile } = useProfile();
   const days = useLiveQuery(() => db.days.toArray(), []);
   const insights = useLiveQuery(() => getAllFoodInsights(), []);
+  const { labels } = useAiActivity();
 
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
@@ -80,7 +85,28 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   }, [mealRows]);
 
   const sortByName = (a: FoodRow, b: FoodRow) => a.name.localeCompare(b.name, 'fr');
-  const rows = (scope === 'catalogue' ? catalogueRows : mealRows).slice().sort(sortByName);
+  const baseRows = (scope === 'catalogue' ? catalogueRows : mealRows).slice().sort(sortByName);
+
+  // Aliments en cours de génération (toutes provenances : analyse en masse, fiche,
+  // recherche). On les fait remonter en haut de la liste le temps de la génération,
+  // pour confirmer visuellement qu'ils ont bien été lancés / créés.
+  const generating = useMemo(() => {
+    const out: FoodRow[] = [];
+    const seen = new Set<string>();
+    const byKey = new Map(baseRows.map((r) => [r.key, r]));
+    for (const label of labels) {
+      if (!label.startsWith(FOOD_TASK_PREFIX)) continue;
+      const name = label.slice(FOOD_TASK_PREFIX.length).trim();
+      const key = normalize(name);
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+      out.push(byKey.get(key) ?? { key, name });
+    }
+    return out;
+  }, [labels, baseRows]);
+  const generatingKeys = new Set(generating.map((r) => r.key));
+
+  const rows = [...generating, ...baseRows.filter((r) => !generatingKeys.has(r.key))];
   const unanalyzed = rows.filter((r) => !r.insight);
 
   // Recherche combobox : préfixe à partir de 3 lettres, sur tout le catalogue.
@@ -275,21 +301,41 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
         </p>
       ) : (
         <ul className="space-y-2">
-          {rows.map((r) => (
+          {rows.map((r) => {
+            const isGenerating = generatingKeys.has(r.key);
+            return (
             <li key={r.key}>
-              <div className="flex items-center gap-3 rounded-xl border border-border bg-surface px-3 py-2.5">
-                <span
-                  className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: CATEGORY_COLOR[r.insight?.category ?? classifyFood(r.name)] }}
-                  title={r.insight ? 'Catégorie issue de l’analyse' : 'Catégorie estimée (non analysé)'}
-                />
+              <div
+                className="flex items-center gap-3 rounded-xl border bg-surface px-3 py-2.5"
+                style={{ borderColor: isGenerating ? 'var(--color-leger)' : 'var(--color-border)' }}
+              >
+                {isGenerating ? (
+                  <Loader2 size={14} className="shrink-0 animate-spin" style={{ color: 'var(--color-leger)' }} />
+                ) : (
+                  <span
+                    className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: CATEGORY_COLOR[r.insight?.category ?? classifyFood(r.name)] }}
+                    title={r.insight ? 'Catégorie issue de l’analyse' : 'Catégorie estimée (non analysé)'}
+                  />
+                )}
                 <button type="button" onClick={() => setSelected(r.name)} className="min-w-0 flex-1 text-left">
                   <span className="block truncate text-ink">{r.name}</span>
                   <span className="block truncate text-xs text-muted">
-                    {r.insight ? r.insight.summary || 'Analysé' : 'Non analysé — touchez pour analyser'}
+                    {isGenerating
+                      ? 'Génération en cours…'
+                      : r.insight
+                        ? r.insight.summary || 'Analysé'
+                        : 'Non analysé — touchez pour analyser'}
                   </span>
                 </button>
-                {r.insight ? (
+                {isGenerating ? (
+                  <span
+                    className="shrink-0 rounded-full border px-2 py-0.5 text-xs"
+                    style={{ color: 'var(--color-leger)', borderColor: 'var(--color-leger)' }}
+                  >
+                    Génération…
+                  </span>
+                ) : r.insight ? (
                   <span
                     className="shrink-0 rounded-full border px-2 py-0.5 text-xs"
                     style={{ color: FODMAP_LEVEL_COLOR[r.insight.fodmapLevel], borderColor: FODMAP_LEVEL_COLOR[r.insight.fodmapLevel] }}
@@ -315,7 +361,8 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                 )}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       )}
 

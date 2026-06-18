@@ -11,6 +11,7 @@ import {
 import type { SymptomKey } from '../types';
 import { useDay } from '../hooks/useDay';
 import { useKnownFoods } from '../hooks/useKnownFoods';
+import { useFoodInsightMap } from '../hooks/useFoodInsightMap';
 import { DayCard } from '../components/DayCard';
 import { FoodInsightSheet } from '../components/ai/FoodInsightSheet';
 import { DayAnalysisSheet } from '../components/ai/DayAnalysisSheet';
@@ -30,6 +31,7 @@ interface JournalViewProps {
 export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalViewProps) {
   const { day, update } = useDay(date);
   const knownFoods = useKnownFoods();
+  const insights = useFoodInsightMap();
   const [foodInfo, setFoodInfo] = useState<string | null>(null);
   const [analysisOpen, setAnalysisOpen] = useState(false);
   const [symptomInfo, setSymptomInfo] = useState<{ name: string; hint: string } | null>(null);
@@ -81,7 +83,7 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
 
       {day ? (
         <>
-          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} onSymptomInfo={openSymptom} knownFoods={knownFoods} />
+          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} onSymptomInfo={openSymptom} knownFoods={knownFoods} insights={insights} />
           {dayHasContent(day) && (
             <button
               type="button"

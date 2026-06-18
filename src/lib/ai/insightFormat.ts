@@ -1,4 +1,5 @@
-import type { FodmapLevel, Verdict } from '../../types';
+import type { FodmapLevel, FoodInsight, Verdict } from '../../types';
+import { CATEGORY_COLOR } from '../constants';
 
 export const FODMAP_LEVEL_LABEL: Record<FodmapLevel, string> = {
   low: 'Bas',
@@ -35,3 +36,14 @@ export const VERDICT_COLOR: Record<Verdict, string> = {
   eviter: 'var(--color-severe)',
   inconnu: 'var(--color-absent)',
 };
+
+/**
+ * Couleur d'une chip d'aliment d'après son analyse IA : on reflète le niveau
+ * FODMAP global (Élevé→sévère/rouge, Modéré→ambre, Bas→léger/vert) ; si le
+ * niveau est inconnu, on retombe sur la catégorie dérivée (pro/bénéfique/neutre).
+ */
+export function insightChipColor(insight: FoodInsight): string {
+  return insight.fodmapLevel === 'unknown'
+    ? CATEGORY_COLOR[insight.category]
+    : FODMAP_LEVEL_COLOR[insight.fodmapLevel];
+}

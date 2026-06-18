@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Plus, Trash2, X } from 'lucide-react';
-import type { FoodCategory, Meal, SymptomKey } from '../types';
+import type { FoodCategory, FoodInsight, FoodItem, Meal, SymptomKey } from '../types';
 import { Chip } from './Chip';
 import {
   CATEGORY_COLOR,
@@ -12,6 +12,7 @@ import {
 } from '../lib/constants';
 import { emptySymptoms, makeFood } from '../lib/factory';
 import { normalize } from '../lib/foodClassifier';
+import { FODMAP_LEVEL_LABEL, insightChipColor } from '../lib/ai/insightFormat';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
 
 /** Nb de suggestions d'autocomplétion affichées au maximum. */
@@ -32,11 +33,29 @@ interface MealEditorProps {
   onSymptomInfo?: (key: SymptomKey) => void;
   /** Aliments déjà saisis ailleurs : proposés en autocomplétion (anti-doublon). */
   knownFoods?: string[];
+  /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
+  insights?: Map<string, FoodInsight>;
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [] }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], insights }: MealEditorProps) {
   const [draft, setDraft] = useState('');
+
+  // En lecture, la couleur d'un aliment reflète son analyse IA (niveau FODMAP :
+  // sévère / modéré / léger) dès qu'elle existe ; sinon sa catégorie saisie.
+  // En édition, on garde la catégorie manuelle pour que le cycle de couleur reste visible.
+  function foodColor(food: FoodItem): string {
+    const insight = editing ? undefined : insights?.get(normalize(food.name));
+    return insight ? insightChipColor(insight) : CATEGORY_COLOR[food.category];
+  }
+  function foodTitle(food: FoodItem): string | undefined {
+    if (editing) return 'Changer la catégorie';
+    if (!onFoodInfo) return undefined;
+    const insight = insights?.get(normalize(food.name));
+    return insight
+      ? `Analyse IA — FODMAP ${FODMAP_LEVEL_LABEL[insight.fodmapLevel].toLowerCase()}. Toucher pour le détail.`
+      : "Analyser avec l'IA";
+  }
 
   // Suggestions d'aliments déjà connus à partir de 3 caractères tapés,
   // hors aliments déjà présents dans ce repas (rien à dupliquer).
@@ -109,7 +128,7 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
         {meal.foods.map((food) => (
           <Chip
             key={food.id}
-            color={CATEGORY_COLOR[food.category]}
+            color={foodColor(food)}
             onClick={
               editing
                 ? () => cycleFood(food.id)
@@ -117,7 +136,7 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
                   ? () => onFoodInfo(food.name)
                   : undefined
             }
-            title={editing ? 'Changer la catégorie' : onFoodInfo ? "Analyser avec l'IA" : undefined}
+            title={foodTitle(food)}
           >
             {food.name}
             {editing && (

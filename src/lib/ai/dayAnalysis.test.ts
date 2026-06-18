@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
+import type { FoodInsight } from '../../types';
 import { describeDay, toDayAnalysis } from './dayAnalysis';
 import { emptyDay, emptySymptoms, makeMeal } from '../factory';
+import { normalize } from '../foodClassifier';
 
 describe('describeDay', () => {
   const day = {
@@ -23,6 +25,27 @@ describe('describeDay', () => {
 
   it('n’inclut pas les symptômes absents', () => {
     expect(describeDay(emptyDay('2025-06-09'))).toContain('Symptômes : aucun');
+  });
+
+  it('enrichit un aliment avec son analyse IA quand elle existe', () => {
+    const insight: FoodInsight = {
+      key: normalize('pain blanc'),
+      name: 'Pain blanc',
+      category: 'pro',
+      fodmapLevel: 'high',
+      fodmaps: { fructose: 'low', lactose: 'low', fructans: 'high', gos: 'low', polyols: 'low' },
+      sibo: { verdict: 'eviter', note: '' },
+      candida: { verdict: 'attention', note: '' },
+      summary: '',
+      tips: [],
+      model: 'm',
+      updatedAt: '2025-06-09T00:00:00.000Z',
+    };
+    const text = describeDay(day, new Map([[insight.key, insight]]));
+    expect(text).toContain('pain blanc (FODMAP élevé, SIBO à éviter, candida à surveiller)');
+    // brocoli n'a pas d'analyse → on garde sa catégorie, sans repère FODMAP.
+    expect(text).toContain('brocoli (');
+    expect(text).not.toMatch(/brocoli \(FODMAP/);
   });
 });
 

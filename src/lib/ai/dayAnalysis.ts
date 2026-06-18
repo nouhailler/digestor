@@ -1,5 +1,15 @@
-import type { AiConfig, DayAnalysis, DayEntry, DayImprovement, Verdict } from '../../types';
+import type {
+  AiConfig,
+  DayAnalysis,
+  DayEntry,
+  DayImprovement,
+  FoodInsight,
+  FoodItem,
+  Verdict,
+} from '../../types';
 import { INTENSITY_LABEL, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../constants';
+import { normalize } from '../foodClassifier';
+import { FODMAP_LEVEL_LABEL, VERDICT_LABEL } from './insightFormat';
 import { chatJSON } from './openrouter';
 
 const VERDICTS: Verdict[] = ['favorable', 'attention', 'eviter', 'inconnu'];
@@ -10,12 +20,25 @@ plausibles entre aliments et symptômes et tu proposes des améliorations concr�
 Tu réponds UNIQUEMENT avec un objet JSON valide, sans texte ni Markdown autour.
 Tu ne poses pas de diagnostic ; tes remarques sont des repères généraux.`;
 
+/**
+ * Annotation d'un aliment pour le prompt. Si une analyse IA existe pour cet
+ * aliment, on injecte ses repères (niveau FODMAP, verdicts SIBO/candida) afin
+ * que le bilan de la journée en tienne compte ; sinon on garde sa catégorie.
+ */
+function foodTag(f: FoodItem, insight?: FoodInsight): string {
+  if (!insight) return `${f.name} (${f.category})`;
+  const parts = [`FODMAP ${FODMAP_LEVEL_LABEL[insight.fodmapLevel].toLowerCase()}`];
+  if (insight.sibo.verdict !== 'inconnu') parts.push(`SIBO ${VERDICT_LABEL[insight.sibo.verdict].toLowerCase()}`);
+  if (insight.candida.verdict !== 'inconnu') parts.push(`candida ${VERDICT_LABEL[insight.candida.verdict].toLowerCase()}`);
+  return `${f.name} (${parts.join(', ')})`;
+}
+
 /** Résumé lisible d'une journée pour le prompt (pur, testable). */
-export function describeDay(day: DayEntry): string {
+export function describeDay(day: DayEntry, insights?: Map<string, FoodInsight>): string {
   const meals = [...day.meals]
     .sort((a, b) => a.time.localeCompare(b.time))
     .map((m) => {
-      const foods = m.foods.map((f) => `${f.name} (${f.category})`).join(', ') || '—';
+      const foods = m.foods.map((f) => foodTag(f, insights?.get(normalize(f.name)))).join(', ') || '—';
       return `  - ${m.time} : ${foods}`;
     })
     .join('\n');
@@ -33,10 +56,10 @@ export function describeDay(day: DayEntry): string {
   return lines.join('\n');
 }
 
-function userPrompt(day: DayEntry, profileContext?: string): string {
+function userPrompt(day: DayEntry, profileContext?: string, insights?: Map<string, FoodInsight>): string {
   return `Analyse cette journée :
 
-${describeDay(day)}
+${describeDay(day, insights)}
 ${profileContext ? `\nProfil de la personne : ${profileContext}\n` : ''}
 Renvoie STRICTEMENT cet objet JSON :
 {
@@ -112,7 +135,7 @@ export function toDayAnalysis(raw: RawDayAnalysis, date: string, model: string):
 export async function analyzeDay(
   day: DayEntry,
   config: AiConfig,
-  opts: { profileContext?: string; signal?: AbortSignal } = {},
+  opts: { profileContext?: string; signal?: AbortSignal; insights?: Map<string, FoodInsight> } = {},
 ): Promise<DayAnalysis> {
   if (!config.apiKey.trim() || !config.modelId) {
     throw new Error('Configurez d’abord la clé OpenRouter et un modèle dans les paramètres IA.');
@@ -121,7 +144,7 @@ export async function analyzeDay(
     apiKey: config.apiKey,
     model: config.modelId,
     system: SYSTEM_PROMPT,
-    user: userPrompt(day, opts.profileContext),
+    user: userPrompt(day, opts.profileContext, opts.insights),
     signal: opts.signal,
   });
   return toDayAnalysis(raw, day.date, config.modelId);
