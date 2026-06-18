@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-92%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-96%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -37,7 +37,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ## ✨ Fonctionnalités
 
 - 📓 **Journal** — saisie jour par jour : repas (chips d'aliments auto-classés 🔴/🟢/⚪, catégorie
-  modifiable d'un tap) avec **une zone de symptômes par repas** (pastilles d'intensité), notes,
+  modifiable d'un tap ; **une fois analysée par l'IA, la chip prend dynamiquement la couleur de sa
+  sévérité FODMAP** 🔴 élevé / 🟠 modéré / 🟢 bas) avec **une zone de symptômes par repas** (pastilles
+  d'intensité), notes,
   transit & hydratation (sélecteur de selles sur l'échelle de Bristol). **Autocomplétion** des
   aliments déjà saisis (dès 3 lettres) pour éviter les doublons d'orthographe. Badge « qualité de
   journée » 🟢→🟠→🔴 selon le cumul de symptômes, surchargeable. Infobulles d'aide. Sauvegarde auto.
@@ -48,7 +50,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   top symptômes) sur semaine / 4 semaines / tout.
 - 🍎 **Aliments** *(IA, optionnel)* — analyse FODMAP (global + par groupe), verdicts SIBO & candidose,
   portion tolérée, conseils. **Catalogue de ~267 aliments**, **analyse en masse**, recherche combobox
-  (préfixe ≥ 3 lettres), **idées de repas adaptées** (ajoutables au journal).
+  (préfixe ≥ 3 lettres), **idées de repas adaptées** (ajoutables au journal). Un aliment en cours
+  d'analyse **remonte en haut de la liste** (badge « Génération… ») le temps de sa génération.
 - 🩺 **Repères / encyclopédie** — symptômes discriminants Candidose vs SIBO/SII ; chaque symptôme est
   **cliquable** pour une fiche détaillée (origine, manifestation, effets, conseils). **« Plus
   d'informations »** : encyclopédie classée par catégorie, **enrichissable par l'IA**.
@@ -57,7 +60,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   **microbiote** (équilibre vs dysbiose, lien avec SIBO & Candida). Chaque étape du transit est
   **cliquable** → fiche d'organe (image, rôle, pathologies fréquentes) avec **approfondissement IA**.
 - 🧠 **Analyse de journée** *(IA)* — verdict global, déclencheurs probables, pistes d'amélioration
-  **justifiées** (chaque recommandation explique le bénéfice recherché).
+  **justifiées** (chaque recommandation explique le bénéfice recherché). Tient compte des **fiches
+  d'aliments déjà analysées** (niveau FODMAP, verdicts SIBO/candida) injectées dans le prompt.
 - ⏳ **Analyses IA en arrière-plan** — une analyse lancée **continue même si vous changez d'écran** ;
   un indicateur global dans l'en-tête (sablier + secondes, puis ✓ vert) montre l'activité en cours.
 - 👤 **Profil santé** — âge, sexe, conditions, phase FODMAP, intolérances, allergies, antécédents,

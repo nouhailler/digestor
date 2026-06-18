@@ -4,6 +4,21 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.9.14] — Couleur d'aliment IA dans les repas & remontée pendant la génération
+
+- **Couleur d'aliment reflétée dans le repas** : dès qu'un aliment a été analysé par l'IA, sa chip
+  dans le Journal prend dynamiquement la couleur de sa **sévérité FODMAP** (Élevé → rouge, Modéré →
+  ambre, Bas → vert ; inconnu → catégorie dérivée). Mise à jour **live** (`useLiveQuery`) : générer
+  l'analyse repeint le repas sans recharger. En **édition**, la chip garde la catégorie manuelle pour
+  que le cycle de couleur au tap reste visible.
+- **Analyse de journée enrichie** : « Analyser ma journée avec l'IA » injecte désormais, pour chaque
+  aliment analysé, ses repères (niveau FODMAP, verdicts SIBO/candida) dans le prompt — le bilan tient
+  compte des fiches générées plutôt que de la seule catégorie saisie.
+- **Aliments en cours de génération remontés** : dans l'onglet Aliments, un aliment dont l'analyse IA
+  tourne remonte **en haut de la liste** (badge « Génération… » + sablier vert) le temps de la
+  génération, toutes provenances confondues (analyse en masse, fiche, recherche d'un nouvel aliment)
+  — confirmation visuelle qu'il a bien été lancé / créé. Source : libellés du store d'activité IA.
+
 ## [0.9.13] — Autocomplétion d'aliments & pistes d'amélioration justifiées
 
 - **Autocomplétion des aliments (anti-doublon)** : dans le Journal, en saisissant un aliment, dès

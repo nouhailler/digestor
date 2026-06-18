@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.13 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, 95 tests)
+## État actuel — v0.9.14 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 96 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -264,6 +264,29 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   dédié : action + ligne « Pourquoi : … » atténuée ; `normalizeImprovement` gère l'ancien format en
   cache (pas de plantage, mais sans justification → « Réanalyser » régénère la version expliquée).
   Tests `dayAnalysis.test.ts` mis à jour (format objet + tolérance chaîne). Total **95 tests**.
+
+## v0.9.14 — couleur d'aliment IA répercutée dans les repas & remontée pendant la génération
+
+- **Couleur d'aliment dans le repas reflète l'analyse IA** : nouveau hook `hooks/useFoodInsightMap.ts`
+  (`useLiveQuery` → `Map<nomNormalisé, FoodInsight>`) propagé `JournalView` → `DayCard` → `MealEditor`.
+  Helper `insightChipColor` (`lib/ai/insightFormat.ts`) : couleur = **niveau FODMAP** (Élevé→sévère,
+  Modéré→ambre, Bas→léger ; `unknown`→catégorie dérivée). C'est le seul signal réellement **tri-niveau**
+  (la catégorie pro/bénéfique/neutre n'a pas d'ambre), d'où ce choix pour « Sévère/Modéré/Léger ».
+  `MealEditor` applique cette couleur **en lecture** uniquement ; **en édition**, on garde
+  `CATEGORY_COLOR[food.category]` pour que le cycle de catégorie au tap reste visible. Réactif :
+  générer une fiche repeint la chip sans rechargement.
+- **Analyse de journée enrichie par les fiches** : `describeDay`/`analyzeDay` (`lib/ai/dayAnalysis.ts`)
+  acceptent une `Map<string, FoodInsight>` optionnelle ; chaque aliment analysé est annoté
+  `nom (FODMAP …, SIBO …, candida …)` au lieu de `nom (catégorie)`. Rétrocompatible (sans map → ancien
+  format). `useDayAnalysis.analyze` et `DayAnalysisSheet` (via `useFoodInsightMap`) transmettent la map.
+- **Aliments en cours de génération en haut de la liste** : `AlimentsView` lit les **libellés** du store
+  d'activité IA (`useAiActivity`), extrait ceux préfixés `Aliment · ` (constante `FOOD_TASK_PREFIX`),
+  normalise → clés en cours de génération. Ces lignes sont **épinglées en tête** (badge « Génération… »
+  + `Loader2` vert, bordure verte) le temps de la génération, puis retombent dans l'ordre alpha. Couvre
+  toutes les provenances (analyse en masse, fiche `FoodInsightSheet`, recherche d'un nouvel aliment) ;
+  un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
+- Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
+  catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
 
 ## Parcours d'import vérifié (bout en bout)
 
