@@ -25,9 +25,11 @@ import {
 import { HYDRATION_TARGET_L } from '../lib/constants';
 import { dayShortLabel, fromISODate, toISODate } from '../lib/dates';
 import { TipBanner } from '../components/TipBanner';
+import { useTheme } from '../hooks/useTheme';
 
 type Range = 'week' | '4weeks' | 'all';
 
+// La palette sémantique est identique sur les deux thèmes (cf. index.css).
 const COL = {
   severe: '#f0606a',
   modere: '#e8a13a',
@@ -39,12 +41,34 @@ const COL = {
   hydration: '#5fbf6f',
 };
 
+// Couleurs « chrome » (grille, axes, tooltip) : Recharts ne lit pas les var CSS,
+// on les calque donc manuellement sur le thème courant.
+const CHROME = {
+  dark: { grid: '#2a2a2c', muted: '#8a8a8e', ink: '#ececec', surface: '#1c1c1e', cursor: 'rgba(255,255,255,0.04)' },
+  light: { grid: '#d9dadf', muted: '#65656b', ink: '#1a1a1d', surface: '#ffffff', cursor: 'rgba(0,0,0,0.04)' },
+} as const;
+
 interface EvolutionViewProps {
   date: string;
 }
 
 export function EvolutionView({ date }: EvolutionViewProps) {
   const [range, setRange] = useState<Range>('4weeks');
+  const { theme } = useTheme();
+  const chrome = CHROME[theme];
+  const axisTick = { fill: chrome.muted, fontSize: 11 };
+  const tooltip = {
+    contentStyle: {
+      background: chrome.surface,
+      border: `1px solid ${chrome.grid}`,
+      borderRadius: 12,
+      color: chrome.ink,
+      fontSize: 12,
+    },
+    labelStyle: { color: chrome.muted },
+    cursor: { fill: chrome.cursor },
+  } as const;
+  const legendProps = { wrapperStyle: { fontSize: 12, color: chrome.muted } } as const;
 
   const days = useLiveQuery(async () => {
     if (range === 'all') {
@@ -104,7 +128,7 @@ export function EvolutionView({ date }: EvolutionViewProps) {
           <ChartCard title="Sévérité globale par jour">
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={severity} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2c" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chrome.grid} vertical={false} />
                 <XAxis dataKey="label" tick={axisTick} interval="preserveStartEnd" />
                 <YAxis tick={axisTick} allowDecimals={false} />
                 <Tooltip {...tooltip} />
@@ -119,7 +143,7 @@ export function EvolutionView({ date }: EvolutionViewProps) {
           <ChartCard title="Tendance hydratation">
             <ResponsiveContainer width="100%" height={200}>
               <ComposedChart data={hydration} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2c" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chrome.grid} vertical={false} />
                 <XAxis dataKey="label" tick={axisTick} interval="preserveStartEnd" />
                 <YAxis tick={axisTick} domain={[0, 'auto']} unit=" L" width={48} />
                 <Tooltip {...tooltip} formatter={(v) => [`${v} L`, 'Hydratation']} />
@@ -145,7 +169,7 @@ export function EvolutionView({ date }: EvolutionViewProps) {
           <ChartCard title="Catégories d'aliments par jour">
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={categories} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2c" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chrome.grid} vertical={false} />
                 <XAxis dataKey="label" tick={axisTick} interval="preserveStartEnd" />
                 <YAxis tick={axisTick} allowDecimals={false} />
                 <Tooltip {...tooltip} />
@@ -164,7 +188,7 @@ export function EvolutionView({ date }: EvolutionViewProps) {
                 data={tops}
                 margin={{ top: 4, right: 12, left: 8, bottom: 0 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#2a2a2c" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={chrome.grid} horizontal={false} />
                 <XAxis type="number" tick={axisTick} allowDecimals={false} />
                 <YAxis type="category" dataKey="label" tick={axisTick} width={130} />
                 <Tooltip {...tooltip} formatter={(v) => [`${v}`, 'Intensité cumulée']} />
@@ -181,22 +205,6 @@ export function EvolutionView({ date }: EvolutionViewProps) {
 function withLabel<T extends { date: string }>(p: T): T & { label: string } {
   return { ...p, label: dayShortLabel(p.date) };
 }
-
-const axisTick = { fill: '#8a8a8e', fontSize: 11 };
-
-const tooltip = {
-  contentStyle: {
-    background: '#1c1c1e',
-    border: '1px solid #2a2a2c',
-    borderRadius: 12,
-    color: '#ececec',
-    fontSize: 12,
-  },
-  labelStyle: { color: '#8a8a8e' },
-  cursor: { fill: 'rgba(255,255,255,0.04)' },
-} as const;
-
-const legendProps = { wrapperStyle: { fontSize: 12, color: '#8a8a8e' } } as const;
 
 function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (

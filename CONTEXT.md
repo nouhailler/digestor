@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.14 (symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 96 tests)
+## État actuel — v0.9.15 (mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 96 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,22 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.9.15 — mode clair en option
+
+- **Thème clair en plus du sombre** (Menu → « Apparence » : Sombre / Clair). Sombre reste le défaut.
+- `lib/theme.ts` : source de vérité en **`localStorage`** (lecture synchrone au boot → pas de « flash »
+  sombre avant le clair), volontairement **hors** de Dexie et de l'export JSON (préférence d'affichage
+  propre à l'appareil, pas une donnée patient). Applique l'attribut `data-theme` sur `<html>` et met à
+  jour `<meta name="theme-color">` (barre du navigateur mobile). Hook `hooks/useTheme.ts`.
+- `index.css` : bloc `html[data-theme='light']` qui surcharge **uniquement** les surfaces et le texte
+  (`--color-bg/surface/surface-2/border/ink/muted`). La palette sémantique (rouge/ambre/vert/gris) reste
+  identique — lisible sur les deux fonds (vérifié par capture). Spécificité > `:root` → tous les
+  utilitaires Tailwind v4 (qui résolvent `var(--color-*)`) basculent automatiquement.
+- `EvolutionView` : Recharts ne lit pas les var CSS → les couleurs « chrome » (grille, axes, tooltip,
+  curseur) sont calquées sur le thème courant via `CHROME[theme]`. Les barres/courbes (palette
+  sémantique) restent inchangées.
+- `main.tsx` applique le thème mémorisé avant le premier rendu.
 
 ## Parcours d'import vérifié (bout en bout)
 

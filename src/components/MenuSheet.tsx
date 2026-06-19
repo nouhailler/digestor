@@ -4,9 +4,11 @@ import {
   GraduationCap,
   Info,
   Mic,
+  Moon,
   RotateCcw,
   Save,
   Sparkles,
+  Sun,
   Upload,
   UserCog,
 } from 'lucide-react';
@@ -14,6 +16,8 @@ import { Sheet } from './Sheet';
 import { importAll, type ExportPayload } from '../lib/db';
 import { downloadBackup } from '../lib/backup';
 import { loadSeed } from '../lib/seed';
+import { useTheme } from '../hooks/useTheme';
+import type { Theme } from '../lib/theme';
 
 interface MenuSheetProps {
   open: boolean;
@@ -36,6 +40,7 @@ export function MenuSheet({
 }: MenuSheetProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const { theme, setTheme } = useTheme();
 
   async function handleExport() {
     await downloadBackup();
@@ -99,6 +104,15 @@ export function MenuSheet({
           <UserCog size={16} className="text-muted" /> Profil santé (intolérances, allergies…)
         </button>
 
+        {/* Apparence : thème sombre (défaut) ou clair */}
+        <div>
+          <p className="mb-2 text-xs font-medium text-muted">Apparence</p>
+          <div className="grid grid-cols-2 gap-2 rounded-xl border border-border p-1">
+            <ThemeOption icon={<Moon size={16} />} label="Sombre" value="dark" current={theme} onSelect={setTheme} />
+            <ThemeOption icon={<Sun size={16} />} label="Clair" value="light" current={theme} onSelect={setTheme} />
+          </div>
+        </div>
+
         <div className="grid grid-cols-2 gap-3">
           <MenuButton icon={<Upload size={16} />} label="Restaurer (JSON)" onClick={() => fileRef.current?.click()} />
           <MenuButton icon={<FileText size={16} />} label="Exporter PDF" onClick={() => window.print()} />
@@ -143,6 +157,37 @@ export function MenuSheet({
         </button>
       </div>
     </Sheet>
+  );
+}
+
+function ThemeOption({
+  icon,
+  label,
+  value,
+  current,
+  onSelect,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: Theme;
+  current: Theme;
+  onSelect: (t: Theme) => void;
+}) {
+  const active = current === value;
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(value)}
+      aria-pressed={active}
+      className="flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm"
+      style={{
+        backgroundColor: active ? 'var(--color-surface-2)' : 'transparent',
+        color: active ? 'var(--color-ink)' : 'var(--color-muted)',
+        fontWeight: active ? 600 : 400,
+      }}
+    >
+      {icon} {label}
+    </button>
   );
 }
 

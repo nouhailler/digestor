@@ -23,6 +23,21 @@
   --radius-2xl: 1rem;
 }
 
+/*
+ * Mode clair : on surcharge uniquement les surfaces et le texte. La palette
+ * sémantique (severe/modere/leger/absent) reste identique, lisible sur les deux fonds.
+ * Sélecteur sur <html> = spécificité supérieure à :root → les utilitaires Tailwind
+ * (qui résolvent var(--color-*)) prennent ces valeurs.
+ */
+html[data-theme='light'] {
+  --color-bg: #f6f6f7;
+  --color-surface: #ffffff;
+  --color-surface-2: #eef0f2;
+  --color-border: #d9dadf;
+  --color-ink: #1a1a1d;
+  --color-muted: #65656b;
+}
+
 html,
 body,
 #root {
