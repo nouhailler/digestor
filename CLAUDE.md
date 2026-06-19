@@ -19,9 +19,9 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 106 tests : `foodClassifier`, `dates`,
-`quality`, `quantity`, `aggregates`, `correlations`, `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`,
-`Chip`, `SymptomGrid`, `MultiChipSelect`, `TipBanner`, … `npm run build` typecheck aussi les tests.
+et appellent `afterEach(cleanup)` localement (pas de setup global). 114 tests : `foodClassifier`, `dates`,
+`quality`, `quantity`, `openFoodFacts`, `aggregates`, `correlations`, `ai/foodInsight`, `ai/dayAnalysis`,
+`ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`, `TipBanner`, … `npm run build` typecheck aussi les tests.
 
 `tsconfig.app.json` active `strict`, `noUnusedLocals`, `noUnusedParameters` :
 les imports/variables inutilisés **cassent le build**.
@@ -58,6 +58,8 @@ src/
     profile.ts        # options profil + buildProfileContext (contexte injecté à l'IA)
     help.ts           # registre aide + tips par onglet (HELP[tab])
     json.ts           # parseJsonLoose (extraction JSON tolérante, partagée)
+    openFoodFacts.ts  # recherche produit par code-barres (Open Food Facts, sans clé)
+    barcodeScanner.ts # lecture code-barres caméra (BarcodeDetector natif + @zxing à la demande)
     mealsImport.ts    # parse/merge du JSON importé (repas + fiches FODMAP + symptômes + transit)
     mealImportPrompt.ts # CLAUDE_WEB_PROMPT (prompt copiable dans la sheet)
     ai/               # couche IA (OpenRouter), optionnelle
@@ -67,7 +69,7 @@ src/
       mealSuggestions.ts # prompt + suggestMeals + coercition
       insightFormat.ts# libellés/couleurs FODMAP & verdicts
   components/         # UI réutilisable (Chip, SymptomGrid, DayCard, MultiChipSelect, ProfileSheet,
-                      #   HelpSheet, TipBanner, Onboarding, ImportMealsSheet, …)
+                      #   HelpSheet, TipBanner, Onboarding, ImportMealsSheet, ScanProductSheet, …)
     ai/               # AiSettingsSheet, FoodInsightCard, FoodInsightSheet
   views/              # un écran par onglet (Journal/Aliments/Week/Evolution/Reperes)
 ```

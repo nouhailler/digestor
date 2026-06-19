@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ChefHat,
   Loader2,
+  ScanLine,
   Search,
   Settings2,
   Sparkles,
@@ -23,6 +24,7 @@ import { useProfile } from '../hooks/useProfile';
 import { useAiActivity } from '../hooks/useAiActivity';
 import { FoodInsightSheet } from '../components/ai/FoodInsightSheet';
 import { MealSuggestionsSheet } from '../components/ai/MealSuggestionsSheet';
+import { ScanProductSheet } from '../components/ScanProductSheet';
 import { TipBanner } from '../components/TipBanner';
 
 interface AlimentsViewProps {
@@ -54,6 +56,9 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
 
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
+  // Contexte produit (ingrédients/marque) d'un aliment scanné, injecté à l'analyse IA.
+  const [selectedDetails, setSelectedDetails] = useState<string | undefined>(undefined);
+  const [scanOpen, setScanOpen] = useState(false);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [scope, setScope] = useState<'repas' | 'catalogue'>('catalogue');
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
@@ -113,6 +118,13 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   const q = normalize(query);
   const matches = q.length >= 3 ? catalogueRows.filter((r) => r.key.startsWith(q)).sort(sortByName).slice(0, 10) : [];
   const isNewFood = query.trim().length > 0 && !catalogueRows.some((r) => r.key === q);
+
+  // Ouvre la fiche d'analyse d'un aliment ; `details` (ingrédients d'un produit
+  // scanné) enrichit l'analyse IA. Réinitialisé pour les ouvertures non scannées.
+  function openInsight(name: string, details?: string) {
+    setSelectedDetails(details);
+    setSelected(name);
+  }
 
   async function runBulk() {
     if (!config) return;
@@ -221,7 +233,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                 <button
                   type="button"
                   onClick={() => {
-                    setSelected(r.name);
+                    openInsight(r.name);
                     setQuery('');
                   }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-surface-2"
@@ -243,7 +255,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                 <button
                   type="button"
                   onClick={() => {
-                    setSelected(query.trim());
+                    openInsight(query.trim());
                     setQuery('');
                   }}
                   className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-ink hover:bg-surface-2"
@@ -255,6 +267,16 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
           </ul>
         )}
       </div>
+
+      {/* Scanner un produit emballé (code-barres → Open Food Facts → analyse IA) */}
+      <button
+        type="button"
+        onClick={() => setScanOpen(true)}
+        title="Scannez le code-barres d'un produit pour savoir s'il est déconseillé (FODMAP, SIBO, candidose)."
+        className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
+      >
+        <ScanLine size={16} className="text-muted" /> Scanner un produit (code-barres)
+      </button>
 
       {/* Actions : idées de repas + analyse en masse */}
       <div className="mb-5 flex flex-wrap gap-2">
@@ -318,7 +340,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                     title={r.insight ? 'Catégorie issue de l’analyse' : 'Catégorie estimée (non analysé)'}
                   />
                 )}
-                <button type="button" onClick={() => setSelected(r.name)} className="min-w-0 flex-1 text-left">
+                <button type="button" onClick={() => openInsight(r.name)} className="min-w-0 flex-1 text-left">
                   <span className="block truncate text-ink">{r.name}</span>
                   <span className="block truncate text-xs text-muted">
                     {isGenerating
@@ -369,10 +391,20 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       <FoodInsightSheet
         open={selected !== null}
         name={selected ?? ''}
+        details={selectedDetails}
         onClose={() => setSelected(null)}
         onOpenAiSettings={() => {
           setSelected(null);
           onOpenAiSettings();
+        }}
+      />
+
+      <ScanProductSheet
+        open={scanOpen}
+        onClose={() => setScanOpen(false)}
+        onPick={(name, details) => {
+          setScanOpen(false);
+          openInsight(name, details);
         }}
       />
 

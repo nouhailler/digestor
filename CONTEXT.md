@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.16 (quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 106 tests)
+## État actuel — v0.9.17 (scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 114 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,31 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.9.17 — scan de produit par code-barres
+
+- **Objectif** : savoir si un produit acheté est déconseillé (FODMAP / SIBO / candidose) en scannant
+  son code-barres. Optionnel et non bloquant, comme le reste de l'IA ; le cœur reste hors-ligne.
+- **Flux** : code-barres (caméra ou saisie) → recherche **Open Food Facts** (base libre, sans clé) →
+  nom + marque + **ingrédients** → on passe le tout à l'analyse IA existante (FODMAP/SIBO/candidose),
+  mise en cache dans `foodInsights` comme n'importe quel aliment (donc visible ensuite dans Aliments,
+  couleur de chip dans le journal, etc.).
+- `lib/openFoodFacts.ts` : `lookupProduct(barcode)` (préfère le FR, marque, ingrédients, contenance),
+  `isValidBarcode`, `productDetails` (contexte texte injecté au prompt). Seul le code-barres est envoyé.
+- `lib/barcodeScanner.ts` : `startBarcodeScan(video, onResult)` — **`BarcodeDetector` natif** si dispo
+  (Android/Chrome, zéro poids), sinon **`@zxing/browser` importé à la demande** (iPhone/Safari). C'est
+  nous qui ouvrons le flux (caméra arrière) pour unifier permission/affichage/nettoyage. Chunk zxing
+  (~436 kB) **séparé et non préchargé** (vérifié : absent de `index.html`).
+- `components/ScanProductSheet.tsx` : caméra + cadre de visée + **saisie manuelle** du code en secours ;
+  états scanning / looking / found / notfound (nom à saisir si produit inconnu). Handoff `onPick(name,
+  details)` → `AlimentsView` ouvre la `FoodInsightSheet` avec le contexte produit.
+- **Enrichissement IA** : `analyzeFood`/`userPrompt` + `useFoodInsight.analyze` + `FoodInsightSheet`
+  acceptent un `details` optionnel (ingrédients/marque) — meilleure précision pour les produits
+  transformés. Rétrocompatible (sans `details` = inchangé).
+- **Dépendance ajoutée** : `@zxing/browser` (lazy). Les 5 vulnérabilités `npm audit` sont **pré-existantes**
+  (vite/vitest/esbuild, dev only), non liées à zxing.
+- Tests : `openFoodFacts.test.ts` (validation code, mapping/repli via fetch mocké, `productDetails`).
+  Total **114 tests**.
 
 ## v0.9.16 — quantités d'aliments (cuillères, portions, poids)
 

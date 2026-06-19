@@ -29,13 +29,13 @@ export function useFoodInsight(name: string) {
     };
   }, []);
 
-  async function analyze(config: AiConfig, profileContext?: string): Promise<void> {
+  async function analyze(config: AiConfig, profileContext?: string, details?: string): Promise<void> {
     if (!key || loading) return;
     setLoading(true);
     setError(null);
     try {
       await runAiTask(`Aliment · ${name}`, (signal) =>
-        analyzeFood(name, config, { profileContext, signal }).then(putFoodInsight),
+        analyzeFood(name, config, { profileContext, details, signal }).then(putFoodInsight),
       );
     } catch (e) {
       if (mounted.current) setError(e instanceof Error ? e.message : "Échec de l'analyse.");

@@ -12,16 +12,18 @@ interface FoodInsightSheetProps {
   name: string;
   onClose: () => void;
   onOpenAiSettings: () => void;
+  /** Contexte produit (ingrédients/marque) injecté à l'analyse — ex. produit scanné. */
+  details?: string;
 }
 
 /** Sheet d'analyse d'un aliment (depuis une chip du journal ou l'écran Aliments). */
-export function FoodInsightSheet({ open, name, onClose, onOpenAiSettings }: FoodInsightSheetProps) {
+export function FoodInsightSheet({ open, name, onClose, onOpenAiSettings, details }: FoodInsightSheetProps) {
   const { config, ready } = useAiConfig();
   const { profile } = useProfile();
   const { insight, loading, error, analyze } = useFoodInsight(name);
 
   const profileAware = hasHealthInfo(profile);
-  const runAnalyze = () => config && analyze(config, buildProfileContext(profile));
+  const runAnalyze = () => config && analyze(config, buildProfileContext(profile), details);
 
   return (
     <Sheet open={open} title={name || 'Aliment'} onClose={onClose}>

@@ -17,9 +17,9 @@ Tu réponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou apr�
 Tu es prudent et factuel : si tu n'es pas sûr, utilise la valeur "unknown" / "inconnu" plutôt que d'inventer.
 Tu ne donnes pas de diagnostic médical ; tes notes restent des repères généraux.`;
 
-function userPrompt(name: string, profileContext?: string): string {
+function userPrompt(name: string, profileContext?: string, details?: string): string {
   return `Analyse l'aliment suivant : « ${name} ».
-
+${details ? `\nInformations produit (issues de l'emballage, à prendre en compte pour juger les FODMAP/sucres/additifs) : ${details}\n` : ''}
 Renvoie STRICTEMENT cet objet JSON (mêmes clés, mêmes valeurs autorisées) :
 {
   "name": "nom court et normalisé de l'aliment, en français",
@@ -132,7 +132,7 @@ export function buildFoodInsight(rawInput: unknown, fallbackName: string, model:
 export async function analyzeFood(
   rawName: string,
   config: AiConfig,
-  opts: { profileContext?: string; signal?: AbortSignal } = {},
+  opts: { profileContext?: string; details?: string; signal?: AbortSignal } = {},
 ): Promise<FoodInsight> {
   const name = rawName.trim();
   if (!name) throw new Error('Nom d’aliment vide.');
@@ -144,7 +144,7 @@ export async function analyzeFood(
     apiKey: config.apiKey,
     model: config.modelId,
     system: SYSTEM_PROMPT,
-    user: userPrompt(name, opts.profileContext),
+    user: userPrompt(name, opts.profileContext, opts.details),
     signal: opts.signal,
   });
 
