@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react';
-import { Plus, Trash2, X } from 'lucide-react';
-import type { FoodCategory, FoodInsight, FoodItem, Meal, SymptomKey } from '../types';
+import { Plus, Scale, Trash2, X } from 'lucide-react';
+import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, SymptomKey } from '../types';
 import { Chip } from './Chip';
+import { FoodQuantityEditor } from './FoodQuantityEditor';
+import { formatQuantity } from '../lib/quantity';
 import {
   CATEGORY_COLOR,
   CATEGORY_CYCLE,
@@ -40,6 +42,8 @@ interface MealEditorProps {
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
 export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], insights }: MealEditorProps) {
   const [draft, setDraft] = useState('');
+  // Id de l'aliment dont le popover de quantité est ouvert (un seul à la fois).
+  const [qtyOpen, setQtyOpen] = useState<string | null>(null);
 
   // En lecture, la couleur d'un aliment reflète son analyse IA (niveau FODMAP :
   // sévère / modéré / léger) dès qu'elle existe ; sinon sa catégorie saisie.
@@ -91,6 +95,20 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
     onChange({ ...meal, foods: meal.foods.filter((f) => f.id !== id) });
   }
 
+  function setFoodQuantity(id: string, quantity: FoodQuantity | undefined) {
+    onChange({
+      ...meal,
+      foods: meal.foods.map((f) => {
+        if (f.id !== id) return f;
+        if (!quantity) {
+          const { quantity: _omit, ...rest } = f;
+          return rest;
+        }
+        return { ...f, quantity };
+      }),
+    });
+  }
+
   const symptoms = meal.symptoms ?? emptySymptoms();
   const activeSymptoms = SYMPTOM_ORDER.filter((k) => symptoms[k] !== 'absent');
 
@@ -126,30 +144,52 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
 
       <div className="flex flex-wrap gap-2">
         {meal.foods.map((food) => (
-          <Chip
-            key={food.id}
-            color={foodColor(food)}
-            onClick={
-              editing
-                ? () => cycleFood(food.id)
-                : onFoodInfo
-                  ? () => onFoodInfo(food.name)
-                  : undefined
-            }
-            title={foodTitle(food)}
-          >
-            {food.name}
-            {editing && (
-              <X
-                size={13}
-                className="ml-0.5 opacity-70 hover:opacity-100"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeFood(food.id);
-                }}
+          <span key={food.id} className="relative inline-flex">
+            <Chip
+              color={foodColor(food)}
+              onClick={
+                editing
+                  ? () => cycleFood(food.id)
+                  : onFoodInfo
+                    ? () => onFoodInfo(food.name)
+                    : undefined
+              }
+              title={foodTitle(food)}
+            >
+              {food.quantity && (
+                <span className="opacity-70">{formatQuantity(food.quantity)}</span>
+              )}
+              {food.name}
+              {editing && (
+                <>
+                  <Scale
+                    size={13}
+                    className="ml-0.5 cursor-pointer opacity-70 hover:opacity-100"
+                    aria-label="Régler la quantité"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setQtyOpen((cur) => (cur === food.id ? null : food.id));
+                    }}
+                  />
+                  <X
+                    size={13}
+                    className="opacity-70 hover:opacity-100"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeFood(food.id);
+                    }}
+                  />
+                </>
+              )}
+            </Chip>
+            {editing && qtyOpen === food.id && (
+              <FoodQuantityEditor
+                value={food.quantity}
+                onChange={(q) => setFoodQuantity(food.id, q)}
+                onClose={() => setQtyOpen(null)}
               />
             )}
-          </Chip>
+          </span>
         ))}
 
         {editing && (

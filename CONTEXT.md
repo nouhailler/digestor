@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.15 (mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 96 tests)
+## État actuel — v0.9.16 (quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 106 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,27 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.9.16 — quantités d'aliments (cuillères, portions, poids)
+
+- **Quantité optionnelle par aliment** : `FoodItem.quantity?: { amount, unit }` (`types.ts`).
+  Unités : càc, càs, pincée, portion, poignée, tranche, verre, bol, g, ml. Motivation : « confiture »
+  ≠ « 1 càc de confiture » pour l'analyse IA — la portion change l'impact FODMAP/sucre.
+- `lib/quantity.ts` : `QUANTITY_UNITS` (libellés + pas + défaut par unité), `formatQuantity`
+  (« 1 càc », « 2 càs », « ½ portion », pluriel géré), `clampAmount`, `defaultQuantity`, et
+  `parseQuantity` (parseur **tolérant** pour l'import : objet `{amount,unit}` ou chaîne libre
+  « 1 càc » / « 2 cuillères à soupe » / « 150 g » / « ½ verre », synonymes + fractions/glyphes).
+- **UI** : `components/FoodQuantityEditor.tsx` — petit popover ancré sous la chip (en édition) :
+  stepper −/+ (pas adapté à l'unité), choix d'unité, « Effacer ». `MealEditor` ajoute une icône
+  balance (`Scale`) sur chaque chip en édition ; la quantité s'affiche en préfixe de la chip
+  (lecture **et** édition). Ouvrir le popover n'ajoute rien tant qu'on n'interagit pas.
+- **IA** : `dayAnalysis.foodTag` préfixe le nom par la quantité (« 1 càc confiture (pro) ») et le
+  `SYSTEM_PROMPT` invite à pondérer selon la portion.
+- **Import** : `mealsImport.parseFood` lit `quantity` (via `parseQuantity`) → propagé jusqu'au repas
+  créé. Prompt `CLAUDE_WEB_PROMPT` + doc miroir mis à jour (champ `quantity` privilégié sur la
+  quantité dans le nom).
+- Tests : `quantity.test.ts` (format, clamp, défaut, parsing) + `describeDay` préfixe la quantité.
+  Total **106 tests**.
 
 ## v0.9.15 — mode clair en option
 

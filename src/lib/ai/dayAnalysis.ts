@@ -9,6 +9,7 @@ import type {
 } from '../../types';
 import { INTENSITY_LABEL, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../constants';
 import { normalize } from '../foodClassifier';
+import { formatQuantity } from '../quantity';
 import { FODMAP_LEVEL_LABEL, VERDICT_LABEL } from './insightFormat';
 import { chatJSON } from './openrouter';
 
@@ -17,6 +18,8 @@ const VERDICTS: Verdict[] = ['favorable', 'attention', 'eviter', 'inconnu'];
 const SYSTEM_PROMPT = `Tu es un assistant nutrition francophone spécialisé FODMAP, SIBO et candidose intestinale.
 On te fournit le journal d'une journée (repas et symptômes). Tu repères, avec prudence, les liens
 plausibles entre aliments et symptômes et tu proposes des améliorations concrètes.
+Quand une quantité est indiquée devant un aliment (ex. « 1 càc confiture »), tiens-en compte :
+une petite portion a un impact moindre qu'une grande.
 Tu réponds UNIQUEMENT avec un objet JSON valide, sans texte ni Markdown autour.
 Tu ne poses pas de diagnostic ; tes remarques sont des repères généraux.`;
 
@@ -26,11 +29,13 @@ Tu ne poses pas de diagnostic ; tes remarques sont des repères généraux.`;
  * que le bilan de la journée en tienne compte ; sinon on garde sa catégorie.
  */
 function foodTag(f: FoodItem, insight?: FoodInsight): string {
-  if (!insight) return `${f.name} (${f.category})`;
+  // La quantité (« 1 càc », « 150 g ») précède le nom : la portion change l'impact.
+  const label = f.quantity ? `${formatQuantity(f.quantity)} ${f.name}` : f.name;
+  if (!insight) return `${label} (${f.category})`;
   const parts = [`FODMAP ${FODMAP_LEVEL_LABEL[insight.fodmapLevel].toLowerCase()}`];
   if (insight.sibo.verdict !== 'inconnu') parts.push(`SIBO ${VERDICT_LABEL[insight.sibo.verdict].toLowerCase()}`);
   if (insight.candida.verdict !== 'inconnu') parts.push(`candida ${VERDICT_LABEL[insight.candida.verdict].toLowerCase()}`);
-  return `${f.name} (${parts.join(', ')})`;
+  return `${label} (${parts.join(', ')})`;
 }
 
 /** Résumé lisible d'une journée pour le prompt (pur, testable). */

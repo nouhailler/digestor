@@ -47,6 +47,20 @@ describe('describeDay', () => {
     expect(text).toContain('brocoli (');
     expect(text).not.toMatch(/brocoli \(FODMAP/);
   });
+
+  it('préfixe la quantité d’un aliment quand elle est précisée', () => {
+    const withQty = {
+      ...emptyDay('2025-06-09'),
+      meals: [
+        {
+          id: 'm1',
+          time: '08:00',
+          foods: [{ id: 'f1', name: 'confiture', category: 'pro' as const, quantity: { amount: 1, unit: 'cac' as const } }],
+        },
+      ],
+    };
+    expect(describeDay(withQty)).toContain('1 càc confiture (pro)');
+  });
 });
 
 describe('toDayAnalysis', () => {

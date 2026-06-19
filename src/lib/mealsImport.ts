@@ -3,12 +3,14 @@ import type {
   DayQuality,
   FoodCategory,
   FoodInsight,
+  FoodQuantity,
   Intensity,
   Stool,
   SymptomKey,
 } from '../types';
 import { parseJsonLoose } from './json';
 import { makeFood, uid } from './factory';
+import { parseQuantity } from './quantity';
 import { normalize } from './foodClassifier';
 import { SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
 import { buildFoodInsight } from './ai/foodInsight';
@@ -19,6 +21,7 @@ export interface ImportedFood {
   name: string;
   category?: FoodCategory; // explicite ou dérivée de l'insight
   insight?: FoodInsight; // fiche FODMAP/SIBO/candidose fournie par l'import
+  quantity?: FoodQuantity; // portion (ex. 1 càc), si fournie
 }
 
 export interface ImportedMeal {
@@ -136,7 +139,8 @@ function parseFood(raw: unknown, warnings: string[]): ImportedFood | null {
     const insight = hasInsightFields(o)
       ? buildFoodInsight(o, name, IMPORT_INSIGHT_MODEL)
       : undefined;
-    return { name, category: explicit ?? insight?.category, insight };
+    const quantity = parseQuantity(o.quantity);
+    return { name, category: explicit ?? insight?.category, insight, quantity };
   }
   warnings.push(`Aliment ignoré (format inattendu) : ${JSON.stringify(raw)}.`);
   return null;
@@ -268,9 +272,10 @@ function toMeal(meal: ImportedMeal) {
   return {
     id: uid(),
     time: meal.time,
-    foods: meal.foods.map((f) =>
-      f.category ? { id: uid(), name: f.name, category: f.category } : makeFood(f.name),
-    ),
+    foods: meal.foods.map((f) => {
+      const base = f.category ? { id: uid(), name: f.name, category: f.category } : makeFood(f.name);
+      return f.quantity ? { ...base, quantity: f.quantity } : base;
+    }),
   };
 }
 

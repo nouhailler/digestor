@@ -19,9 +19,9 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 63 tests : `foodClassifier`, `dates`,
-`quality`, `aggregates`, `correlations`, `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`,
-`Chip`, `SymptomGrid`, `MultiChipSelect`, `TipBanner`. `npm run build` typecheck aussi les tests.
+et appellent `afterEach(cleanup)` localement (pas de setup global). 106 tests : `foodClassifier`, `dates`,
+`quality`, `quantity`, `aggregates`, `correlations`, `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`,
+`Chip`, `SymptomGrid`, `MultiChipSelect`, `TipBanner`, … `npm run build` typecheck aussi les tests.
 
 `tsconfig.app.json` active `strict`, `noUnusedLocals`, `noUnusedParameters` :
 les imports/variables inutilisés **cassent le build**.
@@ -48,6 +48,7 @@ src/
     factory.ts        # uid(), emptyDay(), makeMeal/makeFood
     foodClassifier.ts # dictionnaire ~260 aliments → catégorie + normalisation
     quality.ts        # heuristique badge qualité + score sévérité
+    quantity.ts       # unités de portion (càc/càs/g…), format + parsing tolérant (import)
     aggregates.ts     # stats hebdo + séries pour graphes
     correlations.ts   # détection heuristique aliment → symptôme
     db.ts             # Dexie v4 : days/meta/foodInsights/dayAnalyses/symptomNotes, export/import, config IA

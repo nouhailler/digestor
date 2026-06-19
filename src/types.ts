@@ -3,10 +3,30 @@ export type FoodCategory = 'pro' | 'beneficial' | 'neutral';
 // 'beneficial' => Bénéfique / Anti-fongique (vert)
 // 'neutral'    => Neutre (gris)
 
+/** Unités de quantité proposées (cuillères, portions, poids, volume…). */
+export type QuantityUnit =
+  | 'cac' // cuillère à café
+  | 'cas' // cuillère à soupe
+  | 'pincee'
+  | 'portion'
+  | 'poignee'
+  | 'tranche'
+  | 'verre'
+  | 'bol'
+  | 'g'
+  | 'ml';
+
+/** Quantité d'un aliment dans un repas (ex. 1 càc, 2 càs, 150 g). */
+export interface FoodQuantity {
+  amount: number; // ex. 1, 2, 0.5
+  unit: QuantityUnit;
+}
+
 export interface FoodItem {
   id: string;
   name: string;
   category: FoodCategory; // auto-suggérée puis modifiable
+  quantity?: FoodQuantity; // portion optionnelle (sinon non précisée)
 }
 
 export interface Meal {
