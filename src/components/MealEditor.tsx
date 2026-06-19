@@ -162,23 +162,31 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
               {food.name}
               {editing && (
                 <>
-                  <Scale
-                    size={13}
-                    className="ml-0.5 cursor-pointer opacity-70 hover:opacity-100"
+                  {/* Balance = quantité de l'aliment à sa gauche. Zone tactile élargie
+                      (padding + marges négatives) et séparée de la croix de suppression. */}
+                  <span
+                    role="button"
                     aria-label="Régler la quantité"
+                    title="Régler la quantité (càc, càs, g…)"
                     onClick={(e) => {
                       e.stopPropagation();
                       setQtyOpen((cur) => (cur === food.id ? null : food.id));
                     }}
-                  />
-                  <X
-                    size={13}
-                    className="opacity-70 hover:opacity-100"
+                    className="-my-1.5 ml-1 flex cursor-pointer items-center rounded-full p-1.5 opacity-80 hover:bg-white/10 hover:opacity-100"
+                  >
+                    <Scale size={16} />
+                  </span>
+                  <span
+                    role="button"
+                    aria-label="Supprimer l'aliment"
                     onClick={(e) => {
                       e.stopPropagation();
                       removeFood(food.id);
                     }}
-                  />
+                    className="-my-1.5 -mr-1 ml-1.5 flex cursor-pointer items-center rounded-full border-l border-white/10 p-1.5 pl-2 opacity-70 hover:bg-white/10 hover:opacity-100"
+                  >
+                    <X size={15} />
+                  </span>
                 </>
               )}
             </Chip>
