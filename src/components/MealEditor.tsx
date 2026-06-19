@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Plus, Scale, Trash2, X } from 'lucide-react';
+import { ChevronDown, Plus, Scale, Trash2, X } from 'lucide-react';
 import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, SymptomKey } from '../types';
 import { Chip } from './Chip';
 import { FoodQuantityEditor } from './FoodQuantityEditor';
@@ -44,6 +44,9 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
   const [draft, setDraft] = useState('');
   // Id de l'aliment dont le popover de quantité est ouvert (un seul à la fois).
   const [qtyOpen, setQtyOpen] = useState<string | null>(null);
+  // La grille des symptômes du repas est repliée par défaut (la plupart des repas
+  // n'en ont aucun) ; on la déplie à la demande pour gagner de la place.
+  const [symptomsOpen, setSymptomsOpen] = useState(false);
 
   // En lecture, la couleur d'un aliment reflète son analyse IA (niveau FODMAP :
   // sévère / modéré / léger) dès qu'elle existe ; sinon sa catégorie saisie.
@@ -246,16 +249,39 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
         )}
       </div>
 
-      {/* Zone symptômes du repas */}
+      {/* Zone symptômes du repas — repliée par défaut pour économiser l'espace. */}
       {editing ? (
-        <div className="rounded-lg border border-border/70 bg-surface-2/40 p-3">
-          <p
-            className="mb-2 text-xs font-medium uppercase tracking-wide text-muted"
-            title="Symptômes ressentis dans les heures qui suivent ce repas. Touchez une pastille pour faire varier l'intensité."
+        <div className="rounded-lg border border-border/70 bg-surface-2/40">
+          <button
+            type="button"
+            onClick={() => setSymptomsOpen((o) => !o)}
+            aria-expanded={symptomsOpen}
+            title="Symptômes ressentis dans les heures qui suivent ce repas. Touchez pour déplier."
+            className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
           >
-            Symptômes après ce repas
-          </p>
-          <SymptomGrid symptoms={symptoms} editing onCycle={cycleSymptom} />
+            <span className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted">
+                Symptômes après ce repas
+              </span>
+              {/* Replié : résumé des symptômes déjà saisis (s'il y en a). */}
+              {!symptomsOpen &&
+                activeSymptoms.map((k) => (
+                  <span key={k} className="inline-flex items-center gap-1.5 text-xs text-ink">
+                    <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: INTENSITY_COLOR[symptoms[k]] }} />
+                    {SYMPTOM_LABELS[k]}
+                  </span>
+                ))}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`shrink-0 text-muted transition-transform ${symptomsOpen ? 'rotate-180' : ''}`}
+            />
+          </button>
+          {symptomsOpen && (
+            <div className="px-3 pb-3">
+              <SymptomGrid symptoms={symptoms} editing onCycle={cycleSymptom} />
+            </div>
+          )}
         </div>
       ) : (
         activeSymptoms.length > 0 && (

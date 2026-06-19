@@ -303,6 +303,10 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   (lecture **et** édition). Ouvrir le popover n'ajoute rien tant qu'on n'interagit pas.
   Balance 16 px avec **zone tactile élargie** (padding + marges négatives, sans grossir la chip)
   et **séparée de la croix** de suppression par un léger trait — viser au doigt sur mobile.
+- **Symptômes par repas repliés par défaut** (en édition) : la grille 12 symptômes prenait beaucoup
+  de hauteur par repas alors que la plupart n'en ont aucun. `MealEditor` la met derrière un en-tête
+  cliquable (chevron) ; replié, il affiche un **résumé** des symptômes déjà saisis (pastille + libellé).
+  La grille (sœur du bouton, jamais imbriquée) ne s'affiche que déplié. Lecture inchangée.
 - **IA** : `dayAnalysis.foodTag` préfixe le nom par la quantité (« 1 càc confiture (pro) ») et le
   `SYSTEM_PROMPT` invite à pondérer selon la portion.
 - **Import** : `mealsImport.parseFood` lit `quantity` (via `parseQuantity`) → propagé jusqu'au repas
