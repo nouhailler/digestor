@@ -4,6 +4,19 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.9.18] — Aliments favoris
+
+- **Favoris proposés en tête** : lors de l'ajout d'un aliment à un repas, vos favoris (★) sont
+  proposés d'abord — champ vide → liste des favoris (ajout rapide), puis dès 3 lettres les favoris
+  correspondants avant les autres aliments déjà saisis (dédup, hors aliments déjà dans le repas).
+- **Scan = favori automatique** : un produit scanné est ajouté aux favoris avec sa **date de scan**,
+  affichée dans sa fiche (« Scanné le … ») et dans la liste des favoris.
+- **Gérer ses favoris** : onglet **« Favoris »** dans l'écran Aliments + **étoile cliquable** sur
+  chaque aliment (et dans sa fiche) pour l'ajouter ou le retirer. Les favoris peuvent inclure des
+  produits scannés absents des repas et du catalogue.
+- **Persistance** : nouvelle table Dexie `favorites` (export/import JSON v6). `lib/foodSuggestions.ts`
+  (logique pure, testée), hook `useFavorites`. **120 tests.**
+
 ## [0.9.17] — Scan de produit par code-barres → analyse FODMAP / SIBO / candidose
 
 - **Scanner un produit emballé** (onglet Aliments) : code-barres (caméra ou saisie manuelle) →

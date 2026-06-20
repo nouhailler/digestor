@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-114%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-120%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -41,9 +41,10 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   sévérité FODMAP** 🔴 élevé / 🟠 modéré / 🟢 bas) avec **une zone de symptômes par repas** (pastilles
   d'intensité), notes,
   transit & hydratation (sélecteur de selles sur l'échelle de Bristol). **Autocomplétion** des
-  aliments déjà saisis (dès 3 lettres) pour éviter les doublons d'orthographe. **Quantité par
-  aliment** (càc, càs, portion, g, ml…) qui pondère l'analyse. Badge « qualité de
-  journée » 🟢→🟠→🔴 selon le cumul de symptômes, surchargeable. Infobulles d'aide. Sauvegarde auto.
+  aliments déjà saisis (dès 3 lettres) pour éviter les doublons d'orthographe, **favoris (★)
+  proposés en tête**. **Quantité par aliment** (càc, càs, portion, g, ml…) qui pondère l'analyse.
+  Badge « qualité de journée » 🟢→🟠→🔴 selon le cumul de symptômes, surchargeable. Infobulles
+  d'aide. Sauvegarde auto.
 - 🗓️ **Semaine** — **agenda cliquable** des 7 jours (couleur = qualité, clic → ouvre le jour) +
   récapitulatif calculé en direct (jours difficiles, ballonnements sévères, diarrhée, jours sans sucre
   ajouté, hydratation moyenne, score énergie) + **corrélations** aliment → symptôme.
@@ -58,6 +59,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   ingrédients → analyse FODMAP / SIBO / candidose, pour savoir d'un coup d'œil si un produit acheté est
   déconseillé. `BarcodeDetector` natif quand il existe, sinon `@zxing/browser` chargé à la demande
   (iPhone/Safari). Seul le code-barres est envoyé au réseau.
+- ⭐ **Favoris** — marquez vos aliments habituels d'une étoile : ils sont **proposés en premier** quand
+  vous remplissez un repas. Un produit **scanné devient automatiquement favori** (avec sa date de scan).
+  Onglet « Favoris » dans l'écran Aliments pour tout voir, ajouter ou retirer.
 - 🩺 **Repères / encyclopédie** — symptômes discriminants Candidose vs SIBO/SII ; chaque symptôme est
   **cliquable** pour une fiche détaillée (origine, manifestation, effets, conseils). **« Plus
   d'informations »** : encyclopédie classée par catégorie, **enrichissable par l'IA**.

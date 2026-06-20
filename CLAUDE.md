@@ -19,9 +19,10 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 114 tests : `foodClassifier`, `dates`,
-`quality`, `quantity`, `openFoodFacts`, `aggregates`, `correlations`, `ai/foodInsight`, `ai/dayAnalysis`,
-`ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`, `TipBanner`, … `npm run build` typecheck aussi les tests.
+et appellent `afterEach(cleanup)` localement (pas de setup global). 120 tests : `foodClassifier`, `dates`,
+`quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `aggregates`, `correlations`, `ai/foodInsight`,
+`ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`, `TipBanner`, …
+`npm run build` typecheck aussi les tests.
 
 `tsconfig.app.json` active `strict`, `noUnusedLocals`, `noUnusedParameters` :
 les imports/variables inutilisés **cassent le build**.
@@ -42,6 +43,7 @@ src/
     useFoodInsight.ts    # analyse IA d'un aliment à la demande + cache
     useDayAnalysis.ts    # analyse IA d'une journée (clé = date) + cache
     useMealSuggestions.ts# suggestions de repas IA (cache meta)
+    useFavorites.ts      # aliments favoris en live (table favorites)
   lib/                # logique métier pure (testable, sans React)
     constants.ts      # ordres, libellés, couleurs, cycles
     dates.ts          # semaine lundi→dimanche, labels fr
@@ -49,9 +51,10 @@ src/
     foodClassifier.ts # dictionnaire ~260 aliments → catégorie + normalisation
     quality.ts        # heuristique badge qualité + score sévérité
     quantity.ts       # unités de portion (càc/càs/g…), format + parsing tolérant (import)
+    foodSuggestions.ts# suggestions d'aliments (favoris d'abord) pour l'ajout à un repas
     aggregates.ts     # stats hebdo + séries pour graphes
     correlations.ts   # détection heuristique aliment → symptôme
-    db.ts             # Dexie v4 : days/meta/foodInsights/dayAnalyses/symptomNotes, export/import, config IA
+    db.ts             # Dexie v6 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites, export/import, config IA
     encyclopedia.ts   # socle statique des symptômes digestifs (catégorisé) — Repères
     aggregates.ts     # (+ dayHasContent / latestActiveDate, réutilisés par db.ts)
     seed.ts           # données démo Lundi/Mardi conformes aux maquettes

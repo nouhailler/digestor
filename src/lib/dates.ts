@@ -56,6 +56,11 @@ export function dayLongLabel(iso: string): string {
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
+/** "20 juin 2026" à partir d'une date ISO (jour ou datetime). */
+export function dateLabel(iso: string): string {
+  return format(parseISO(iso), 'd MMMM yyyy', { locale: fr });
+}
+
 /** "lun. 9" (axes de graphes). */
 export function dayShortLabel(iso: string): string {
   return format(fromISODate(iso), 'EEE d', { locale: fr });

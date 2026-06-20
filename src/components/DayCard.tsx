@@ -31,11 +31,13 @@ interface DayCardProps {
   onSymptomInfo?: (key: SymptomKey) => void;
   /** Aliments déjà saisis : proposés en autocomplétion (anti-doublon). */
   knownFoods?: string[];
+  /** Noms des aliments favoris : proposés en tête des suggestions. */
+  favorites?: string[];
   /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
   insights?: Map<string, FoodInsight>;
 }
 
-export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, insights }: DayCardProps) {
+export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, favorites, insights }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
 
   const suggested = useMemo(() => suggestDayQuality(day), [day]);
@@ -115,6 +117,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
               onFoodInfo={onFoodInfo}
               onSymptomInfo={onSymptomInfo}
               knownFoods={knownFoods}
+              favorites={favorites}
               insights={insights}
             />
           ))}

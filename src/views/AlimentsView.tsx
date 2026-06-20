@@ -7,13 +7,22 @@ import {
   Search,
   Settings2,
   Sparkles,
+  Star,
   StopCircle,
   Trash2,
   Wand2,
 } from 'lucide-react';
 import type { FoodInsight } from '../types';
-import { db, deleteFoodInsight, getAllFoodInsights, putFoodInsight } from '../lib/db';
+import {
+  addFavorite,
+  db,
+  deleteFoodInsight,
+  getAllFoodInsights,
+  putFoodInsight,
+  toggleFavorite,
+} from '../lib/db';
 import { CATEGORY_COLOR } from '../lib/constants';
+import { dateLabel } from '../lib/dates';
 import { FODMAP_LEVEL_COLOR, FODMAP_LEVEL_LABEL } from '../lib/ai/insightFormat';
 import { classifyFood, dictionaryFoods, normalize } from '../lib/foodClassifier';
 import { analyzeFood } from '../lib/ai/foodInsight';
@@ -21,6 +30,7 @@ import { runAiTask } from '../lib/ai/aiActivity';
 import { buildProfileContext } from '../lib/profile';
 import { useAiConfig } from '../hooks/useAiConfig';
 import { useProfile } from '../hooks/useProfile';
+import { useFavorites } from '../hooks/useFavorites';
 import { useAiActivity } from '../hooks/useAiActivity';
 import { FoodInsightSheet } from '../components/ai/FoodInsightSheet';
 import { MealSuggestionsSheet } from '../components/ai/MealSuggestionsSheet';
@@ -37,6 +47,7 @@ interface FoodRow {
   key: string;
   name: string;
   insight?: FoodInsight;
+  scannedAt?: string; // renseigné pour les favoris issus d'un scan
 }
 
 /** Met une majuscule initiale aux noms du dictionnaire (clés normalisées). */
@@ -52,6 +63,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   const { profile } = useProfile();
   const days = useLiveQuery(() => db.days.toArray(), []);
   const insights = useLiveQuery(() => getAllFoodInsights(), []);
+  const favorites = useFavorites();
   const { labels } = useAiActivity();
 
   const [query, setQuery] = useState('');
@@ -60,7 +72,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   const [selectedDetails, setSelectedDetails] = useState<string | undefined>(undefined);
   const [scanOpen, setScanOpen] = useState(false);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
-  const [scope, setScope] = useState<'repas' | 'catalogue'>('catalogue');
+  const [scope, setScope] = useState<'repas' | 'catalogue' | 'favoris'>('catalogue');
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [bulkError, setBulkError] = useState<string | null>(null);
   const stopRef = useRef(false);
@@ -89,8 +101,21 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
     return [...byKey.values()];
   }, [mealRows]);
 
+  // Favoris : peuvent inclure des produits scannés absents des repas/catalogue.
+  const favoriteKeys = new Set(favorites.map((f) => f.key));
+  const favoriteRows = useMemo<FoodRow[]>(() => {
+    const insightByKey = new Map((insights ?? []).map((i) => [i.key, i]));
+    return favorites.map((f) => ({
+      key: f.key,
+      name: f.name,
+      insight: insightByKey.get(f.key),
+      scannedAt: f.scannedAt,
+    }));
+  }, [favorites, insights]);
+
   const sortByName = (a: FoodRow, b: FoodRow) => a.name.localeCompare(b.name, 'fr');
-  const baseRows = (scope === 'catalogue' ? catalogueRows : mealRows).slice().sort(sortByName);
+  const scopeRows = scope === 'favoris' ? favoriteRows : scope === 'catalogue' ? catalogueRows : mealRows;
+  const baseRows = scopeRows.slice().sort(sortByName);
 
   // Aliments en cours de génération (toutes provenances : analyse en masse, fiche,
   // recherche). On les fait remonter en haut de la liste le temps de la génération,
@@ -187,6 +212,18 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
           }}
         >
           Catalogue ({catalogueRows.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setScope('favoris')}
+          className="inline-flex items-center gap-1 rounded-full px-3 py-1"
+          style={{
+            backgroundColor: scope === 'favoris' ? 'var(--color-surface-2)' : 'transparent',
+            color: scope === 'favoris' ? 'var(--color-ink)' : 'var(--color-muted)',
+          }}
+        >
+          <Star size={12} fill={scope === 'favoris' ? 'currentColor' : 'none'} style={{ color: 'var(--color-modere)' }} />
+          Favoris ({favorites.length})
         </button>
       </div>
 
@@ -319,12 +356,20 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       {/* Liste de tous les aliments */}
       {rows.length === 0 ? (
         <p className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted">
-          Aucun aliment pour l'instant. Ajoutez des repas dans le Journal, ou analysez un aliment via la recherche.
+          {scope === 'favoris'
+            ? 'Aucun favori pour l’instant. Touchez l’étoile d’un aliment pour l’ajouter, ou scannez un produit (favori automatique).'
+            : "Aucun aliment pour l'instant. Ajoutez des repas dans le Journal, ou analysez un aliment via la recherche."}
         </p>
       ) : (
         <ul className="space-y-2">
           {rows.map((r) => {
             const isGenerating = generatingKeys.has(r.key);
+            const isFavorite = favoriteKeys.has(r.key);
+            const subtitle = isGenerating
+              ? 'Génération en cours…'
+              : r.insight
+                ? r.insight.summary || 'Analysé'
+                : 'Non analysé — touchez pour analyser';
             return (
             <li key={r.key}>
               <div
@@ -343,11 +388,10 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                 <button type="button" onClick={() => openInsight(r.name)} className="min-w-0 flex-1 text-left">
                   <span className="block truncate text-ink">{r.name}</span>
                   <span className="block truncate text-xs text-muted">
-                    {isGenerating
-                      ? 'Génération en cours…'
-                      : r.insight
-                        ? r.insight.summary || 'Analysé'
-                        : 'Non analysé — touchez pour analyser'}
+                    {r.scannedAt && (
+                      <span style={{ color: 'var(--color-modere)' }}>Scanné le {dateLabel(r.scannedAt)} · </span>
+                    )}
+                    {subtitle}
                   </span>
                 </button>
                 {isGenerating ? (
@@ -370,6 +414,16 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                     à analyser
                   </span>
                 )}
+                <button
+                  type="button"
+                  onClick={() => toggleFavorite(r.name)}
+                  aria-label={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                  title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                  className="shrink-0 hover:opacity-80"
+                  style={{ color: isFavorite ? 'var(--color-modere)' : 'var(--color-muted)' }}
+                >
+                  <Star size={15} fill={isFavorite ? 'currentColor' : 'none'} />
+                </button>
                 {r.insight && (
                   <button
                     type="button"
@@ -404,6 +458,8 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
         onClose={() => setScanOpen(false)}
         onPick={(name, details) => {
           setScanOpen(false);
+          // Un produit scanné devient automatiquement favori, avec sa date de scan.
+          void addFavorite(name, { scannedAt: new Date().toISOString() });
           openInsight(name, details);
         }}
       />

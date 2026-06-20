@@ -93,6 +93,18 @@ export interface Profile {
   notes?: string; // contexte santé libre
 }
 
+/**
+ * Aliment favori : remonté en tête des suggestions lors de l'ajout d'un aliment
+ * à un repas. Un produit scanné devient automatiquement favori (avec sa date de
+ * scan). Clé primaire = nom normalisé.
+ */
+export interface FavoriteFood {
+  key: string; // nom normalisé (clé primaire)
+  name: string; // nom affiché
+  addedAt: string; // ISO — ajout aux favoris
+  scannedAt?: string; // ISO — date du dernier scan (si ajouté via le scanner)
+}
+
 // ---- IA (OpenRouter) ----
 
 export interface AiConfig {

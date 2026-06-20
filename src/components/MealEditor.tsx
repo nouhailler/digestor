@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, Plus, Scale, Trash2, X } from 'lucide-react';
+import { ChevronDown, Plus, Scale, Star, Trash2, X } from 'lucide-react';
 import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, SymptomKey } from '../types';
 import { Chip } from './Chip';
 import { FoodQuantityEditor } from './FoodQuantityEditor';
@@ -14,6 +14,7 @@ import {
 } from '../lib/constants';
 import { emptySymptoms, makeFood } from '../lib/factory';
 import { normalize } from '../lib/foodClassifier';
+import { foodSuggestions } from '../lib/foodSuggestions';
 import { FODMAP_LEVEL_LABEL, insightChipColor } from '../lib/ai/insightFormat';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
 
@@ -35,13 +36,18 @@ interface MealEditorProps {
   onSymptomInfo?: (key: SymptomKey) => void;
   /** Aliments déjà saisis ailleurs : proposés en autocomplétion (anti-doublon). */
   knownFoods?: string[];
+  /** Noms des aliments favoris : proposés en tête des suggestions. */
+  favorites?: string[];
   /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
   insights?: Map<string, FoodInsight>;
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], insights }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], favorites = [], insights }: MealEditorProps) {
   const [draft, setDraft] = useState('');
+  // Saisie d'aliment focalisée : permet d'afficher les favoris (ajout rapide) tant
+  // que rien n'est tapé, sans laisser la liste ouverte au rendu initial.
+  const [foodInputFocused, setFoodInputFocused] = useState(false);
   // Id de l'aliment dont le popover de quantité est ouvert (un seul à la fois).
   const [qtyOpen, setQtyOpen] = useState<string | null>(null);
   // La grille des symptômes du repas est repliée par défaut (la plupart des repas
@@ -64,19 +70,22 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
       : "Analyser avec l'IA";
   }
 
-  // Suggestions d'aliments déjà connus à partir de 3 caractères tapés,
-  // hors aliments déjà présents dans ce repas (rien à dupliquer).
-  const suggestions = useMemo(() => {
-    const q = normalize(draft);
-    if (q.length < 3) return [];
-    const inMeal = new Set(meal.foods.map((f) => normalize(f.name)));
-    return knownFoods
-      .filter((name) => {
-        const n = normalize(name);
-        return n.includes(q) && n !== q && !inMeal.has(n);
-      })
-      .slice(0, MAX_SUGGESTIONS);
-  }, [draft, knownFoods, meal.foods]);
+  // Suggestions d'aliments : favoris en tête (ajout rapide quand rien n'est tapé),
+  // puis aliments déjà connus dès 3 caractères, hors aliments déjà dans ce repas.
+  const suggestions = useMemo(
+    () =>
+      foodSuggestions({
+        query: draft,
+        favorites,
+        knownFoods,
+        exclude: new Set(meal.foods.map((f) => normalize(f.name))),
+        limit: MAX_SUGGESTIONS,
+      }),
+    [draft, favorites, knownFoods, meal.foods],
+  );
+  // On affiche la liste seulement quand le champ a le focus (évite qu'elle reste
+  // ouverte au rendu, notamment pour la liste des favoris à requête vide).
+  const showSuggestions = foodInputFocused && suggestions.length > 0;
 
   function addFood(name = draft) {
     const trimmed = name.trim();
@@ -208,6 +217,9 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
             <input
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
+              onFocus={() => setFoodInputFocused(true)}
+              // léger délai : laisse le clic sur une suggestion (onMouseDown) agir avant la fermeture.
+              onBlur={() => setTimeout(() => setFoodInputFocused(false), 120)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   e.preventDefault();
@@ -215,31 +227,34 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
                 }
               }}
               placeholder="ajouter un aliment…"
-              title="Tapez un aliment puis Entrée. Sa catégorie (couleur) est devinée automatiquement, modifiable ensuite d'un toucher."
+              title="Tapez un aliment puis Entrée. Vos favoris (★) sont proposés en premier. La catégorie (couleur) est devinée automatiquement, modifiable ensuite d'un toucher."
               className="w-36 bg-transparent text-sm text-ink placeholder:text-muted focus:outline-none"
             />
             <button type="button" onClick={() => addFood()} aria-label="Ajouter" className="text-muted hover:text-leger">
               <Plus size={15} />
             </button>
 
-            {suggestions.length > 0 && (
+            {showSuggestions && (
               <ul
                 className="absolute left-0 top-full z-10 mt-1 max-h-56 w-56 overflow-auto rounded-lg border border-border bg-surface-2 py-1 shadow-lg"
                 role="listbox"
-                aria-label="Aliments déjà saisis"
+                aria-label="Aliments suggérés (favoris d'abord)"
               >
-                {suggestions.map((name) => (
-                  <li key={name}>
+                {suggestions.map((s) => (
+                  <li key={s.name}>
                     <button
                       type="button"
                       // onMouseDown : agir avant le blur de l'input.
                       onMouseDown={(e) => {
                         e.preventDefault();
-                        addFood(name);
+                        addFood(s.name);
                       }}
-                      className="block w-full px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
+                      className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
                     >
-                      {name}
+                      {s.favorite && (
+                        <Star size={13} fill="currentColor" className="shrink-0" style={{ color: 'var(--color-modere)' }} />
+                      )}
+                      <span className="truncate">{s.name}</span>
                     </button>
                   </li>
                 ))}

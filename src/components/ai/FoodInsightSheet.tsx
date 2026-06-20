@@ -1,10 +1,14 @@
-import { Loader2, RefreshCw, Settings2, Sparkles, UserCheck } from 'lucide-react';
+import { Loader2, RefreshCw, Settings2, Sparkles, Star, UserCheck } from 'lucide-react';
+import { useLiveQuery } from 'dexie-react-hooks';
 import { Sheet } from '../Sheet';
 import { AiBusy } from './AiBusy';
 import { FoodInsightCard } from './FoodInsightCard';
 import { useAiConfig } from '../../hooks/useAiConfig';
 import { useFoodInsight } from '../../hooks/useFoodInsight';
 import { useProfile } from '../../hooks/useProfile';
+import { addFavorite, db, removeFavorite } from '../../lib/db';
+import { normalize } from '../../lib/foodClassifier';
+import { dateLabel } from '../../lib/dates';
 import { buildProfileContext, hasHealthInfo } from '../../lib/profile';
 
 interface FoodInsightSheetProps {
@@ -27,6 +31,7 @@ export function FoodInsightSheet({ open, name, onClose, onOpenAiSettings, detail
 
   return (
     <Sheet open={open} title={name || 'Aliment'} onClose={onClose}>
+      <FavoriteToggle name={name} />
       {insight ? (
         // Une fiche en cache (analyse IA OU import) est toujours consultable,
         // même sans clé configurée.
@@ -89,6 +94,33 @@ export function FoodInsightSheet({ open, name, onClose, onOpenAiSettings, detail
         </div>
       )}
     </Sheet>
+  );
+}
+
+/** Étoile favori + date de scan (la « fiche » de l'aliment). */
+function FavoriteToggle({ name }: { name: string }) {
+  const key = normalize(name);
+  const favorite = useLiveQuery(() => (key ? db.favorites.get(key) : undefined), [key]);
+  const isFav = !!favorite;
+  if (!name) return null;
+  return (
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+      <button
+        type="button"
+        onClick={() => (isFav ? removeFavorite(key) : addFavorite(name))}
+        className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs"
+        style={{
+          borderColor: isFav ? 'var(--color-modere)' : 'var(--color-border)',
+          color: isFav ? 'var(--color-modere)' : 'var(--color-muted)',
+        }}
+      >
+        <Star size={13} fill={isFav ? 'currentColor' : 'none'} />
+        {isFav ? 'Favori' : 'Ajouter aux favoris'}
+      </button>
+      {favorite?.scannedAt && (
+        <span className="text-xs text-muted">Scanné le {dateLabel(favorite.scannedAt)}</span>
+      )}
+    </div>
   );
 }
 

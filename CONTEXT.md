@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.17 (scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 114 tests)
+## État actuel — v0.9.18 (aliments favoris — proposés en tête + scan auto-favori, scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 120 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,27 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.9.18 — aliments favoris
+
+- **Objectif** : retrouver vite ses aliments habituels et savoir si un produit acheté a déjà été
+  repéré. Les favoris sont **proposés en tête** lors de l'ajout d'un aliment à un repas.
+- **Modèle** : `FavoriteFood { key, name, addedAt, scannedAt? }` (`types.ts`), clé = nom normalisé.
+  Table Dexie **v6 `favorites`** (`db.ts`, `name` indexé pour `orderBy`). CRUD `getAllFavorites`,
+  `addFavorite` (conserve `addedAt`/`name`, pose `scannedAt` sans l'effacer), `removeFavorite`,
+  `toggleFavorite`. Inclus dans l'export/import JSON (payload **v6**) et `clearAll`.
+- **Suggestions favoris-d'abord** : `lib/foodSuggestions.ts` (pur, testé) — requête vide → liste des
+  favoris (ajout rapide) ; 1–2 car. → rien ; ≥ 3 car. → favoris correspondants puis aliments connus ;
+  dédup par forme normalisée, exclusion des aliments déjà dans le repas, correspondance exacte ignorée
+  (déjà ajoutable via Entrée). `MealEditor` l'utilise (★ ambre, liste affichée au focus du champ),
+  threadé via `DayCard` → `JournalView` (hook `useFavorites`).
+- **Scan → favori automatique** : à la validation d'un produit scanné (`AlimentsView.onPick`),
+  `addFavorite(name, { scannedAt: now })`. La **date de scan** est affichée dans la fiche de l'aliment
+  (`FoodInsightSheet` : « Scanné le … » + étoile favori) et sous l'aliment dans la liste Favoris.
+- **Gérer les favoris** : `AlimentsView` ajoute l'onglet **« Favoris (n) »** (à côté de « De mes repas »
+  / « Catalogue ») et une **étoile cliquable sur chaque ligne** (ajout/retrait, toutes portées). Les
+  favoris peuvent inclure des produits scannés absents des repas/catalogue.
+- Tests : `foodSuggestions.test.ts` (ordre favoris/connus, dédup, exclusion, seuils). Total **120 tests**.
 
 ## v0.9.17 — scan de produit par code-barres
 

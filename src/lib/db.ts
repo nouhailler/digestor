@@ -4,6 +4,7 @@ import type {
   DayAnalysis,
   DayEntry,
   EncyclopediaExtra,
+  FavoriteFood,
   FoodInsight,
   MealSuggestionSet,
   OrganInfo,
@@ -11,6 +12,7 @@ import type {
   SymptomInfo,
 } from '../types';
 import { dayHasContent } from './aggregates';
+import { normalize } from './foodClassifier';
 
 const PROFILE_KEY = 'profile';
 const AI_CONFIG_KEY = 'aiConfig';
@@ -26,6 +28,7 @@ class DigestorDB extends Dexie {
   dayAnalyses!: Table<DayAnalysis, string>; // clé primaire = date ISO
   symptomNotes!: Table<SymptomInfo, string>; // clé primaire = nom normalisé
   organNotes!: Table<OrganInfo, string>; // clé primaire = id d'organe
+  favorites!: Table<FavoriteFood, string>; // clé primaire = nom normalisé
 
   constructor() {
     super('digestor');
@@ -63,6 +66,17 @@ class DigestorDB extends Dexie {
       dayAnalyses: '&date',
       symptomNotes: '&key',
       organNotes: '&key',
+    });
+    // v6 : aliments favoris (remontés en tête des suggestions ; produits scannés).
+    // `name` est indexé pour orderBy('name').
+    this.version(6).stores({
+      days: '&date',
+      meta: '&key',
+      foodInsights: '&key, name',
+      dayAnalyses: '&date',
+      symptomNotes: '&key',
+      organNotes: '&key',
+      favorites: '&key, name',
     });
   }
 }
@@ -196,6 +210,43 @@ export async function setEncyclopediaExtra(extra: EncyclopediaExtra): Promise<vo
   await db.meta.put({ key: ENCYCLOPEDIA_KEY, value: extra });
 }
 
+// ---- Aliments favoris ----
+
+export async function getAllFavorites(): Promise<FavoriteFood[]> {
+  return db.favorites.orderBy('name').toArray();
+}
+
+/**
+ * Ajoute (ou met à jour) un favori. Conserve `addedAt`/`name` existants ; pose
+ * `scannedAt` si fourni (produit scanné) sans l'effacer pour les ajouts manuels.
+ */
+export async function addFavorite(
+  name: string,
+  opts: { scannedAt?: string } = {},
+): Promise<void> {
+  const key = normalize(name);
+  if (!key) return;
+  const existing = await db.favorites.get(key);
+  await db.favorites.put({
+    key,
+    name: existing?.name ?? name.trim(),
+    addedAt: existing?.addedAt ?? new Date().toISOString(),
+    scannedAt: opts.scannedAt ?? existing?.scannedAt,
+  });
+}
+
+export async function removeFavorite(key: string): Promise<void> {
+  await db.favorites.delete(key);
+}
+
+/** Bascule l'état favori d'un aliment (par son nom). */
+export async function toggleFavorite(name: string): Promise<void> {
+  const key = normalize(name);
+  if (!key) return;
+  if (await db.favorites.get(key)) await db.favorites.delete(key);
+  else await addFavorite(name);
+}
+
 export async function getDay(date: string): Promise<DayEntry | undefined> {
   return db.days.get(date);
 }
@@ -227,7 +278,7 @@ export async function getLatestActiveDate(): Promise<string | undefined> {
 
 export interface ExportPayload {
   app: 'digestor';
-  version: 1 | 2 | 3 | 4 | 5;
+  version: 1 | 2 | 3 | 4 | 5 | 6;
   exportedAt: string;
   profile: Profile;
   days: DayEntry[];
@@ -235,6 +286,7 @@ export interface ExportPayload {
   dayAnalyses?: DayAnalysis[]; // depuis v3
   symptomNotes?: SymptomInfo[]; // depuis v4 (fiches de symptômes)
   organNotes?: OrganInfo[]; // depuis v5 (approfondissements d'organes)
+  favorites?: FavoriteFood[]; // depuis v6 (aliments favoris)
   mealSuggestions?: MealSuggestionSet; // depuis v4
   encyclopediaExtra?: EncyclopediaExtra; // depuis v4
   // Réglages non sensibles (depuis v4). La CLÉ API n'y figure jamais (secret).
@@ -245,7 +297,7 @@ export async function exportAll(): Promise<ExportPayload> {
   const aiConfig = await getAiConfig();
   return {
     app: 'digestor',
-    version: 5,
+    version: 6,
     exportedAt: new Date().toISOString(),
     profile: await getProfile(),
     days: await getAllDays(),
@@ -253,6 +305,7 @@ export async function exportAll(): Promise<ExportPayload> {
     dayAnalyses: await db.dayAnalyses.toArray(),
     symptomNotes: await getAllSymptomInfos(),
     organNotes: await getAllOrganInfos(),
+    favorites: await getAllFavorites(),
     mealSuggestions: await getMealSuggestions(),
     encyclopediaExtra: await getEncyclopediaExtra(),
     // Réglages sans secret : on conserve le modèle choisi, pas la clé.
@@ -266,7 +319,7 @@ export async function importAll(payload: ExportPayload): Promise<void> {
   }
   await db.transaction(
     'rw',
-    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes],
+    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes, db.favorites],
     async () => {
       await db.days.clear();
       await db.days.bulkPut(payload.days);
@@ -282,6 +335,9 @@ export async function importAll(payload: ExportPayload): Promise<void> {
 
     await db.organNotes.clear();
     if (Array.isArray(payload.organNotes)) await db.organNotes.bulkPut(payload.organNotes);
+
+    await db.favorites.clear();
+    if (Array.isArray(payload.favorites)) await db.favorites.bulkPut(payload.favorites);
 
     if (payload.profile) await setProfile(payload.profile);
     if (payload.mealSuggestions) await setMealSuggestions(payload.mealSuggestions);
@@ -304,13 +360,14 @@ export async function importAll(payload: ExportPayload): Promise<void> {
 export async function clearAll(): Promise<void> {
   await db.transaction(
     'rw',
-    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes],
+    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes, db.favorites],
     async () => {
       await db.days.clear();
       await db.foodInsights.clear();
       await db.dayAnalyses.clear();
       await db.symptomNotes.clear();
       await db.organNotes.clear();
+      await db.favorites.clear();
       await db.meta.clear();
     },
   );
