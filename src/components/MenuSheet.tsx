@@ -8,6 +8,7 @@ import {
   RotateCcw,
   Save,
   Sparkles,
+  Stethoscope,
   Sun,
   Upload,
   UserCog,
@@ -27,6 +28,7 @@ interface MenuSheetProps {
   onOpenProfile: () => void;
   onReplayOnboarding: () => void;
   onOpenImportMeals: () => void;
+  onOpenMedicalRecord: () => void;
 }
 
 export function MenuSheet({
@@ -37,6 +39,7 @@ export function MenuSheet({
   onOpenProfile,
   onReplayOnboarding,
   onOpenImportMeals,
+  onOpenMedicalRecord,
 }: MenuSheetProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -143,6 +146,18 @@ export function MenuSheet({
           className="flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-muted hover:text-ink"
         >
           <GraduationCap size={16} /> Revoir le tutoriel
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            onOpenMedicalRecord();
+          }}
+          title="Synthèse complète de votre journal (profil, symptômes, transit, aliments, corrélations) à imprimer / partager avec un médecin."
+          className="flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-muted hover:text-ink"
+        >
+          <Stethoscope size={16} /> Dossier médical
         </button>
 
         <button

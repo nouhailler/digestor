@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.18 (aliments favoris — proposés en tête + scan auto-favori, scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 120 tests)
+## État actuel — v0.9.19 (dossier médical imprimable, aliments favoris — proposés en tête + scan auto-favori, scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 126 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,29 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.9.19 — dossier médical imprimable
+
+- **Objectif** : produire une synthèse complète de toutes les données du journal, à imprimer / exporter
+  en PDF pour la remettre à un médecin. Accessible via le menu ⋯ (entre « Revoir le tutoriel » et
+  « À propos & avertissement médical »).
+- **Builder pur** `lib/medicalRecord.ts` (`buildMedicalRecord(days, profile, insights)`) : ne compte
+  que les jours renseignés (`dayHasContent`), période couverte (1er→dernier jour + amplitude),
+  **synthèse des symptômes** (jours présents / dont sévères / intensité max, via `effectiveDaySymptoms`,
+  triée par poids), **aliments les plus fréquents** (dédup par nom normalisé, catégorie issue de l'IA si
+  dispo) + repérage des **aliments défavorables** (catégorie `pro`), **transit & hydratation** (moyenne,
+  répartition Bristol, jours avec selle), **corrélations** (`detectCorrelations`), et **détail
+  chronologique** des jours (repas + heures + quantités + symptômes par repas + transit + notes).
+- **UI** `components/MedicalRecordSheet.tsx` : overlay **plein écran** (hors `Sheet`, car l'impression
+  cible spécifiquement `#dossier`), thème sombre à l'écran, sections : profil santé (repli « non
+  renseigné »), synthèse symptômes (tableau + pastilles d'intensité), transit, aliments, corrélations,
+  journal détaillé, avertissement médical. Données live (`getAllDays` + `useFoodInsightMap` + profil).
+- **Impression** : bouton « Imprimer / PDF » → `window.print()` après ajout de `body.printing-dossier`
+  (retiré sur `afterprint`). Règles `@media print` dans `index.css` : on n'imprime que `#dossier`, en
+  **noir sur blanc** (texte forcé `#111`), en **conservant les pastilles de couleur** (sévérité /
+  catégorie, via `background-color`). N'interfère pas avec l'« Exporter PDF » existant (semaine).
+- Tests : `medicalRecord.test.ts` (période, agrégation symptômes, dédup aliments + défavorables,
+  transit/Bristol, détail chronologique, cas vide). Total **126 tests**.
 
 ## v0.9.18 — aliments favoris
 

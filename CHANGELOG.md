@@ -4,6 +4,18 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.9.19] — Dossier médical imprimable
+
+- **Dossier médical** (menu ⋯, entre « Revoir le tutoriel » et « À propos ») : synthèse complète de
+  toutes les données du journal, à **imprimer / exporter en PDF** pour la remettre à un médecin.
+- **Contenu** : profil santé, période couverte, **synthèse des symptômes** (jours présents / sévères /
+  intensité max), **transit & hydratation** (moyenne, répartition Bristol), **aliments les plus
+  fréquents** + repérage des aliments défavorables, **corrélations** repérées, et **journal détaillé**
+  chronologique (repas, heures, quantités, symptômes par repas, transit, notes). Avertissement médical.
+- **Impression** soignée : seul le dossier s'imprime, en **noir sur blanc**, en conservant les pastilles
+  de couleur (sévérité / catégorie). N'affecte pas l'« Exporter PDF » de la semaine.
+- `lib/medicalRecord.ts` (logique pure, testée), `components/MedicalRecordSheet.tsx`. **126 tests.**
+
 ## [0.9.18] — Aliments favoris
 
 - **Favoris proposés en tête** : lors de l'ajout d'un aliment à un repas, vos favoris (★) sont

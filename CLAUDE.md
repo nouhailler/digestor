@@ -19,10 +19,10 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 120 tests : `foodClassifier`, `dates`,
-`quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `aggregates`, `correlations`, `ai/foodInsight`,
-`ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`, `TipBanner`, …
-`npm run build` typecheck aussi les tests.
+et appellent `afterEach(cleanup)` localement (pas de setup global). 126 tests : `foodClassifier`, `dates`,
+`quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `aggregates`, `correlations`,
+`ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
+`TipBanner`, … `npm run build` typecheck aussi les tests.
 
 `tsconfig.app.json` active `strict`, `noUnusedLocals`, `noUnusedParameters` :
 les imports/variables inutilisés **cassent le build**.
@@ -52,6 +52,7 @@ src/
     quality.ts        # heuristique badge qualité + score sévérité
     quantity.ts       # unités de portion (càc/càs/g…), format + parsing tolérant (import)
     foodSuggestions.ts# suggestions d'aliments (favoris d'abord) pour l'ajout à un repas
+    medicalRecord.ts  # buildMedicalRecord : synthèse complète du journal (dossier médical imprimable)
     aggregates.ts     # stats hebdo + séries pour graphes
     correlations.ts   # détection heuristique aliment → symptôme
     db.ts             # Dexie v6 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites, export/import, config IA
@@ -72,7 +73,8 @@ src/
       mealSuggestions.ts # prompt + suggestMeals + coercition
       insightFormat.ts# libellés/couleurs FODMAP & verdicts
   components/         # UI réutilisable (Chip, SymptomGrid, DayCard, MultiChipSelect, ProfileSheet,
-                      #   HelpSheet, TipBanner, Onboarding, ImportMealsSheet, ScanProductSheet, …)
+                      #   HelpSheet, TipBanner, Onboarding, ImportMealsSheet, ScanProductSheet,
+                      #   MedicalRecordSheet [dossier médical imprimable], …)
     ai/               # AiSettingsSheet, FoodInsightCard, FoodInsightSheet
   views/              # un écran par onglet (Journal/Aliments/Week/Evolution/Reperes)
 ```

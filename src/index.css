@@ -91,4 +91,28 @@ body {
     background: #fff !important;
     color: #111 !important;
   }
+
+  /* Dossier médical : on n'imprime que #dossier, en clair (texte noir).
+     Les pastilles de couleur (sévérité / catégorie) utilisent background-color,
+     préservé tel quel pour rester lisible. */
+  body.printing-dossier * {
+    visibility: hidden;
+  }
+  body.printing-dossier #dossier,
+  body.printing-dossier #dossier * {
+    visibility: visible;
+  }
+  body.printing-dossier #dossier {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: #fff !important;
+  }
+  body.printing-dossier #dossier :where(h1, h2, h3, h4, p, span, td, th, li, dt, dd, strong, em, div, article, header, footer) {
+    color: #111 !important;
+  }
+  body.printing-dossier #dossier :where(th, td, table, article, section, header, footer, h3) {
+    border-color: #ccc !important;
+  }
 }

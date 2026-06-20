@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-120%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-126%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -78,6 +78,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   médicaments (champs facultatifs) ; pris en compte par l'IA (allergies signalées en priorité).
 - 🎙️ **Entrer un repas (voix → JSON)** — dictez votre journée à Claude Web, collez le JSON généré
   (repas + fiches FODMAP + symptômes + transit). Voir [`docs/claude-web-repas-prompt.md`](./docs/claude-web-repas-prompt.md).
+- 🩺 **Dossier médical** *(imprimable)* — synthèse complète du journal (profil santé, période couverte,
+  fréquence & sévérité des symptômes, transit & hydratation, aliments les plus fréquents et défavorables,
+  corrélations, journal détaillé) à **imprimer ou exporter en PDF** pour la remettre à un médecin.
 - 🎨 **Apparence** — thème **sombre** (défaut) ou **clair** (Menu → « Apparence »), mémorisé par appareil.
 - 💡 **Aide & onboarding** — bouton `?` par écran, astuces contextuelles, visite guidée au 1er lancement.
 - 💾 **Export / Import JSON** complet, **export PDF** de la semaine.
