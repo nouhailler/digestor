@@ -4,6 +4,43 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.9.17] — Scan de produit par code-barres → analyse FODMAP / SIBO / candidose
+
+- **Scanner un produit emballé** (onglet Aliments) : code-barres (caméra ou saisie manuelle) →
+  recherche **Open Food Facts** (base libre, sans clé) → nom + marque + **ingrédients** → analyse IA
+  existante (FODMAP / SIBO / candidose), mise en cache comme n'importe quel aliment. Optionnel et non
+  bloquant ; le cœur reste hors-ligne, **seul le code-barres** est envoyé au réseau.
+- **Lecture caméra universelle** : `BarcodeDetector` natif si disponible (Android/Chrome, zéro poids),
+  sinon `@zxing/browser` **importé à la demande** (iPhone/Safari) — chunk séparé et non préchargé.
+  Repli **saisie manuelle** du code-barres si la caméra est indisponible, et saisie du nom si le produit
+  est introuvable.
+- **Enrichissement IA** : les ingrédients/marque sont injectés au prompt (`details` optionnel,
+  rétrocompatible) pour une meilleure précision sur les produits transformés.
+- `lib/openFoodFacts.ts`, `lib/barcodeScanner.ts`, `components/ScanProductSheet.tsx` ;
+  tests `openFoodFacts.test.ts`. **114 tests.**
+
+## [0.9.16] — Quantités d'aliments (cuillères, portions, poids)
+
+- **Quantité optionnelle par aliment** (`FoodItem.quantity`) : càc, càs, pincée, portion, poignée,
+  tranche, verre, bol, g, ml. Motivation : « 1 càc de confiture » ≠ « confiture » pour l'analyse
+  (la portion change l'impact FODMAP/sucre). Affichée en préfixe de la chip (lecture et édition).
+- **UI** : icône balance sur chaque chip en édition → popover stepper −/+ (pas adapté à l'unité) +
+  choix d'unité ; zone tactile élargie, séparée de la croix de suppression (visée au doigt sur mobile).
+- **Symptômes par repas repliés par défaut** (édition) : la grille des 12 symptômes passe derrière un
+  en-tête cliquable avec résumé des symptômes déjà saisis (gain de hauteur). Lecture inchangée.
+- **IA & import** : la quantité est injectée au prompt d'analyse de journée ; l'import lit le champ
+  `quantity` (parseur tolérant : objet ou chaîne libre « 2 cuillères à soupe », « 150 g », « ½ verre »).
+- `lib/quantity.ts`, `components/FoodQuantityEditor.tsx` ; tests `quantity.test.ts`.
+
+## [0.9.15] — Mode clair en option
+
+- **Thème clair en plus du sombre** (Menu → « Apparence »). Sombre reste le défaut.
+- Préférence stockée en **`localStorage`** (lecture synchrone au boot → pas de flash), volontairement
+  hors de Dexie et de l'export JSON (préférence d'affichage propre à l'appareil, pas une donnée patient).
+- Seules les surfaces et le texte sont surchargés ; la palette sémantique (rouge/ambre/vert/gris) reste
+  identique sur les deux fonds. `EvolutionView` (Recharts) calque grille/axes/tooltip sur le thème courant.
+- `lib/theme.ts`, `hooks/useTheme.ts` ; `<meta name="theme-color">` mis à jour pour la barre du navigateur.
+
 ## [0.9.14] — Couleur d'aliment IA dans les repas & remontée pendant la génération
 
 - **Couleur d'aliment reflétée dans le repas** : dès qu'un aliment a été analysé par l'IA, sa chip

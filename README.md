@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-96%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-114%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -41,7 +41,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   sévérité FODMAP** 🔴 élevé / 🟠 modéré / 🟢 bas) avec **une zone de symptômes par repas** (pastilles
   d'intensité), notes,
   transit & hydratation (sélecteur de selles sur l'échelle de Bristol). **Autocomplétion** des
-  aliments déjà saisis (dès 3 lettres) pour éviter les doublons d'orthographe. Badge « qualité de
+  aliments déjà saisis (dès 3 lettres) pour éviter les doublons d'orthographe. **Quantité par
+  aliment** (càc, càs, portion, g, ml…) qui pondère l'analyse. Badge « qualité de
   journée » 🟢→🟠→🔴 selon le cumul de symptômes, surchargeable. Infobulles d'aide. Sauvegarde auto.
 - 🗓️ **Semaine** — **agenda cliquable** des 7 jours (couleur = qualité, clic → ouvre le jour) +
   récapitulatif calculé en direct (jours difficiles, ballonnements sévères, diarrhée, jours sans sucre
@@ -52,6 +53,11 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   portion tolérée, conseils. **Catalogue de ~267 aliments**, **analyse en masse**, recherche combobox
   (préfixe ≥ 3 lettres), **idées de repas adaptées** (ajoutables au journal). Un aliment en cours
   d'analyse **remonte en haut de la liste** (badge « Génération… ») le temps de sa génération.
+- 📷 **Scanner un produit** *(code-barres)* — visez le code-barres d'un produit emballé (caméra, ou
+  saisie manuelle en secours) → recherche **Open Food Facts** (base libre, sans clé) → nom + marque +
+  ingrédients → analyse FODMAP / SIBO / candidose, pour savoir d'un coup d'œil si un produit acheté est
+  déconseillé. `BarcodeDetector` natif quand il existe, sinon `@zxing/browser` chargé à la demande
+  (iPhone/Safari). Seul le code-barres est envoyé au réseau.
 - 🩺 **Repères / encyclopédie** — symptômes discriminants Candidose vs SIBO/SII ; chaque symptôme est
   **cliquable** pour une fiche détaillée (origine, manifestation, effets, conseils). **« Plus
   d'informations »** : encyclopédie classée par catégorie, **enrichissable par l'IA**.
@@ -68,6 +74,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   médicaments (champs facultatifs) ; pris en compte par l'IA (allergies signalées en priorité).
 - 🎙️ **Entrer un repas (voix → JSON)** — dictez votre journée à Claude Web, collez le JSON généré
   (repas + fiches FODMAP + symptômes + transit). Voir [`docs/claude-web-repas-prompt.md`](./docs/claude-web-repas-prompt.md).
+- 🎨 **Apparence** — thème **sombre** (défaut) ou **clair** (Menu → « Apparence »), mémorisé par appareil.
 - 💡 **Aide & onboarding** — bouton `?` par écran, astuces contextuelles, visite guidée au 1er lancement.
 - 💾 **Export / Import JSON** complet, **export PDF** de la semaine.
 
