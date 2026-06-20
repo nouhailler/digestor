@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import {
+  ClipboardList,
   FileText,
   FlaskConical,
   GraduationCap,
@@ -9,6 +10,7 @@ import {
   Pill,
   RotateCcw,
   Save,
+  Search,
   Sparkles,
   Stethoscope,
   Sun,
@@ -33,6 +35,8 @@ interface MenuSheetProps {
   onOpenMedicalRecord: () => void;
   onOpenTreatments: () => void;
   onOpenReintro: () => void;
+  onOpenMealTemplates: () => void;
+  onOpenSearch: () => void;
 }
 
 export function MenuSheet({
@@ -46,6 +50,8 @@ export function MenuSheet({
   onOpenMedicalRecord,
   onOpenTreatments,
   onOpenReintro,
+  onOpenMealTemplates,
+  onOpenSearch,
 }: MenuSheetProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -95,11 +101,33 @@ export function MenuSheet({
           type="button"
           onClick={() => {
             onClose();
+            onOpenSearch();
+          }}
+          className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
+        >
+          <Search size={16} className="text-muted" /> Rechercher dans le journal
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
             onOpenImportMeals();
           }}
           className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
         >
           <Mic size={16} className="text-muted" /> Entrer un repas (voix → JSON)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            onOpenMealTemplates();
+          }}
+          className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
+        >
+          <ClipboardList size={16} className="text-muted" /> Modèles de repas
         </button>
 
         <button

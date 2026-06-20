@@ -71,6 +71,10 @@ export interface DayEntry {
   hydrationL?: number; // 1.2
   stool?: Stool;
   digestionDelayH?: number; // 3 => "Délai digestion : ~3 h"
+  // Facteurs contextuels (modulateurs connus du SII / SIBO)
+  stress?: Intensity; // niveau de stress du jour (absent → sévère)
+  sleepH?: number; // heures de sommeil
+  menstrual?: boolean; // règles ce jour (cycle menstruel)
 }
 
 /** Phase du protocole pauvre en FODMAP. */
@@ -264,4 +268,47 @@ export interface ReintroChallenge {
   result: ReintroResult;
   doses?: ReintroDose[];
   notes?: string;
+}
+
+// ---- Modèles de repas (repas récurrents réutilisables) ----
+
+/** Aliment d'un modèle (sans id : régénéré à chaque insertion dans un repas). */
+export interface TemplateFood {
+  name: string;
+  category: FoodCategory;
+  quantity?: FoodQuantity;
+}
+
+/** Modèle de repas réutilisable, ex. « petit-déjeuner habituel ». */
+export interface MealTemplate {
+  id: string;
+  name: string;
+  time?: string; // heure suggérée (facultatif)
+  foods: TemplateFood[];
+  updatedAt: string;
+}
+
+// ---- Rapport IA de période (semaine / mois / tout) ----
+
+/** Une tendance calculée localement entre la 1re et la 2de moitié de la période. */
+export interface PeriodTrend {
+  metric: string; // ex. « Jours à symptômes »
+  direction: 'up' | 'down' | 'flat';
+  detail: string; // ex. « 60 % → 30 % »
+  good: boolean; // l'évolution est-elle favorable ?
+}
+
+/** Analyse IA d'une période complète, mise en cache (clé = portée+plage). */
+export interface PeriodAnalysis {
+  key: string; // ex. « all » ou « 4weeks:2026-05-01:2026-05-28 »
+  scope: 'week' | '4weeks' | 'all';
+  from: string;
+  to: string;
+  verdict: Verdict;
+  summary: string;
+  trends: string[]; // tendances narratives (IA)
+  triggers: string[];
+  improvements: DayImprovement[];
+  model: string;
+  updatedAt: string;
 }

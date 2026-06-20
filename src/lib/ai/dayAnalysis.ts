@@ -57,6 +57,9 @@ export function describeDay(day: DayEntry, insights?: Map<string, FoodInsight>):
   if (day.symptomTiming) lines.push(`Moment des symptômes : ${day.symptomTiming}`);
   if (typeof day.hydrationL === 'number') lines.push(`Hydratation : ${day.hydrationL} L`);
   if (day.stool?.label) lines.push(`Transit : ${day.stool.label}${day.stool.bristol ? ` (Bristol ${day.stool.bristol})` : ''}`);
+  if (day.stress && day.stress !== 'absent') lines.push(`Stress : ${INTENSITY_LABEL[day.stress].toLowerCase()}`);
+  if (typeof day.sleepH === 'number') lines.push(`Sommeil : ${day.sleepH} h`);
+  if (day.menstrual) lines.push(`Cycle : règles ce jour`);
   if (day.notes) lines.push(`Notes : ${day.notes}`);
   return lines.join('\n');
 }

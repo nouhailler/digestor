@@ -9,6 +9,8 @@ import type {
   MealSuggestionSet,
   OrganInfo,
   Profile,
+  MealTemplate,
+  PeriodAnalysis,
   ReintroChallenge,
   SymptomInfo,
   Treatment,
@@ -33,6 +35,8 @@ class DigestorDB extends Dexie {
   favorites!: Table<FavoriteFood, string>; // clé primaire = nom normalisé
   treatments!: Table<Treatment, string>; // clé primaire = id
   reintroChallenges!: Table<ReintroChallenge, string>; // clé primaire = id
+  mealTemplates!: Table<MealTemplate, string>; // clé primaire = id
+  periodAnalyses!: Table<PeriodAnalysis, string>; // clé primaire = key (portée+plage)
 
   constructor() {
     super('digestor');
@@ -94,6 +98,20 @@ class DigestorDB extends Dexie {
       favorites: '&key, name',
       treatments: '&id, startDate',
       reintroChallenges: '&id, startDate',
+    });
+    // v8 : modèles de repas + cache des rapports IA de période.
+    this.version(8).stores({
+      days: '&date',
+      meta: '&key',
+      foodInsights: '&key, name',
+      dayAnalyses: '&date',
+      symptomNotes: '&key',
+      organNotes: '&key',
+      favorites: '&key, name',
+      treatments: '&id, startDate',
+      reintroChallenges: '&id, startDate',
+      mealTemplates: '&id, name',
+      periodAnalyses: '&key',
     });
   }
 }
@@ -292,6 +310,31 @@ export async function deleteReintroChallenge(id: string): Promise<void> {
   await db.reintroChallenges.delete(id);
 }
 
+// ---- Modèles de repas ----
+
+export async function getAllMealTemplates(): Promise<MealTemplate[]> {
+  return db.mealTemplates.orderBy('name').toArray();
+}
+
+export async function putMealTemplate(t: MealTemplate): Promise<void> {
+  await db.mealTemplates.put(t);
+}
+
+export async function deleteMealTemplate(id: string): Promise<void> {
+  await db.mealTemplates.delete(id);
+}
+
+// ---- Cache des rapports IA de période ----
+
+export async function getPeriodAnalysis(key: string): Promise<PeriodAnalysis | undefined> {
+  if (!key) return undefined;
+  return db.periodAnalyses.get(key);
+}
+
+export async function putPeriodAnalysis(a: PeriodAnalysis): Promise<void> {
+  await db.periodAnalyses.put(a);
+}
+
 export async function getDay(date: string): Promise<DayEntry | undefined> {
   return db.days.get(date);
 }
@@ -323,7 +366,7 @@ export async function getLatestActiveDate(): Promise<string | undefined> {
 
 export interface ExportPayload {
   app: 'digestor';
-  version: 1 | 2 | 3 | 4 | 5 | 6 | 7;
+  version: 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
   exportedAt: string;
   profile: Profile;
   days: DayEntry[];
@@ -334,6 +377,7 @@ export interface ExportPayload {
   favorites?: FavoriteFood[]; // depuis v6 (aliments favoris)
   treatments?: Treatment[]; // depuis v7 (traitements & compléments)
   reintroChallenges?: ReintroChallenge[]; // depuis v7 (réintroductions FODMAP)
+  mealTemplates?: MealTemplate[]; // depuis v8 (modèles de repas)
   mealSuggestions?: MealSuggestionSet; // depuis v4
   encyclopediaExtra?: EncyclopediaExtra; // depuis v4
   // Réglages non sensibles (depuis v4). La CLÉ API n'y figure jamais (secret).
@@ -344,7 +388,7 @@ export async function exportAll(): Promise<ExportPayload> {
   const aiConfig = await getAiConfig();
   return {
     app: 'digestor',
-    version: 7,
+    version: 8,
     exportedAt: new Date().toISOString(),
     profile: await getProfile(),
     days: await getAllDays(),
@@ -355,6 +399,7 @@ export async function exportAll(): Promise<ExportPayload> {
     favorites: await getAllFavorites(),
     treatments: await getAllTreatments(),
     reintroChallenges: await getAllReintroChallenges(),
+    mealTemplates: await getAllMealTemplates(),
     mealSuggestions: await getMealSuggestions(),
     encyclopediaExtra: await getEncyclopediaExtra(),
     // Réglages sans secret : on conserve le modèle choisi, pas la clé.
@@ -378,6 +423,8 @@ export async function importAll(payload: ExportPayload): Promise<void> {
       db.favorites,
       db.treatments,
       db.reintroChallenges,
+      db.mealTemplates,
+      db.periodAnalyses,
     ],
     async () => {
       await db.days.clear();
@@ -403,6 +450,12 @@ export async function importAll(payload: ExportPayload): Promise<void> {
 
     await db.reintroChallenges.clear();
     if (Array.isArray(payload.reintroChallenges)) await db.reintroChallenges.bulkPut(payload.reintroChallenges);
+
+    await db.mealTemplates.clear();
+    if (Array.isArray(payload.mealTemplates)) await db.mealTemplates.bulkPut(payload.mealTemplates);
+
+    // Cache régénérable : on le vide à l'import (les analyses ne sont pas exportées).
+    await db.periodAnalyses.clear();
 
     if (payload.profile) await setProfile(payload.profile);
     if (payload.mealSuggestions) await setMealSuggestions(payload.mealSuggestions);
@@ -435,6 +488,8 @@ export async function clearAll(): Promise<void> {
       db.favorites,
       db.treatments,
       db.reintroChallenges,
+      db.mealTemplates,
+      db.periodAnalyses,
     ],
     async () => {
       await db.days.clear();
@@ -445,6 +500,8 @@ export async function clearAll(): Promise<void> {
       await db.favorites.clear();
       await db.treatments.clear();
       await db.reintroChallenges.clear();
+      await db.mealTemplates.clear();
+      await db.periodAnalyses.clear();
       await db.meta.clear();
     },
   );

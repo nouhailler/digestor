@@ -62,6 +62,14 @@ export const INTENSITY_LABEL: Record<Intensity, string> = {
   severe: 'Sévère',
 };
 
+/** Libellés d'intensité adaptés au stress (« Aucun → Élevé »). */
+export const STRESS_LABEL: Record<Intensity, string> = {
+  absent: 'Aucun',
+  leger: 'Léger',
+  modere: 'Modéré',
+  severe: 'Élevé',
+};
+
 export const INTENSITY_HINT: Record<Intensity, string> = {
   absent: 'Symptôme absent.',
   leger: 'Symptôme léger, peu gênant.',

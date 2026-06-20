@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-130%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-148%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -51,7 +51,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   personnalisées** calculées sur tout l'historique : déclencheurs suspectés (taux de symptôme les jours
   « avec » vs « sans ») et aliments fréquents bien tolérés — détection conservatrice, jamais inventée.
 - 📈 **Évolution** — graphes (sévérité par jour, hydratation vs cible 1,5 L, catégories d'aliments,
-  top symptômes) sur semaine / 4 semaines / tout.
+  top symptômes) sur semaine / 4 semaines / tout, + **rapport de période** : tendances calculées
+  (début vs fin) et **synthèse IA** optionnelle (verdict, déclencheurs récurrents, pistes).
 - 🍎 **Aliments** *(IA, optionnel)* — analyse FODMAP (global + par groupe), verdicts SIBO & candidose,
   portion tolérée, conseils. **Catalogue de ~267 aliments**, **analyse en masse**, recherche combobox
   (préfixe ≥ 3 lettres), **idées de repas adaptées** (ajoutables au journal). Un aliment en cours
@@ -83,6 +84,10 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   dossier médical.
 - 🧪 **Réintroductions FODMAP** — testez **un aliment d'un groupe à la fois**, notez le verdict
   (toléré / limité / non toléré) et un journal des doses : l'outil de la phase de réintroduction.
+- 🫁 **Facteurs contextuels** — stress, sommeil et cycle menstruel par jour : leur corrélation avec
+  les jours à symptômes est calculée (Semaine + dossier médical), car ils modulent fortement le SII.
+- 📋 **Modèles de repas** — enregistrez vos repas récurrents et ajoutez-les au Journal en un geste.
+- 🔎 **Recherche** — retrouvez les jours par aliment, symptôme ou note (menu).
 - 🎙️ **Entrer un repas (voix → JSON)** — dictez votre journée à Claude Web, collez le JSON généré
   (repas + fiches FODMAP + symptômes + transit). Voir [`docs/claude-web-repas-prompt.md`](./docs/claude-web-repas-prompt.md).
 - 🩺 **Dossier médical** *(imprimable)* — synthèse complète du journal (profil santé, période couverte,

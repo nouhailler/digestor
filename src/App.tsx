@@ -12,6 +12,8 @@ import { ImportMealsSheet } from './components/ImportMealsSheet';
 import { MedicalRecordSheet } from './components/MedicalRecordSheet';
 import { TreatmentsSheet } from './components/TreatmentsSheet';
 import { ReintroSheet } from './components/ReintroSheet';
+import { MealTemplatesSheet } from './components/MealTemplatesSheet';
+import { JournalSearchSheet } from './components/JournalSearchSheet';
 import { BackupReminder } from './components/BackupReminder';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { JournalView } from './views/JournalView';
@@ -44,6 +46,8 @@ export default function App() {
   const [medicalRecordOpen, setMedicalRecordOpen] = useState(false);
   const [treatmentsOpen, setTreatmentsOpen] = useState(false);
   const [reintroOpen, setReintroOpen] = useState(false);
+  const [mealTemplatesOpen, setMealTemplatesOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const { profile } = useProfile();
 
   useEffect(() => {
@@ -109,7 +113,7 @@ export default function App() {
           <Suspense
             fallback={<div className="mx-auto max-w-3xl px-4 pt-10 text-center text-muted">Chargement des graphes…</div>}
           >
-            <EvolutionView date={date} />
+            <EvolutionView date={date} onOpenAiSettings={() => setAiSettingsOpen(true)} />
           </Suspense>
         )}
         {tab === 'reperes' && (
@@ -132,11 +136,23 @@ export default function App() {
         onOpenMedicalRecord={() => setMedicalRecordOpen(true)}
         onOpenTreatments={() => setTreatmentsOpen(true)}
         onOpenReintro={() => setReintroOpen(true)}
+        onOpenMealTemplates={() => setMealTemplatesOpen(true)}
+        onOpenSearch={() => setSearchOpen(true)}
       />
       <AboutSheet open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <MedicalRecordSheet open={medicalRecordOpen} onClose={() => setMedicalRecordOpen(false)} />
       <TreatmentsSheet open={treatmentsOpen} onClose={() => setTreatmentsOpen(false)} />
       <ReintroSheet open={reintroOpen} onClose={() => setReintroOpen(false)} />
+      <MealTemplatesSheet open={mealTemplatesOpen} onClose={() => setMealTemplatesOpen(false)} />
+      <JournalSearchSheet
+        open={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        onOpenDay={(d) => {
+          setSearchOpen(false);
+          setDate(d);
+          setTab('journal');
+        }}
+      />
       <AiSettingsSheet open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />
       <ProfileSheet open={profileOpen} onClose={() => setProfileOpen(false)} />
       <HelpSheet open={helpOpen} tab={tab} onClose={() => setHelpOpen(false)} />

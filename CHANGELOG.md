@@ -4,6 +4,24 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.11.0] — Facteurs contextuels, modèles de repas, rapport de période & recherche
+
+Quatre fonctionnalités pour affiner le suivi et accélérer la saisie.
+
+- **Facteurs contextuels** : enregistrez par jour le **stress**, les **heures de sommeil** et les
+  **règles** (section « Bien-être & contexte » du Journal). Leur lien avec les jours à symptômes est
+  calculé et affiché dans Semaine et le dossier médical, et pris en compte par l'analyse IA de journée.
+- **Modèles de repas** : enregistrez un repas récurrent (bouton signet en édition, ou via « Modèles de
+  repas » dans le menu) et **ajoutez-le en un geste** au Journal (« Depuis un modèle »).
+- **Rapport de période** (écran Évolution) : **tendances** calculées entre le début et la fin de la
+  période (jours à symptômes, sévérité, aliments défavorables, hydratation) + **synthèse IA** optionnelle
+  (verdict, déclencheurs récurrents, pistes).
+- **Recherche dans le journal** (menu) : retrouvez les jours par **aliment, symptôme ou note** ;
+  résultats cliquables.
+- **Données** : nouvelles tables Dexie `mealTemplates` et `periodAnalyses` (export/import JSON v8).
+  `lib/contextCorrelations.ts`, `lib/mealTemplates.ts`, `lib/periodReport.ts`, `lib/journalSearch.ts`,
+  `lib/ai/periodAnalysis.ts`. **148 tests.**
+
 ## [0.10.0] — Traitements, réintroductions FODMAP & corrélations personnalisées
 
 Trois fonctionnalités cliniques majeures pour le suivi candidose / SIBO / SII.

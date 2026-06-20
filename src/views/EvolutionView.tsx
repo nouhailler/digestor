@@ -24,10 +24,15 @@ import {
 } from '../lib/aggregates';
 import { HYDRATION_TARGET_L } from '../lib/constants';
 import { dayShortLabel, fromISODate, toISODate } from '../lib/dates';
+import { dayHasContent } from '../lib/aggregates';
 import { TipBanner } from '../components/TipBanner';
+import { PeriodReportSheet } from '../components/ai/PeriodReportSheet';
 import { useTheme } from '../hooks/useTheme';
+import { Sparkles } from 'lucide-react';
 
 type Range = 'week' | '4weeks' | 'all';
+
+const RANGE_LABEL: Record<Range, string> = { week: 'Semaine', '4weeks': '4 semaines', all: 'Tout' };
 
 // La palette sémantique est identique sur les deux thèmes (cf. index.css).
 const COL = {
@@ -50,10 +55,12 @@ const CHROME = {
 
 interface EvolutionViewProps {
   date: string;
+  onOpenAiSettings: () => void;
 }
 
-export function EvolutionView({ date }: EvolutionViewProps) {
+export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
   const [range, setRange] = useState<Range>('4weeks');
+  const [reportOpen, setReportOpen] = useState(false);
   const { theme } = useTheme();
   const chrome = CHROME[theme];
   const axisTick = { fill: chrome.muted, fontSize: 11 };
@@ -95,6 +102,11 @@ export function EvolutionView({ date }: EvolutionViewProps) {
   const categories = categoryCountsByDay(days).map(withLabel);
   const tops = topSymptoms(days);
 
+  // Plage réelle (jours renseignés) pour la clé de cache du rapport de période.
+  const recorded = days.filter(dayHasContent);
+  const from = recorded[0]?.date ?? days[0]?.date ?? date;
+  const to = recorded[recorded.length - 1]?.date ?? from;
+
   return (
     <div className="mx-auto max-w-3xl px-4 pt-4 pb-28">
       <TipBanner tab="evolution" />
@@ -118,6 +130,16 @@ export function EvolutionView({ date }: EvolutionViewProps) {
           ))}
         </div>
       </div>
+
+      <button
+        type="button"
+        onClick={() => setReportOpen(true)}
+        disabled={!hasData}
+        title="Bilan de la période : tendances calculées + synthèse IA (verdict, déclencheurs récurrents, pistes)."
+        className="mb-4 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm text-ink hover:border-leger disabled:opacity-50"
+      >
+        <Sparkles size={15} style={{ color: 'var(--color-leger)' }} /> Rapport de la période ({RANGE_LABEL[range]})
+      </button>
 
       {!hasData ? (
         <div className="rounded-2xl border border-border bg-surface p-8 text-center text-muted">
@@ -198,6 +220,20 @@ export function EvolutionView({ date }: EvolutionViewProps) {
           </ChartCard>
         </div>
       )}
+
+      <PeriodReportSheet
+        open={reportOpen}
+        onClose={() => setReportOpen(false)}
+        onOpenAiSettings={() => {
+          setReportOpen(false);
+          onOpenAiSettings();
+        }}
+        days={days}
+        scope={range}
+        from={from}
+        to={to}
+        label={RANGE_LABEL[range]}
+      />
     </div>
   );
 }

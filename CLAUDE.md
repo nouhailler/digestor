@@ -19,10 +19,11 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 130 tests : `foodClassifier`, `dates`,
+et appellent `afterEach(cleanup)` localement (pas de setup global). 148 tests : `foodClassifier`, `dates`,
 `quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
-`aggregates`, `correlations`, `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`,
-`SymptomGrid`, `MultiChipSelect`, `TipBanner`, … `npm run build` typecheck aussi les tests.
+`contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`, `correlations`,
+`ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
+`TipBanner`, … `npm run build` typecheck aussi les tests.
 
 `tsconfig.app.json` active `strict`, `noUnusedLocals`, `noUnusedParameters` :
 les imports/variables inutilisés **cassent le build**.
@@ -46,6 +47,8 @@ src/
     useFavorites.ts      # aliments favoris en live (table favorites)
     useTreatments.ts     # traitements & compléments en live (table treatments)
     useReintroChallenges.ts # tests de réintroduction FODMAP en live (table reintroChallenges)
+    useMealTemplates.ts  # modèles de repas en live (table mealTemplates)
+    usePeriodAnalysis.ts # rapport IA d'une période (clé portée+plage) + cache
   lib/                # logique métier pure (testable, sans React)
     constants.ts      # ordres, libellés, couleurs, cycles
     dates.ts          # semaine lundi→dimanche, labels fr
@@ -56,11 +59,15 @@ src/
     foodSuggestions.ts# suggestions d'aliments (favoris d'abord) pour l'ajout à un repas
     medicalRecord.ts  # buildMedicalRecord : synthèse complète du journal (dossier médical imprimable)
     personalCorrelations.ts # corrélations aliment→symptôme calculées sur les données réelles (déclencheurs / aliments sûrs)
+    contextCorrelations.ts # facteurs contextuels (stress/sommeil/règles) → jours à symptômes
     treatments.ts     # libellés/types de traitements & compléments + helpers (actif, tri)
     reintro.ts        # libellés groupes/verdicts FODMAP + tri (tests de réintroduction)
+    mealTemplates.ts  # modèles de repas : repas↔modèle (instanciation avec id neufs)
+    periodReport.ts   # tendances (1re vs 2de moitié) + describePeriod (résumé pour l'IA)
+    journalSearch.ts  # recherche dans le journal (aliments / symptômes / notes)
     aggregates.ts     # stats hebdo + séries pour graphes
     correlations.ts   # détection heuristique aliment → symptôme
-    db.ts             # Dexie v7 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites/treatments/reintroChallenges, export/import, config IA
+    db.ts             # Dexie v8 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites/treatments/reintroChallenges/mealTemplates/periodAnalyses, export/import, config IA
     encyclopedia.ts   # socle statique des symptômes digestifs (catégorisé) — Repères
     aggregates.ts     # (+ dayHasContent / latestActiveDate, réutilisés par db.ts)
     seed.ts           # données démo Lundi/Mardi conformes aux maquettes
@@ -75,13 +82,15 @@ src/
       openrouter.ts   # client : fetchFreeModels, chatJSON (parse JSON robuste)
       foodInsight.ts  # prompt + analyzeFood + buildFoodInsight (réutilisé par l'import) + deriveCategory
       dayAnalysis.ts  # describeDay + analyzeDay + coercition (analyse de journée)
+      periodAnalysis.ts # rapport IA d'une période : prompt + analyzePeriod + coercition
       mealSuggestions.ts # prompt + suggestMeals + coercition
       insightFormat.ts# libellés/couleurs FODMAP & verdicts
   components/         # UI réutilisable (Chip, SymptomGrid, DayCard, MultiChipSelect, ProfileSheet,
                       #   HelpSheet, TipBanner, Onboarding, ImportMealsSheet, ScanProductSheet,
                       #   MedicalRecordSheet [dossier médical imprimable],
-                      #   TreatmentsSheet, ReintroSheet, …)
-    ai/               # AiSettingsSheet, FoodInsightCard, FoodInsightSheet
+                      #   TreatmentsSheet, ReintroSheet, MealTemplatesSheet,
+                      #   JournalSearchSheet, ContextRow, …)
+    ai/               # AiSettingsSheet, FoodInsightCard, FoodInsightSheet, PeriodReportSheet
   views/              # un écran par onglet (Journal/Aliments/Week/Evolution/Reperes)
 ```
 

@@ -7,6 +7,7 @@ import { getAllDays } from '../lib/db';
 import { computeWeekStats, dayHasContent, effectiveDaySymptoms } from '../lib/aggregates';
 import { detectCorrelations, type CorrelationLevel } from '../lib/correlations';
 import { personalCorrelations } from '../lib/personalCorrelations';
+import { contextCorrelations } from '../lib/contextCorrelations';
 import { suggestDayQuality } from '../lib/quality';
 import { SYMPTOM_ORDER } from '../lib/constants';
 import {
@@ -62,6 +63,7 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
   const stats = computeWeekStats(days);
   const correlations = detectCorrelations(days);
   const personal = personalCorrelations(allDays ?? []);
+  const context = contextCorrelations(allDays ?? []);
   const today = todayISO();
 
   return (
@@ -209,6 +211,25 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
                     </span>
                   ))}
                 </div>
+              </div>
+            )}
+            {context.links.length > 0 && (
+              <div>
+                <p className="mb-1.5 font-medium text-ink">Facteurs contextuels</p>
+                <ul className="space-y-1.5">
+                  {context.links.map((l, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-ink">
+                      <span
+                        className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: 'var(--color-modere)' }}
+                      />
+                      <span>
+                        <strong>{l.label}</strong> → {Math.round(l.rateWith * 100)} % de jours à symptômes{' '}
+                        <span className="text-muted">vs {Math.round(l.rateWithout * 100)} % sinon</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
             <p className="text-xs text-muted">

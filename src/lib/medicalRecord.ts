@@ -15,6 +15,7 @@ import { INTENSITY_WEIGHT, STOOL_OPTIONS, SYMPTOM_LABELS, SYMPTOM_ORDER } from '
 import { dayHasContent, effectiveDaySymptoms } from './aggregates';
 import { detectCorrelations, type Correlation } from './correlations';
 import { personalCorrelations, type PersonalCorrelations } from './personalCorrelations';
+import { contextCorrelations, type ContextCorrelations } from './contextCorrelations';
 import { sortTreatments } from './treatments';
 import { sortReintro } from './reintro';
 import { normalize } from './foodClassifier';
@@ -70,6 +71,9 @@ export interface RecordDay {
   hydrationL?: number;
   stool?: Stool;
   digestionDelayH?: number;
+  stress?: Intensity;
+  sleepH?: number;
+  menstrual?: boolean;
 }
 
 export interface MedicalRecord {
@@ -90,6 +94,7 @@ export interface MedicalRecord {
   stoolDays: number; // jours avec une selle renseignée
   correlations: Correlation[]; // heuristiques (motifs connus)
   personal: PersonalCorrelations; // corrélations calculées sur les données réelles
+  context: ContextCorrelations; // facteurs contextuels (stress / sommeil / règles)
   treatments: Treatment[]; // traitements & compléments (en cours d'abord)
   reintro: ReintroChallenge[]; // tests de réintroduction FODMAP
   days: RecordDay[]; // détail chronologique des jours renseignés
@@ -210,6 +215,9 @@ export function buildMedicalRecord(
     hydrationL: day.hydrationL,
     stool: day.stool,
     digestionDelayH: day.digestionDelayH,
+    stress: day.stress,
+    sleepH: day.sleepH,
+    menstrual: day.menstrual,
   }));
 
   return {
@@ -230,6 +238,7 @@ export function buildMedicalRecord(
     stoolDays,
     correlations: detectCorrelations(recorded),
     personal: personalCorrelations(recorded),
+    context: contextCorrelations(recorded),
     treatments: sortTreatments(treatments, todayISO()),
     reintro: sortReintro(reintro),
     days,

@@ -344,6 +344,23 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
                       </p>
                     </div>
                   )}
+                  {record.context.links.length > 0 && (
+                    <div>
+                      <p className="font-medium text-ink">Facteurs contextuels</p>
+                      <ul className="mt-1 space-y-1">
+                        {record.context.links.map((l, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Dot color="var(--color-modere)" />
+                            <span>
+                              <strong className="text-ink">{l.label}</strong> →{' '}
+                              <span className="text-ink">{Math.round(l.rateWith * 100)} %</span> de jours à symptômes{' '}
+                              <span className="text-muted">vs {Math.round(l.rateWithout * 100)} % sinon</span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <p className="text-xs text-muted">
                     Détection conservatrice sur {record.personal.analyzedDays} jours (association le même jour) —
                     à confirmer médicalement, ce ne sont pas des certitudes.
@@ -395,6 +412,13 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
                             {typeof d.hydrationL === 'number' && `Hydratation : ${d.hydrationL} L. `}
                             {d.stool && stoolText(d.stool)}
                             {typeof d.digestionDelayH === 'number' && `Délai digestion : ~${d.digestionDelayH} h.`}
+                          </p>
+                        )}
+                        {((d.stress && d.stress !== 'absent') || typeof d.sleepH === 'number' || d.menstrual) && (
+                          <p className="text-muted">
+                            {d.stress && d.stress !== 'absent' && `Stress : ${INTENSITY_LABEL[d.stress].toLowerCase()}. `}
+                            {typeof d.sleepH === 'number' && `Sommeil : ${d.sleepH} h. `}
+                            {d.menstrual && 'Règles. '}
                           </p>
                         )}
                         {d.notes?.trim() && (

@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import {
   CalendarDays,
   Check,
+  ClipboardList,
   Droplets,
+  HeartPulse,
   Pencil,
   Plus,
   ScrollText,
@@ -12,12 +14,16 @@ import {
 import type { DayEntry, DayQuality, FoodInsight, Meal, SymptomKey } from '../types';
 import { dayLongLabel } from '../lib/dates';
 import { makeMeal } from '../lib/factory';
+import { mealFromTemplate, templateFromMeal } from '../lib/mealTemplates';
+import { putMealTemplate } from '../lib/db';
+import { useMealTemplates } from '../hooks/useMealTemplates';
 import { DEFAULT_MEAL_TIMES, SYMPTOM_ORDER } from '../lib/constants';
 import { suggestDayQuality } from '../lib/quality';
 import { QualityBadge } from './QualityBadge';
 import { MealEditor } from './MealEditor';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
 import { TransitRow } from './TransitRow';
+import { ContextRow } from './ContextRow';
 
 const QUALITY_CYCLE: DayQuality[] = [null, 'difficile', 'correcte', 'bonne'];
 
@@ -39,6 +45,8 @@ interface DayCardProps {
 
 export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, favorites, insights }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
+  const [tplOpen, setTplOpen] = useState(false);
+  const templates = useMealTemplates();
 
   const suggested = useMemo(() => suggestDayQuality(day), [day]);
   const effectiveQuality = day.quality ?? suggested;
@@ -58,6 +66,20 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
       const time = DEFAULT_MEAL_TIMES[d.meals.length] ?? '12:00';
       return { ...d, meals: [...d.meals, makeMeal(time)] };
     });
+  }
+  function addMealFromTemplate(id: string) {
+    const tpl = templates.find((t) => t.id === id);
+    setTplOpen(false);
+    if (!tpl) return;
+    update((d) => {
+      const time = tpl.time ?? DEFAULT_MEAL_TIMES[d.meals.length] ?? '12:00';
+      return { ...d, meals: [...d.meals, mealFromTemplate(tpl, time)] };
+    });
+  }
+  function saveMealAsTemplate(meal: Meal) {
+    if (meal.foods.length === 0) return;
+    const name = window.prompt('Nom du modèle de repas :', meal.foods[0]?.name ?? 'Mon repas');
+    if (name?.trim()) void putMealTemplate(templateFromMeal(name.trim(), meal));
   }
   function cycleSymptom(key: SymptomKey) {
     update((d) => ({
@@ -119,18 +141,51 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
               knownFoods={knownFoods}
               favorites={favorites}
               insights={insights}
+              onSaveAsTemplate={saveMealAsTemplate}
             />
           ))}
         </div>
         {editing && (
-          <button
-            type="button"
-            onClick={addMeal}
-            title="Ajouter un repas (heure + aliments + symptômes ressentis après)."
-            className="mt-3 inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:text-ink"
-          >
-            <Plus size={15} /> Repas
-          </button>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={addMeal}
+              title="Ajouter un repas (heure + aliments + symptômes ressentis après)."
+              className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:text-ink"
+            >
+              <Plus size={15} /> Repas
+            </button>
+            {templates.length > 0 && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setTplOpen((o) => !o)}
+                  title="Ajouter un repas à partir d'un modèle enregistré."
+                  className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:text-ink"
+                >
+                  <ClipboardList size={15} /> Depuis un modèle
+                </button>
+                {tplOpen && (
+                  <ul className="absolute left-0 top-full z-10 mt-1 max-h-56 w-56 overflow-auto rounded-lg border border-border bg-surface-2 py-1 shadow-lg">
+                    {templates.map((t) => (
+                      <li key={t.id}>
+                        <button
+                          type="button"
+                          onClick={() => addMealFromTemplate(t.id)}
+                          className="block w-full px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
+                        >
+                          {t.name}
+                          <span className="block truncate text-xs text-muted">
+                            {t.foods.map((f) => f.name).join(', ')}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </Section>
 
@@ -189,6 +244,11 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
       {/* Transit & hydratation */}
       <Section icon={<Droplets size={15} />} title="Transit & hydratation">
         <TransitRow day={day} editing={editing} onChange={(patch) => update((d) => ({ ...d, ...patch }))} />
+      </Section>
+
+      {/* Bien-être & contexte (stress, sommeil, cycle) */}
+      <Section icon={<HeartPulse size={15} />} title="Bien-être & contexte">
+        <ContextRow day={day} editing={editing} onChange={(patch) => update((d) => ({ ...d, ...patch }))} />
       </Section>
     </article>
   );

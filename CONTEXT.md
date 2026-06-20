@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.10.0 (suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris — proposés en tête + scan auto-favori, scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 130 tests)
+## État actuel — v0.11.0 (facteurs contextuels stress/sommeil/cycle, modèles de repas, rapport IA de période + tendances, recherche dans le journal, suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris, scan de produit par code-barres, quantités d'aliments, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 148 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,29 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.11.0 — facteurs contextuels, modèles de repas, rapport de période & recherche (Tier 2)
+
+Quatre fonctionnalités (cf. brainstorming « Tier 2 »).
+
+- **Facteurs contextuels (stress / sommeil / cycle)** : `DayEntry` += `stress` (Intensity), `sleepH`,
+  `menstrual`. Saisie via `components/ContextRow.tsx` (section « Bien-être & contexte » du Journal).
+  `lib/contextCorrelations.ts` (pur, testé) : stress élevé / sommeil court (< 6 h) / règles → taux de
+  jours à symptômes (avec vs sans), seuils conservateurs. Affiché dans **Semaine** et le **dossier
+  médical** ; injecté aussi à `describeDay` (prompt d'analyse de journée).
+- **Modèles de repas** : type `MealTemplate` + table Dexie **v8 `mealTemplates`** + `lib/mealTemplates.ts`
+  (`templateFromMeal`, `mealFromTemplate`, pur/testé) + hook `useMealTemplates`. `MealTemplatesSheet`
+  (menu) pour créer/éditer ; bouton signet dans `MealEditor` pour enregistrer un repas comme modèle ;
+  « Depuis un modèle » dans `DayCard` pour insérer un repas en un geste.
+- **Rapport IA de période + tendances** : `lib/periodReport.ts` (`computeTrends` comparant 1re/2de
+  moitié + `describePeriod`, pur/testé), `lib/ai/periodAnalysis.ts` (pipeline IA, cache table **v8
+  `periodAnalyses`** clé = portée+plage), hook `usePeriodAnalysis`, `PeriodReportSheet` ouvert depuis
+  **Évolution** (tendances locales toujours visibles ; synthèse IA optionnelle, non bloquante).
+- **Recherche dans le journal** : `lib/journalSearch.ts` (aliments / symptômes actifs / notes, pur/testé)
+  + `JournalSearchSheet` (menu) ; résultats cliquables → ouvrent le jour.
+- **DB v8** : 2 tables ajoutées ; export/import couvre `mealTemplates` (le cache `periodAnalyses` est
+  régénérable, vidé à l'import) ; `clearAll` couvre tout. Menu enrichi (Recherche, Modèles de repas).
+- Tests : `contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`. Total **148 tests**.
 
 ## v0.10.0 — traitements, réintroductions FODMAP & corrélations personnalisées (Tier 1)
 

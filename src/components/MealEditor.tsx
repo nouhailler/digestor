@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ChevronDown, Plus, Scale, Star, Trash2, X } from 'lucide-react';
+import { BookmarkPlus, ChevronDown, Plus, Scale, Star, Trash2, X } from 'lucide-react';
 import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, SymptomKey } from '../types';
 import { Chip } from './Chip';
 import { FoodQuantityEditor } from './FoodQuantityEditor';
@@ -40,10 +40,12 @@ interface MealEditorProps {
   favorites?: string[];
   /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
   insights?: Map<string, FoodInsight>;
+  /** En édition, enregistrer ce repas comme modèle réutilisable. */
+  onSaveAsTemplate?: (meal: Meal) => void;
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], favorites = [], insights }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], favorites = [], insights, onSaveAsTemplate }: MealEditorProps) {
   const [draft, setDraft] = useState('');
   // Saisie d'aliment focalisée : permet d'afficher les favoris (ajout rapide) tant
   // que rien n'est tapé, sans laisser la liste ouverte au rendu initial.
@@ -143,14 +145,27 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
           <span className="text-xs text-muted">{formatTime(meal.time)}</span>
         )}
         {editing && (
-          <button
-            type="button"
-            onClick={onRemove}
-            aria-label="Supprimer le repas"
-            className="text-muted hover:text-severe"
-          >
-            <Trash2 size={14} />
-          </button>
+          <>
+            {onSaveAsTemplate && meal.foods.length > 0 && (
+              <button
+                type="button"
+                onClick={() => onSaveAsTemplate(meal)}
+                aria-label="Enregistrer comme modèle"
+                title="Enregistrer ce repas comme modèle réutilisable"
+                className="text-muted hover:text-leger"
+              >
+                <BookmarkPlus size={14} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onRemove}
+              aria-label="Supprimer le repas"
+              className="text-muted hover:text-severe"
+            >
+              <Trash2 size={14} />
+            </button>
+          </>
         )}
       </div>
 
