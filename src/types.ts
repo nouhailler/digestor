@@ -216,3 +216,52 @@ export interface EncyclopediaExtra {
   model: string;
   updatedAt: string;
 }
+
+// ---- Suivi des traitements & compléments ----
+
+export type TreatmentKind =
+  | 'antifongique'
+  | 'antibiotique'
+  | 'probiotique'
+  | 'prebiotique'
+  | 'complement'
+  | 'phytotherapie'
+  | 'medicament'
+  | 'autre';
+
+/** Une cure / traitement / complément, sur une plage de dates (fin vide = en cours). */
+export interface Treatment {
+  id: string;
+  name: string; // ex. « Nystatine », « Berbérine », « Lactobacillus »
+  kind: TreatmentKind;
+  dose?: string; // ex. « 500 mg »
+  frequency?: string; // ex. « 2× / jour »
+  startDate: string; // ISO jour
+  endDate?: string; // ISO jour — vide = en cours
+  notes?: string;
+}
+
+// ---- Protocole FODMAP : tests de réintroduction ----
+
+/** Groupe FODMAP testé (les 5 groupes suivis + « autre »). */
+export type ReintroGroup = keyof FodmapGroups | 'autre';
+
+export type ReintroResult = 'en_cours' | 'tolere' | 'partiel' | 'non_tolere' | 'abandonne';
+
+/** Une étape de dose d'un test de réintroduction + la réaction observée. */
+export interface ReintroDose {
+  label: string; // ex. « Jour 1 : ¼ d'avocat »
+  severity: Intensity; // réaction (absent → sévère)
+}
+
+/** Un test de réintroduction d'un aliment représentatif d'un groupe FODMAP. */
+export interface ReintroChallenge {
+  id: string;
+  foodName: string; // aliment testé (ex. « Miel » pour le fructose)
+  group: ReintroGroup;
+  startDate: string; // ISO jour
+  endDate?: string; // ISO jour
+  result: ReintroResult;
+  doses?: ReintroDose[];
+  notes?: string;
+}

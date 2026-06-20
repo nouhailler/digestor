@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-126%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-130%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -47,7 +47,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   d'aide. Sauvegarde auto.
 - 🗓️ **Semaine** — **agenda cliquable** des 7 jours (couleur = qualité, clic → ouvre le jour) +
   récapitulatif calculé en direct (jours difficiles, ballonnements sévères, diarrhée, jours sans sucre
-  ajouté, hydratation moyenne, score énergie) + **corrélations** aliment → symptôme.
+  ajouté, hydratation moyenne, score énergie) + **corrélations** aliment → symptôme. **Corrélations
+  personnalisées** calculées sur tout l'historique : déclencheurs suspectés (taux de symptôme les jours
+  « avec » vs « sans ») et aliments fréquents bien tolérés — détection conservatrice, jamais inventée.
 - 📈 **Évolution** — graphes (sévérité par jour, hydratation vs cible 1,5 L, catégories d'aliments,
   top symptômes) sur semaine / 4 semaines / tout.
 - 🍎 **Aliments** *(IA, optionnel)* — analyse FODMAP (global + par groupe), verdicts SIBO & candidose,
@@ -76,6 +78,11 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   un indicateur global dans l'en-tête (sablier + secondes, puis ✓ vert) montre l'activité en cours.
 - 👤 **Profil santé** — âge, sexe, conditions, phase FODMAP, intolérances, allergies, antécédents,
   médicaments (champs facultatifs) ; pris en compte par l'IA (allergies signalées en priorité).
+- 💊 **Traitements & compléments** — suivez vos cures (antifongiques, antibiotiques, probiotiques,
+  phytothérapie, compléments…) avec dose, fréquence et dates (en cours / terminé) ; reprises dans le
+  dossier médical.
+- 🧪 **Réintroductions FODMAP** — testez **un aliment d'un groupe à la fois**, notez le verdict
+  (toléré / limité / non toléré) et un journal des doses : l'outil de la phase de réintroduction.
 - 🎙️ **Entrer un repas (voix → JSON)** — dictez votre journée à Claude Web, collez le JSON généré
   (repas + fiches FODMAP + symptômes + transit). Voir [`docs/claude-web-repas-prompt.md`](./docs/claude-web-repas-prompt.md).
 - 🩺 **Dossier médical** *(imprimable)* — synthèse complète du journal (profil santé, période couverte,

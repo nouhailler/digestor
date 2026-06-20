@@ -1,10 +1,12 @@
 import { useRef, useState } from 'react';
 import {
   FileText,
+  FlaskConical,
   GraduationCap,
   Info,
   Mic,
   Moon,
+  Pill,
   RotateCcw,
   Save,
   Sparkles,
@@ -29,6 +31,8 @@ interface MenuSheetProps {
   onReplayOnboarding: () => void;
   onOpenImportMeals: () => void;
   onOpenMedicalRecord: () => void;
+  onOpenTreatments: () => void;
+  onOpenReintro: () => void;
 }
 
 export function MenuSheet({
@@ -40,6 +44,8 @@ export function MenuSheet({
   onReplayOnboarding,
   onOpenImportMeals,
   onOpenMedicalRecord,
+  onOpenTreatments,
+  onOpenReintro,
 }: MenuSheetProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
@@ -105,6 +111,28 @@ export function MenuSheet({
           className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
         >
           <UserCog size={16} className="text-muted" /> Profil santé (intolérances, allergies…)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            onOpenTreatments();
+          }}
+          className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
+        >
+          <Pill size={16} className="text-muted" /> Traitements & compléments
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            onOpenReintro();
+          }}
+          className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
+        >
+          <FlaskConical size={16} className="text-muted" /> Réintroductions FODMAP
         </button>
 
         {/* Apparence : thème sombre (défaut) ou clair */}

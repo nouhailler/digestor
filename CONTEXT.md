@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.9.19 (dossier médical imprimable, aliments favoris — proposés en tête + scan auto-favori, scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 126 tests)
+## État actuel — v0.10.0 (suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris — proposés en tête + scan auto-favori, scan de produit par code-barres, quantités d'aliments — cuillères/poids, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 130 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,30 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.10.0 — traitements, réintroductions FODMAP & corrélations personnalisées (Tier 1)
+
+Trois fonctionnalités cliniques majeures (cf. brainstorming « Tier 1 »).
+
+- **Suivi des traitements & compléments** : type `Treatment` + table Dexie **v7 `treatments`** + CRUD +
+  hook `useTreatments`. `lib/treatments.ts` (8 types : antifongique, antibiotique, probiotique,
+  prébiotique, complément, phytothérapie, médicament, autre ; `isTreatmentActive`, tri en cours
+  d'abord). `components/TreatmentsSheet.tsx` (menu, sous Profil santé) : ajout/édition/suppression,
+  « marquer terminé », dose / fréquence / dates / notes.
+- **Réintroductions FODMAP** : types `ReintroChallenge` / `ReintroDose` + table **v7
+  `reintroChallenges`** + CRUD + hook `useReintroChallenges`. `lib/reintro.ts` (groupes FODMAP +
+  « autre », verdicts toléré / partiel / non toléré / abandonné / en cours avec couleurs, tri).
+  `components/ReintroSheet.tsx` : aliment testé, groupe, verdict, **journal des doses** (étape +
+  réaction colorée), notes.
+- **Corrélations personnalisées (données réelles)** : `lib/personalCorrelations.ts` (pur, testé) —
+  pour chaque aliment assez fréquent, taux de symptôme « les jours avec » vs « sans », **déclencheurs
+  suspectés** (seuils conservateurs, respecte la règle d'honnêteté) + **aliments fréquents bien
+  tolérés**. Affiché dans **Semaine** (sur tout l'historique) et dans le **Dossier médical**.
+- **Intégrations** : export/import JSON **v7** + `clearAll` couvrent les deux nouvelles tables ;
+  `buildMedicalRecord(days, profile, insights, treatments, reintro)` ajoute 3 sections (traitements,
+  réintroductions, corrélations personnalisées).
+- Tests : `personalCorrelations.test.ts` (seuils, déclencheur net, aliment rare, aliments tolérés).
+  Total **130 tests**.
 
 ## v0.9.19 — dossier médical imprimable
 

@@ -10,6 +10,8 @@ import { HelpSheet } from './components/HelpSheet';
 import { Onboarding } from './components/Onboarding';
 import { ImportMealsSheet } from './components/ImportMealsSheet';
 import { MedicalRecordSheet } from './components/MedicalRecordSheet';
+import { TreatmentsSheet } from './components/TreatmentsSheet';
+import { ReintroSheet } from './components/ReintroSheet';
 import { BackupReminder } from './components/BackupReminder';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { JournalView } from './views/JournalView';
@@ -40,6 +42,8 @@ export default function App() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [importMealsOpen, setImportMealsOpen] = useState(false);
   const [medicalRecordOpen, setMedicalRecordOpen] = useState(false);
+  const [treatmentsOpen, setTreatmentsOpen] = useState(false);
+  const [reintroOpen, setReintroOpen] = useState(false);
   const { profile } = useProfile();
 
   useEffect(() => {
@@ -126,9 +130,13 @@ export default function App() {
         onReplayOnboarding={() => setShowOnboarding(true)}
         onOpenImportMeals={() => setImportMealsOpen(true)}
         onOpenMedicalRecord={() => setMedicalRecordOpen(true)}
+        onOpenTreatments={() => setTreatmentsOpen(true)}
+        onOpenReintro={() => setReintroOpen(true)}
       />
       <AboutSheet open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <MedicalRecordSheet open={medicalRecordOpen} onClose={() => setMedicalRecordOpen(false)} />
+      <TreatmentsSheet open={treatmentsOpen} onClose={() => setTreatmentsOpen(false)} />
+      <ReintroSheet open={reintroOpen} onClose={() => setReintroOpen(false)} />
       <AiSettingsSheet open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />
       <ProfileSheet open={profileOpen} onClose={() => setProfileOpen(false)} />
       <HelpSheet open={helpOpen} tab={tab} onClose={() => setHelpOpen(false)} />

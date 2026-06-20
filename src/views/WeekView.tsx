@@ -1,9 +1,12 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { addWeeks } from 'date-fns';
+import { useLiveQuery } from 'dexie-react-hooks';
 import type { DayEntry } from '../types';
 import { useDays } from '../hooks/useDays';
+import { getAllDays } from '../lib/db';
 import { computeWeekStats, dayHasContent, effectiveDaySymptoms } from '../lib/aggregates';
 import { detectCorrelations, type CorrelationLevel } from '../lib/correlations';
+import { personalCorrelations } from '../lib/personalCorrelations';
 import { suggestDayQuality } from '../lib/quality';
 import { SYMPTOM_ORDER } from '../lib/constants';
 import {
@@ -51,12 +54,14 @@ function countActiveSymptoms(day: DayEntry): number {
 export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
   const dates = weekDays(fromISODate(date));
   const days = useDays(dates);
+  const allDays = useLiveQuery(() => getAllDays(), []);
   const goWeek = (d: number) => onDateChange(toISODate(addWeeks(fromISODate(date), d)));
 
   if (!days) return <Loading />;
 
   const stats = computeWeekStats(days);
   const correlations = detectCorrelations(days);
+  const personal = personalCorrelations(allDays ?? []);
   const today = todayISO();
 
   return (
@@ -148,6 +153,68 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
               </li>
             ))}
           </ul>
+        )}
+      </div>
+
+      {/* Corrélations personnalisées : sur tout l'historique, à partir des données réelles */}
+      <div className="mt-6 rounded-2xl border border-border bg-surface p-5">
+        <h3 className="text-base font-semibold text-ink">Corrélations personnalisées</h3>
+        <p className="mb-3 text-xs text-muted">
+          Calculées sur l'ensemble de votre journal ({personal.analyzedDays} jour
+          {personal.analyzedDays > 1 ? 's' : ''} renseigné{personal.analyzedDays > 1 ? 's' : ''}).
+        </p>
+        {!personal.enoughData ? (
+          <p className="text-sm text-muted">
+            Pas encore assez de données pour une analyse fiable — continuez à remplir le journal.
+          </p>
+        ) : (
+          <div className="space-y-4 text-sm">
+            <div>
+              <p className="mb-1.5 font-medium text-ink">Déclencheurs suspectés</p>
+              {personal.triggers.length === 0 ? (
+                <p className="text-muted">
+                  Aucun déclencheur net détecté sur {personal.analyzedFoods} aliment
+                  {personal.analyzedFoods > 1 ? 's' : ''} fréquent{personal.analyzedFoods > 1 ? 's' : ''}.
+                </p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {personal.triggers.map((t, i) => (
+                    <li key={i} className="flex items-start gap-2.5 text-ink">
+                      <span
+                        className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: 'var(--color-severe)' }}
+                      />
+                      <span>
+                        <strong>{t.food}</strong> → {t.symptomLabel} :{' '}
+                        {Math.round(t.rateWith * 100)} % des jours avec{' '}
+                        <span className="text-muted">vs {Math.round(t.rateWithout * 100)} % sans</span>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {personal.safeFoods.length > 0 && (
+              <div>
+                <p className="mb-1.5 font-medium text-ink">Aliments fréquents bien tolérés</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {personal.safeFoods.map((f) => (
+                    <span
+                      key={f.food}
+                      className="rounded-full border px-2.5 py-1 text-xs"
+                      style={{ color: 'var(--color-leger)', borderColor: 'var(--color-leger)' }}
+                      title={`${f.daysEaten} jours, ${Math.round(f.symptomDayRate * 100)} % à symptômes`}
+                    >
+                      {f.food}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <p className="text-xs text-muted">
+              Détection conservatrice (association le même jour). Indications à confirmer, pas un diagnostic.
+            </p>
+          </div>
         )}
       </div>
     </div>

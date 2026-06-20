@@ -4,6 +4,23 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.10.0] — Traitements, réintroductions FODMAP & corrélations personnalisées
+
+Trois fonctionnalités cliniques majeures pour le suivi candidose / SIBO / SII.
+
+- **Suivi des traitements & compléments** (menu, sous Profil santé) : enregistrez vos cures
+  (antifongiques, antibiotiques, probiotiques, phytothérapie, compléments…) avec dose, fréquence et
+  dates. Statut « en cours / terminé », édition, suppression. Repris dans le dossier médical.
+- **Réintroductions FODMAP** (menu) : testez **un aliment d'un groupe à la fois**, notez le verdict
+  (toléré / toléré en quantité limitée / non toléré / abandonné) et un **journal des doses** (étape +
+  réaction). Pour la phase de réintroduction du protocole low-FODMAP.
+- **Corrélations personnalisées** (Semaine + dossier médical) : déclencheurs suspectés et aliments
+  bien tolérés **calculés sur vos données réelles** (taux de symptôme les jours « avec » vs « sans »),
+  avec une détection volontairement conservatrice (rien sous le seuil d'échantillon).
+- **Données** : nouvelles tables Dexie `treatments` et `reintroChallenges` (export/import JSON v7).
+  `lib/personalCorrelations.ts`, `lib/treatments.ts`, `lib/reintro.ts`, `TreatmentsSheet`,
+  `ReintroSheet`, hooks dédiés. **130 tests.**
+
 ## [0.9.19] — Dossier médical imprimable
 
 - **Dossier médical** (menu ⋯, entre « Revoir le tutoriel » et « À propos ») : synthèse complète de

@@ -9,7 +9,9 @@ import type {
   MealSuggestionSet,
   OrganInfo,
   Profile,
+  ReintroChallenge,
   SymptomInfo,
+  Treatment,
 } from '../types';
 import { dayHasContent } from './aggregates';
 import { normalize } from './foodClassifier';
@@ -29,6 +31,8 @@ class DigestorDB extends Dexie {
   symptomNotes!: Table<SymptomInfo, string>; // clé primaire = nom normalisé
   organNotes!: Table<OrganInfo, string>; // clé primaire = id d'organe
   favorites!: Table<FavoriteFood, string>; // clé primaire = nom normalisé
+  treatments!: Table<Treatment, string>; // clé primaire = id
+  reintroChallenges!: Table<ReintroChallenge, string>; // clé primaire = id
 
   constructor() {
     super('digestor');
@@ -77,6 +81,19 @@ class DigestorDB extends Dexie {
       symptomNotes: '&key',
       organNotes: '&key',
       favorites: '&key, name',
+    });
+    // v7 : suivi des traitements/compléments + tests de réintroduction FODMAP.
+    // `startDate` indexé pour l'ordre chronologique.
+    this.version(7).stores({
+      days: '&date',
+      meta: '&key',
+      foodInsights: '&key, name',
+      dayAnalyses: '&date',
+      symptomNotes: '&key',
+      organNotes: '&key',
+      favorites: '&key, name',
+      treatments: '&id, startDate',
+      reintroChallenges: '&id, startDate',
     });
   }
 }
@@ -247,6 +264,34 @@ export async function toggleFavorite(name: string): Promise<void> {
   else await addFavorite(name);
 }
 
+// ---- Traitements & compléments ----
+
+export async function getAllTreatments(): Promise<Treatment[]> {
+  return db.treatments.orderBy('startDate').reverse().toArray();
+}
+
+export async function putTreatment(t: Treatment): Promise<void> {
+  await db.treatments.put(t);
+}
+
+export async function deleteTreatment(id: string): Promise<void> {
+  await db.treatments.delete(id);
+}
+
+// ---- Tests de réintroduction FODMAP ----
+
+export async function getAllReintroChallenges(): Promise<ReintroChallenge[]> {
+  return db.reintroChallenges.orderBy('startDate').reverse().toArray();
+}
+
+export async function putReintroChallenge(c: ReintroChallenge): Promise<void> {
+  await db.reintroChallenges.put(c);
+}
+
+export async function deleteReintroChallenge(id: string): Promise<void> {
+  await db.reintroChallenges.delete(id);
+}
+
 export async function getDay(date: string): Promise<DayEntry | undefined> {
   return db.days.get(date);
 }
@@ -278,7 +323,7 @@ export async function getLatestActiveDate(): Promise<string | undefined> {
 
 export interface ExportPayload {
   app: 'digestor';
-  version: 1 | 2 | 3 | 4 | 5 | 6;
+  version: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   exportedAt: string;
   profile: Profile;
   days: DayEntry[];
@@ -287,6 +332,8 @@ export interface ExportPayload {
   symptomNotes?: SymptomInfo[]; // depuis v4 (fiches de symptômes)
   organNotes?: OrganInfo[]; // depuis v5 (approfondissements d'organes)
   favorites?: FavoriteFood[]; // depuis v6 (aliments favoris)
+  treatments?: Treatment[]; // depuis v7 (traitements & compléments)
+  reintroChallenges?: ReintroChallenge[]; // depuis v7 (réintroductions FODMAP)
   mealSuggestions?: MealSuggestionSet; // depuis v4
   encyclopediaExtra?: EncyclopediaExtra; // depuis v4
   // Réglages non sensibles (depuis v4). La CLÉ API n'y figure jamais (secret).
@@ -297,7 +344,7 @@ export async function exportAll(): Promise<ExportPayload> {
   const aiConfig = await getAiConfig();
   return {
     app: 'digestor',
-    version: 6,
+    version: 7,
     exportedAt: new Date().toISOString(),
     profile: await getProfile(),
     days: await getAllDays(),
@@ -306,6 +353,8 @@ export async function exportAll(): Promise<ExportPayload> {
     symptomNotes: await getAllSymptomInfos(),
     organNotes: await getAllOrganInfos(),
     favorites: await getAllFavorites(),
+    treatments: await getAllTreatments(),
+    reintroChallenges: await getAllReintroChallenges(),
     mealSuggestions: await getMealSuggestions(),
     encyclopediaExtra: await getEncyclopediaExtra(),
     // Réglages sans secret : on conserve le modèle choisi, pas la clé.
@@ -319,7 +368,17 @@ export async function importAll(payload: ExportPayload): Promise<void> {
   }
   await db.transaction(
     'rw',
-    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes, db.favorites],
+    [
+      db.days,
+      db.meta,
+      db.foodInsights,
+      db.dayAnalyses,
+      db.symptomNotes,
+      db.organNotes,
+      db.favorites,
+      db.treatments,
+      db.reintroChallenges,
+    ],
     async () => {
       await db.days.clear();
       await db.days.bulkPut(payload.days);
@@ -338,6 +397,12 @@ export async function importAll(payload: ExportPayload): Promise<void> {
 
     await db.favorites.clear();
     if (Array.isArray(payload.favorites)) await db.favorites.bulkPut(payload.favorites);
+
+    await db.treatments.clear();
+    if (Array.isArray(payload.treatments)) await db.treatments.bulkPut(payload.treatments);
+
+    await db.reintroChallenges.clear();
+    if (Array.isArray(payload.reintroChallenges)) await db.reintroChallenges.bulkPut(payload.reintroChallenges);
 
     if (payload.profile) await setProfile(payload.profile);
     if (payload.mealSuggestions) await setMealSuggestions(payload.mealSuggestions);
@@ -360,7 +425,17 @@ export async function importAll(payload: ExportPayload): Promise<void> {
 export async function clearAll(): Promise<void> {
   await db.transaction(
     'rw',
-    [db.days, db.meta, db.foodInsights, db.dayAnalyses, db.symptomNotes, db.organNotes, db.favorites],
+    [
+      db.days,
+      db.meta,
+      db.foodInsights,
+      db.dayAnalyses,
+      db.symptomNotes,
+      db.organNotes,
+      db.favorites,
+      db.treatments,
+      db.reintroChallenges,
+    ],
     async () => {
       await db.days.clear();
       await db.foodInsights.clear();
@@ -368,6 +443,8 @@ export async function clearAll(): Promise<void> {
       await db.symptomNotes.clear();
       await db.organNotes.clear();
       await db.favorites.clear();
+      await db.treatments.clear();
+      await db.reintroChallenges.clear();
       await db.meta.clear();
     },
   );

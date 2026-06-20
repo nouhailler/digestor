@@ -19,10 +19,10 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 126 tests : `foodClassifier`, `dates`,
-`quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `aggregates`, `correlations`,
-`ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
-`TipBanner`, … `npm run build` typecheck aussi les tests.
+et appellent `afterEach(cleanup)` localement (pas de setup global). 130 tests : `foodClassifier`, `dates`,
+`quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
+`aggregates`, `correlations`, `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`,
+`SymptomGrid`, `MultiChipSelect`, `TipBanner`, … `npm run build` typecheck aussi les tests.
 
 `tsconfig.app.json` active `strict`, `noUnusedLocals`, `noUnusedParameters` :
 les imports/variables inutilisés **cassent le build**.
@@ -44,6 +44,8 @@ src/
     useDayAnalysis.ts    # analyse IA d'une journée (clé = date) + cache
     useMealSuggestions.ts# suggestions de repas IA (cache meta)
     useFavorites.ts      # aliments favoris en live (table favorites)
+    useTreatments.ts     # traitements & compléments en live (table treatments)
+    useReintroChallenges.ts # tests de réintroduction FODMAP en live (table reintroChallenges)
   lib/                # logique métier pure (testable, sans React)
     constants.ts      # ordres, libellés, couleurs, cycles
     dates.ts          # semaine lundi→dimanche, labels fr
@@ -53,9 +55,12 @@ src/
     quantity.ts       # unités de portion (càc/càs/g…), format + parsing tolérant (import)
     foodSuggestions.ts# suggestions d'aliments (favoris d'abord) pour l'ajout à un repas
     medicalRecord.ts  # buildMedicalRecord : synthèse complète du journal (dossier médical imprimable)
+    personalCorrelations.ts # corrélations aliment→symptôme calculées sur les données réelles (déclencheurs / aliments sûrs)
+    treatments.ts     # libellés/types de traitements & compléments + helpers (actif, tri)
+    reintro.ts        # libellés groupes/verdicts FODMAP + tri (tests de réintroduction)
     aggregates.ts     # stats hebdo + séries pour graphes
     correlations.ts   # détection heuristique aliment → symptôme
-    db.ts             # Dexie v6 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites, export/import, config IA
+    db.ts             # Dexie v7 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites/treatments/reintroChallenges, export/import, config IA
     encyclopedia.ts   # socle statique des symptômes digestifs (catégorisé) — Repères
     aggregates.ts     # (+ dayHasContent / latestActiveDate, réutilisés par db.ts)
     seed.ts           # données démo Lundi/Mardi conformes aux maquettes
@@ -74,7 +79,8 @@ src/
       insightFormat.ts# libellés/couleurs FODMAP & verdicts
   components/         # UI réutilisable (Chip, SymptomGrid, DayCard, MultiChipSelect, ProfileSheet,
                       #   HelpSheet, TipBanner, Onboarding, ImportMealsSheet, ScanProductSheet,
-                      #   MedicalRecordSheet [dossier médical imprimable], …)
+                      #   MedicalRecordSheet [dossier médical imprimable],
+                      #   TreatmentsSheet, ReintroSheet, …)
     ai/               # AiSettingsSheet, FoodInsightCard, FoodInsightSheet
   views/              # un écran par onglet (Journal/Aliments/Week/Evolution/Reperes)
 ```

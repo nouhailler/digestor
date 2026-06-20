@@ -7,6 +7,8 @@ import { buildMedicalRecord } from '../lib/medicalRecord';
 import { getAllDays } from '../lib/db';
 import { useFoodInsightMap } from '../hooks/useFoodInsightMap';
 import { useProfile } from '../hooks/useProfile';
+import { useTreatments } from '../hooks/useTreatments';
+import { useReintroChallenges } from '../hooks/useReintroChallenges';
 import {
   CATEGORY_COLOR,
   CATEGORY_LABEL,
@@ -15,7 +17,9 @@ import {
   INTENSITY_LABEL,
 } from '../lib/constants';
 import { FODMAP_PHASE_LABEL, SEX_LABEL } from '../lib/profile';
-import { dateLabel, dayLongLabel } from '../lib/dates';
+import { TREATMENT_KIND_LABEL, isTreatmentActive } from '../lib/treatments';
+import { REINTRO_GROUP_LABEL, REINTRO_RESULT_COLOR, REINTRO_RESULT_LABEL } from '../lib/reintro';
+import { dateLabel, dayLongLabel, todayISO } from '../lib/dates';
 
 const CORRELATION_COLOR: Record<CorrelationLevel, string> = {
   defavorable: 'var(--color-severe)',
@@ -37,7 +41,12 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
   const days = useLiveQuery(() => getAllDays(), []);
   const insights = useFoodInsightMap();
   const { profile } = useProfile();
-  const record = useMemo(() => buildMedicalRecord(days ?? [], profile, insights), [days, profile, insights]);
+  const treatments = useTreatments();
+  const reintro = useReintroChallenges();
+  const record = useMemo(
+    () => buildMedicalRecord(days ?? [], profile, insights, treatments, reintro),
+    [days, profile, insights, treatments, reintro],
+  );
 
   if (!open) return null;
 
@@ -140,6 +149,60 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
               </dl>
             </Section>
 
+            {/* 1b. Traitements & compléments */}
+            {record.treatments.length > 0 && (
+              <Section title="Traitements & compléments">
+                <ul className="space-y-1.5">
+                  {record.treatments.map((t) => (
+                    <li key={t.id} className="flex items-start gap-2">
+                      <Dot color={isTreatmentActive(t, todayISO()) ? 'var(--color-leger)' : 'var(--color-absent)'} />
+                      <span>
+                        <strong className="text-ink">{t.name}</strong>{' '}
+                        <span className="text-muted">({TREATMENT_KIND_LABEL[t.kind]})</span>
+                        {(t.dose || t.frequency) && (
+                          <span className="text-muted"> — {[t.dose, t.frequency].filter(Boolean).join(' · ')}</span>
+                        )}
+                        <span className="text-muted">
+                          {' · '}
+                          {dateLabel(t.startDate)}
+                          {t.endDate ? ` → ${dateLabel(t.endDate)}` : ' → en cours'}
+                        </span>
+                        {t.notes && <span className="text-muted"> — {t.notes}</span>}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            )}
+
+            {/* 1c. Réintroductions FODMAP */}
+            {record.reintro.length > 0 && (
+              <Section title="Réintroductions FODMAP">
+                <ul className="space-y-2">
+                  {record.reintro.map((c) => (
+                    <li key={c.id}>
+                      <p>
+                        <strong className="text-ink">{c.foodName}</strong>{' '}
+                        <span className="text-muted">({REINTRO_GROUP_LABEL[c.group]})</span>{' '}
+                        <span style={{ color: REINTRO_RESULT_COLOR[c.result] }}>— {REINTRO_RESULT_LABEL[c.result]}</span>
+                        <span className="text-muted"> · débuté le {dateLabel(c.startDate)}</span>
+                      </p>
+                      {c.doses?.length ? (
+                        <ul className="ml-4 list-disc text-muted">
+                          {c.doses.map((d, i) => (
+                            <li key={i}>
+                              <span className="text-ink">{d.label}</span> ({INTENSITY_LABEL[d.severity].toLowerCase()})
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                      {c.notes && <p className="text-muted">{c.notes}</p>}
+                    </li>
+                  ))}
+                </ul>
+              </Section>
+            )}
+
             {/* 2. Synthèse des symptômes */}
             <Section title="Synthèse des symptômes">
               {record.symptomStats.length === 0 ? (
@@ -238,6 +301,54 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
                     </li>
                   ))}
                 </ul>
+              )}
+            </Section>
+
+            {/* 5b. Corrélations personnalisées (données réelles) */}
+            <Section title="Corrélations personnalisées (vos données)">
+              {!record.personal.enoughData ? (
+                <p className="text-muted">
+                  Pas encore assez de jours renseignés ({record.personal.analyzedDays}) pour une analyse fiable.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  <div>
+                    <p className="font-medium text-ink">Déclencheurs suspectés</p>
+                    {record.personal.triggers.length === 0 ? (
+                      <p className="text-muted">
+                        Aucun déclencheur net détecté sur {record.personal.analyzedFoods} aliment
+                        {record.personal.analyzedFoods > 1 ? 's' : ''} assez fréquent
+                        {record.personal.analyzedFoods > 1 ? 's' : ''}.
+                      </p>
+                    ) : (
+                      <ul className="mt-1 space-y-1">
+                        {record.personal.triggers.map((t, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Dot color="var(--color-severe)" />
+                            <span>
+                              <strong className="text-ink">{t.food}</strong> → {t.symptomLabel} :{' '}
+                              <span className="text-ink">{Math.round(t.rateWith * 100)} %</span> des jours avec (
+                              {t.daysSymptomWithFood}/{t.daysWithFood}){' '}
+                              <span className="text-muted">vs {Math.round(t.rateWithout * 100)} % sans</span>
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                  {record.personal.safeFoods.length > 0 && (
+                    <div>
+                      <p className="font-medium text-ink">Aliments fréquents bien tolérés</p>
+                      <p className="text-muted">
+                        {record.personal.safeFoods.map((f) => `${f.food} (${f.daysEaten} j)`).join(', ')}.
+                      </p>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted">
+                    Détection conservatrice sur {record.personal.analyzedDays} jours (association le même jour) —
+                    à confirmer médicalement, ce ne sont pas des certitudes.
+                  </p>
+                </div>
               )}
             </Section>
 

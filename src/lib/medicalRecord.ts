@@ -6,15 +6,20 @@ import type {
   FoodInsight,
   Intensity,
   Profile,
+  ReintroChallenge,
   Stool,
   SymptomKey,
+  Treatment,
 } from '../types';
 import { INTENSITY_WEIGHT, STOOL_OPTIONS, SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
 import { dayHasContent, effectiveDaySymptoms } from './aggregates';
 import { detectCorrelations, type Correlation } from './correlations';
+import { personalCorrelations, type PersonalCorrelations } from './personalCorrelations';
+import { sortTreatments } from './treatments';
+import { sortReintro } from './reintro';
 import { normalize } from './foodClassifier';
 import { formatQuantity } from './quantity';
-import { fromISODate } from './dates';
+import { fromISODate, todayISO } from './dates';
 
 export interface SymptomStat {
   key: SymptomKey;
@@ -83,7 +88,10 @@ export interface MedicalRecord {
   bristol: BristolStat[]; // répartition des selles (échelle de Bristol)
   avgHydrationL: number | null;
   stoolDays: number; // jours avec une selle renseignée
-  correlations: Correlation[];
+  correlations: Correlation[]; // heuristiques (motifs connus)
+  personal: PersonalCorrelations; // corrélations calculées sur les données réelles
+  treatments: Treatment[]; // traitements & compléments (en cours d'abord)
+  reintro: ReintroChallenge[]; // tests de réintroduction FODMAP
   days: RecordDay[]; // détail chronologique des jours renseignés
 }
 
@@ -110,6 +118,8 @@ export function buildMedicalRecord(
   allDays: DayEntry[],
   profile: Profile | undefined,
   insights?: Map<string, FoodInsight>,
+  treatments: Treatment[] = [],
+  reintro: ReintroChallenge[] = [],
 ): MedicalRecord {
   const recorded = allDays.filter(dayHasContent).sort((a, b) => a.date.localeCompare(b.date));
   const from = recorded[0]?.date;
@@ -219,6 +229,9 @@ export function buildMedicalRecord(
     avgHydrationL: hydrationN > 0 ? hydrationSum / hydrationN : null,
     stoolDays,
     correlations: detectCorrelations(recorded),
+    personal: personalCorrelations(recorded),
+    treatments: sortTreatments(treatments, todayISO()),
+    reintro: sortReintro(reintro),
     days,
   };
 }
