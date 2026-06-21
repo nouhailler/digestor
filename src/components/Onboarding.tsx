@@ -7,6 +7,7 @@ import {
   LineChart,
   ShieldCheck,
   Sparkles,
+  Stethoscope,
 } from 'lucide-react';
 
 interface Step {
@@ -35,6 +36,11 @@ const STEPS: Step[] = [
     Icon: Apple,
     title: 'Analysez vos aliments (IA)',
     body: "Optionnel : avec une clé OpenRouter, l'onglet Aliments (ou un toucher sur une chip) analyse le profil FODMAP, SIBO et candidose d'un aliment. Renseignez votre profil santé pour des analyses personnalisées.",
+  },
+  {
+    Icon: Stethoscope,
+    title: 'Votre boîte à outils',
+    body: "Depuis le menu (☰) : suivez vos traitements & compléments, menez vos tests de réintroduction FODMAP, réutilisez vos modèles de repas, générez un rapport de période et un dossier médical imprimable, et fouillez votre journal. Dans Aliments, « Trouver les doublons » fait le ménage et chaque aliment peut être supprimé définitivement.",
   },
   {
     Icon: ShieldCheck,

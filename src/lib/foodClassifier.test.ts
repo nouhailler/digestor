@@ -4,6 +4,7 @@ import {
   dictionaryFoods,
   dictionarySize,
   isAddedSugarOrAlcohol,
+  looseKey,
   normalize,
 } from './foodClassifier';
 
@@ -16,6 +17,24 @@ describe('normalize', () => {
 
   it('renvoie une chaîne vide pour une saisie vide', () => {
     expect(normalize('   ')).toBe('');
+  });
+});
+
+describe('looseKey', () => {
+  it('regroupe les variantes singulier/pluriel', () => {
+    expect(looseKey('Tomate')).toBe(looseKey('Tomates'));
+    expect(looseKey('Œuf')).toBe(looseKey('Œufs'));
+    expect(looseKey('Noix')).toBe(looseKey('Noi'));
+  });
+
+  it('ne fusionne pas des aliments distincts', () => {
+    expect(looseKey('Pomme')).not.toBe(looseKey('Pomme de terre'));
+    expect(looseKey('riz')).toBe('riz'); // mot court : pas de dépliage
+  });
+
+  it('préserve les mots courts (pas de pluriel artificiel)', () => {
+    expect(looseKey('ail')).toBe('ail');
+    expect(looseKey('os')).toBe('os');
   });
 });
 

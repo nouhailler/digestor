@@ -15,6 +15,19 @@ export function normalize(s: string): string {
 }
 
 /**
+ * Clé « relâchée » pour repérer les quasi-doublons : normalise puis déplie les
+ * pluriels (`s`/`x` final des mots de ≥ 4 lettres). « Tomate » et « Tomates »,
+ * « Œuf » et « Œufs » partagent ainsi la même clé relâchée. Sert UNIQUEMENT à
+ * grouper les doublons à l'affichage — jamais comme clé de stockage.
+ */
+export function looseKey(s: string): string {
+  return normalize(s)
+    .split(' ')
+    .map((w) => (w.length >= 4 ? w.replace(/[sx]$/, '') : w))
+    .join(' ');
+}
+
+/**
  * Dictionnaire ~80 aliments français → catégorie.
  * Les clés sont normalisées ; la correspondance accepte un match partiel
  * (le terme du dictionnaire est contenu dans la saisie, ou inversement).

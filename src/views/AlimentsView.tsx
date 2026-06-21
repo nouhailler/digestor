@@ -2,6 +2,8 @@ import { useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ChefHat,
+  Copy,
+  Eraser,
   Loader2,
   ScanLine,
   Search,
@@ -16,6 +18,7 @@ import type { FoodInsight } from '../types';
 import {
   addFavorite,
   db,
+  deleteFoodEverywhere,
   deleteFoodInsight,
   getAllFoodInsights,
   putFoodInsight,
@@ -24,7 +27,7 @@ import {
 import { CATEGORY_COLOR } from '../lib/constants';
 import { dateLabel } from '../lib/dates';
 import { FODMAP_LEVEL_COLOR, FODMAP_LEVEL_LABEL } from '../lib/ai/insightFormat';
-import { classifyFood, dictionaryFoods, normalize } from '../lib/foodClassifier';
+import { classifyFood, dictionaryFoods, looseKey, normalize } from '../lib/foodClassifier';
 import { analyzeFood } from '../lib/ai/foodInsight';
 import { runAiTask } from '../lib/ai/aiActivity';
 import { buildProfileContext } from '../lib/profile';
@@ -73,6 +76,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   const [scanOpen, setScanOpen] = useState(false);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [scope, setScope] = useState<'repas' | 'catalogue' | 'favoris'>('catalogue');
+  const [showDuplicates, setShowDuplicates] = useState(false);
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [bulkError, setBulkError] = useState<string | null>(null);
   const stopRef = useRef(false);
@@ -138,6 +142,51 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
 
   const rows = [...generating, ...baseRows.filter((r) => !generatingKeys.has(r.key))];
   const unanalyzed = rows.filter((r) => !r.insight);
+
+  // Clés présentes dans les repas du journal (pour étiqueter la provenance et
+  // savoir si une suppression doit aussi nettoyer l'historique).
+  const mealKeys = useMemo(() => new Set(mealRows.map((r) => r.key)), [mealRows]);
+
+  // Un aliment n'est supprimable « définitivement » que s'il a une trace
+  // effaçable : analyse en cache, favori, ou occurrence dans un repas. Les
+  // entrées issues uniquement du dictionnaire embarqué ne le sont pas.
+  const isDeletable = (r: FoodRow) => !!r.insight || favoriteKeys.has(r.key) || mealKeys.has(r.key);
+
+  // Étiquettes de provenance d'un aliment, pour aider à choisir lequel garder.
+  const sourceTags = (r: FoodRow): string[] => {
+    const tags: string[] = [];
+    if (mealKeys.has(r.key)) tags.push('journal');
+    if (r.insight) tags.push('analysé');
+    if (favoriteKeys.has(r.key)) tags.push('favori');
+    if (tags.length === 0) tags.push('catalogue');
+    return tags;
+  };
+
+  // Quasi-doublons de la portée courante : variantes proches (pluriel, accents,
+  // espaces) regroupées par clé relâchée. On ne garde que les groupes de ≥ 2.
+  const duplicateGroups = useMemo(() => {
+    const byLoose = new Map<string, FoodRow[]>();
+    for (const r of baseRows) {
+      const lk = looseKey(r.name);
+      if (!lk) continue;
+      const arr = byLoose.get(lk);
+      if (arr) arr.push(r);
+      else byLoose.set(lk, [r]);
+    }
+    return [...byLoose.values()]
+      .filter((g) => g.length >= 2)
+      .sort((a, b) => a[0].name.localeCompare(b[0].name, 'fr'));
+  }, [baseRows]);
+  const duplicateCount = duplicateGroups.reduce((n, g) => n + g.length, 0);
+
+  async function forgetFood(r: FoodRow) {
+    const inMeals = mealKeys.has(r.key);
+    const msg = inMeals
+      ? `Supprimer définitivement « ${r.name} » ?\n\nCela retire son analyse, son favori ET toutes ses occurrences dans vos repas du journal. Action irréversible (cela modifie l'historique).`
+      : `Supprimer définitivement « ${r.name} » ?\n\nCela retire son analyse et son favori. Action irréversible.`;
+    if (!confirm(msg)) return;
+    await deleteFoodEverywhere(r.key);
+  }
 
   // Recherche combobox : préfixe à partir de 3 lettres, sur tout le catalogue.
   const q = normalize(query);
@@ -345,7 +394,66 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
               <Wand2 size={15} /> Analyser les {unanalyzed.length} aliments non analysés
             </button>
           ))}
+        <button
+          type="button"
+          onClick={() => setShowDuplicates((v) => !v)}
+          title="Repère les aliments en double (variantes de pluriel, d'accents ou d'orthographe) pour faire le ménage."
+          className="inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium"
+          style={{
+            borderColor: showDuplicates ? 'var(--color-modere)' : 'var(--color-border)',
+            color: showDuplicates ? 'var(--color-modere)' : 'var(--color-ink)',
+            backgroundColor: showDuplicates ? 'rgba(232,161,58,0.08)' : 'var(--color-surface-2)',
+          }}
+        >
+          <Copy size={15} /> Trouver les doublons{duplicateCount > 0 ? ` (${duplicateCount})` : ''}
+        </button>
       </div>
+
+      {/* Panneau des doublons (variantes proches regroupées) */}
+      {showDuplicates && (
+        <div className="mb-5 rounded-2xl border border-border bg-surface p-4">
+          <p className="mb-3 text-sm text-muted">
+            {duplicateGroups.length === 0
+              ? `Aucun doublon repéré dans « ${scope === 'favoris' ? 'Favoris' : scope === 'catalogue' ? 'Catalogue' : 'De mes repas'} ». Les variantes proches (pluriel, accents, orthographe) seraient regroupées ici.`
+              : `${duplicateGroups.length} groupe${duplicateGroups.length > 1 ? 's' : ''} de doublons. Gardez l'entrée à conserver et supprimez les autres.`}
+          </p>
+          <ul className="space-y-3">
+            {duplicateGroups.map((group) => (
+              <li key={looseKey(group[0].name)} className="rounded-xl border border-border bg-surface-2 p-2">
+                <ul className="space-y-1.5">
+                  {group.map((r) => (
+                    <li key={r.key} className="flex items-center gap-2 rounded-lg px-2 py-1.5">
+                      <span
+                        className="inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                        style={{ backgroundColor: CATEGORY_COLOR[r.insight?.category ?? classifyFood(r.name)] }}
+                      />
+                      <button type="button" onClick={() => openInsight(r.name)} className="min-w-0 flex-1 text-left">
+                        <span className="block truncate text-ink">{r.name}</span>
+                        <span className="block truncate text-xs text-muted">{sourceTags(r).join(' · ')}</span>
+                      </button>
+                      {isDeletable(r) ? (
+                        <button
+                          type="button"
+                          onClick={() => forgetFood(r)}
+                          aria-label="Supprimer définitivement"
+                          title="Supprimer définitivement (analyse, favori et occurrences dans les repas)"
+                          className="shrink-0 text-muted hover:text-severe"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      ) : (
+                        <span className="shrink-0 text-xs text-muted" title="Entrée du dictionnaire embarqué : non supprimable">
+                          intégré
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {bulkError && (
         <p className="mb-3 rounded-lg px-3 py-2 text-sm" style={{ color: 'var(--color-severe)', background: 'rgba(240,96,106,0.08)' }}>
@@ -428,8 +536,19 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                   <button
                     type="button"
                     onClick={() => deleteFoodInsight(r.key)}
-                    aria-label="Supprimer l'analyse"
-                    title="Supprimer l'analyse en cache"
+                    aria-label="Effacer l'analyse"
+                    title="Effacer l'analyse en cache (l'aliment reste, ré-analysable)"
+                    className="shrink-0 text-muted hover:text-severe"
+                  >
+                    <Eraser size={15} />
+                  </button>
+                )}
+                {isDeletable(r) && (
+                  <button
+                    type="button"
+                    onClick={() => forgetFood(r)}
+                    aria-label="Supprimer définitivement"
+                    title="Supprimer définitivement (analyse, favori et occurrences dans les repas)"
                     className="shrink-0 text-muted hover:text-severe"
                   >
                     <Trash2 size={15} />

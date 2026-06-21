@@ -185,6 +185,34 @@ export async function deleteFoodInsight(key: string): Promise<void> {
   await db.foodInsights.delete(key);
 }
 
+/**
+ * Supprime DÉFINITIVEMENT un aliment : son analyse en cache, son favori, et
+ * toutes ses occurrences dans les repas du journal (comparaison sur clé
+ * normalisée). N'affecte pas le dictionnaire embarqué (statique). Renvoie le
+ * nombre de jours dont les repas ont été modifiés.
+ */
+export async function deleteFoodEverywhere(key: string): Promise<{ daysTouched: number }> {
+  if (!key) return { daysTouched: 0 };
+  await db.foodInsights.delete(key);
+  await db.favorites.delete(key);
+  let daysTouched = 0;
+  const days = await db.days.toArray();
+  for (const day of days) {
+    let changed = false;
+    const meals = day.meals.map((m) => {
+      const foods = m.foods.filter((f) => normalize(f.name) !== key);
+      if (foods.length === m.foods.length) return m;
+      changed = true;
+      return { ...m, foods };
+    });
+    if (changed) {
+      await db.days.put({ ...day, meals });
+      daysTouched++;
+    }
+  }
+  return { daysTouched };
+}
+
 // ---- Analyse IA d'une journée ----
 
 export async function getDayAnalysis(date: string): Promise<DayAnalysis | undefined> {
