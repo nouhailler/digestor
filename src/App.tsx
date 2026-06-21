@@ -34,6 +34,7 @@ import { fromISODate, todayISO, weekLabel } from './lib/dates';
 
 export default function App() {
   const [ready, setReady] = useState(false);
+  const [startupError, setStartupError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>('journal');
   const [date, setDate] = useState<string>(todayISO());
   const [menuOpen, setMenuOpen] = useState(false);
@@ -54,12 +55,20 @@ export default function App() {
     // Demande un stockage persistant (limite l'éviction auto, surtout iOS).
     void ensurePersistentStorage();
     (async () => {
-      const wasEmpty = await isEmpty();
-      await seedIfEmpty();
-      // Au tout premier lancement, ouvrir sur le rendu de référence (semaine seed).
-      if (wasEmpty) setDate(SEED_DAYS[0].date);
-      setShowOnboarding(!(await isOnboardingDone()));
-      setReady(true);
+      try {
+        const wasEmpty = await isEmpty();
+        await seedIfEmpty();
+        // Au tout premier lancement, ouvrir sur le rendu de référence (semaine seed).
+        if (wasEmpty) setDate(SEED_DAYS[0].date);
+        setShowOnboarding(!(await isOnboardingDone()));
+      } catch (err) {
+        // Ne jamais figer sur l'écran de chargement : on affiche l'erreur et on
+        // laisse l'app se rendre (les données restent dans IndexedDB).
+        console.error('Échec du démarrage de Digestor :', err);
+        setStartupError(err instanceof Error ? `${err.name}: ${err.message}` : String(err));
+      } finally {
+        setReady(true);
+      }
     })();
   }, []);
 
@@ -79,6 +88,14 @@ export default function App() {
   return (
     <div className="min-h-full">
       <Legend title={title} onMenu={() => setMenuOpen(true)} onHelp={() => setHelpOpen(true)} />
+
+      {startupError && (
+        <div className="mx-auto max-w-3xl px-4 pt-3">
+          <div className="rounded-lg border border-severe/40 bg-severe/10 px-3 py-2 text-sm text-severe">
+            Un problème est survenu au démarrage (tes données restent en sécurité). Détail : {startupError}
+          </div>
+        </div>
+      )}
 
       <div className="px-4">
         <BackupReminder />
