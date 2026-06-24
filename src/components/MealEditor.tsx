@@ -36,6 +36,8 @@ interface MealEditorProps {
   onSymptomInfo?: (key: SymptomKey) => void;
   /** Aliments déjà saisis ailleurs : proposés en autocomplétion (anti-doublon). */
   knownFoods?: string[];
+  /** Aliments consommés récemment (aujourd'hui/hier/avant-hier) : proposés en tête. */
+  recentFoods?: string[];
   /** Noms des aliments favoris : proposés en tête des suggestions. */
   favorites?: string[];
   /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
@@ -45,7 +47,7 @@ interface MealEditorProps {
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], favorites = [], insights, onSaveAsTemplate }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], recentFoods = [], favorites = [], insights, onSaveAsTemplate }: MealEditorProps) {
   const [draft, setDraft] = useState('');
   // Saisie d'aliment focalisée : permet d'afficher les favoris (ajout rapide) tant
   // que rien n'est tapé, sans laisser la liste ouverte au rendu initial.
@@ -80,10 +82,11 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
         query: draft,
         favorites,
         knownFoods,
+        recent: recentFoods,
         exclude: new Set(meal.foods.map((f) => normalize(f.name))),
         limit: MAX_SUGGESTIONS,
       }),
-    [draft, favorites, knownFoods, meal.foods],
+    [draft, favorites, knownFoods, recentFoods, meal.foods],
   );
   // On affiche la liste seulement quand le champ a le focus (évite qu'elle reste
   // ouverte au rendu, notamment pour la liste des favoris à requête vide).

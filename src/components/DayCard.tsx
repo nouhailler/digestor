@@ -37,13 +37,15 @@ interface DayCardProps {
   onSymptomInfo?: (key: SymptomKey) => void;
   /** Aliments déjà saisis : proposés en autocomplétion (anti-doublon). */
   knownFoods?: string[];
+  /** Aliments consommés récemment (aujourd'hui/hier/avant-hier) : proposés en tête. */
+  recentFoods?: string[];
   /** Noms des aliments favoris : proposés en tête des suggestions. */
   favorites?: string[];
   /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
   insights?: Map<string, FoodInsight>;
 }
 
-export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, favorites, insights }: DayCardProps) {
+export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, recentFoods, favorites, insights }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
   const [tplOpen, setTplOpen] = useState(false);
   const templates = useMealTemplates();
@@ -139,6 +141,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
               onFoodInfo={onFoodInfo}
               onSymptomInfo={onSymptomInfo}
               knownFoods={knownFoods}
+              recentFoods={recentFoods}
               favorites={favorites}
               insights={insights}
               onSaveAsTemplate={saveMealAsTemplate}

@@ -11,6 +11,7 @@ import {
 import type { SymptomKey } from '../types';
 import { useDay } from '../hooks/useDay';
 import { useKnownFoods } from '../hooks/useKnownFoods';
+import { useRecentFoods } from '../hooks/useRecentFoods';
 import { useFavorites } from '../hooks/useFavorites';
 import { useFoodInsightMap } from '../hooks/useFoodInsightMap';
 import { DayCard } from '../components/DayCard';
@@ -32,6 +33,7 @@ interface JournalViewProps {
 export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalViewProps) {
   const { day, update } = useDay(date);
   const knownFoods = useKnownFoods();
+  const recentFoods = useRecentFoods();
   const favorites = useFavorites();
   const favoriteNames = favorites.map((f) => f.name);
   const insights = useFoodInsightMap();
@@ -86,7 +88,7 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
 
       {day ? (
         <>
-          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} onSymptomInfo={openSymptom} knownFoods={knownFoods} favorites={favoriteNames} insights={insights} />
+          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} onSymptomInfo={openSymptom} knownFoods={knownFoods} recentFoods={recentFoods} favorites={favoriteNames} insights={insights} />
           {dayHasContent(day) && (
             <button
               type="button"

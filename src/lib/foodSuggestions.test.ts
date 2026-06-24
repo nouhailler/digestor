@@ -36,6 +36,33 @@ describe('foodSuggestions', () => {
     expect(foodSuggestions({ query: 'banane', favorites, knownFoods })).toEqual([]);
   });
 
+  it('≥ 3 caractères → les aliments récents passent devant favoris et connus', () => {
+    // « Pain de mie » mangé récemment remonte avant le favori « Pain complet ».
+    const out = foodSuggestions({
+      query: 'pai',
+      favorites,
+      knownFoods,
+      recent: ['Pain de mie'],
+    });
+    expect(out).toEqual([
+      { name: 'Pain de mie', favorite: false }, // récent d'abord
+      { name: 'Pain complet', favorite: true }, // puis le favori
+    ]);
+  });
+
+  it('un récent qui est aussi favori garde son étoile et reste en tête', () => {
+    const out = foodSuggestions({
+      query: 'pai',
+      favorites,
+      knownFoods,
+      recent: ['Pain complet'],
+    });
+    expect(out).toEqual([
+      { name: 'Pain complet', favorite: true }, // récent ET favori → étoilé, en tête
+      { name: 'Pain de mie', favorite: false },
+    ]);
+  });
+
   it('exclut les aliments déjà dans le repas et respecte la limite', () => {
     const out = foodSuggestions({
       query: '',
