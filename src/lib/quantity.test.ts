@@ -14,6 +14,12 @@ describe('formatQuantity', () => {
     expect(formatQuantity({ amount: 3, unit: 'tranche' })).toBe('3 tranches');
   });
 
+  it('« nombre seul » : n’affiche que le chiffre, sans libellé', () => {
+    expect(formatQuantity({ amount: 2, unit: 'unite' })).toBe('2');
+    expect(formatQuantity({ amount: 1, unit: 'unite' })).toBe('1');
+    expect(formatQuantity({ amount: 0.5, unit: 'unite' })).toBe('½');
+  });
+
   it('affiche les demis en glyphe', () => {
     expect(formatAmount(0.5)).toBe('½');
     expect(formatAmount(1.5)).toBe('1½');

@@ -5,6 +5,7 @@ export type FoodCategory = 'pro' | 'beneficial' | 'neutral';
 
 /** Unités de quantité proposées (cuillères, portions, poids, volume…). */
 export type QuantityUnit =
+  | 'unite' // nombre seul, sans libellé (ex. « 2 » pour 2 œufs)
   | 'cac' // cuillère à café
   | 'cas' // cuillère à soupe
   | 'pincee'

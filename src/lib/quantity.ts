@@ -18,6 +18,7 @@ interface UnitDef {
 
 /** Ordre d'affichage des unités dans le sélecteur. */
 export const QUANTITY_UNITS: UnitDef[] = [
+  { key: 'unite', short: 'nombre', long: 'nombre seul (sans unité, ex. 2 œufs)', step: 1, default: 1 },
   { key: 'cac', short: 'càc', long: 'cuillère à café', step: 0.5, default: 1 },
   { key: 'cas', short: 'càs', long: 'cuillère à soupe', step: 0.5, default: 1 },
   { key: 'pincee', short: 'pincée', long: 'pincée', plural: 'pincées', step: 1, default: 1 },
@@ -62,6 +63,8 @@ export function formatAmount(n: number): string {
 export function formatQuantity(q: FoodQuantity): string {
   const def = UNIT_BY_KEY[q.unit];
   if (!def) return formatAmount(q.amount);
+  // « nombre seul » : on n'affiche que le chiffre, sans libellé d'unité.
+  if (q.unit === 'unite') return formatAmount(q.amount);
   const label = q.amount > 1 && def.plural ? def.plural : def.short;
   return `${formatAmount(q.amount)} ${label}`;
 }
@@ -88,6 +91,8 @@ const FRACTION_GLYPHS: Record<string, number> = {
 
 // Synonymes d'unités → clé canonique (clés déjà normalisées : sans accent, minuscules).
 const UNIT_SYNONYMS: Record<string, QuantityUnit> = {
+  unite: 'unite',
+  unites: 'unite',
   cac: 'cac',
   cc: 'cac',
   'c a c': 'cac',
