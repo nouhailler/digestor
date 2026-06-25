@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.11.0 (facteurs contextuels stress/sommeil/cycle, modèles de repas, rapport IA de période + tendances, recherche dans le journal, suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris, scan de produit par code-barres, quantités d'aliments, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 148 tests)
+## État actuel — v0.12.0 (visite guidée par écran avec bulles ancrées, quantité « nombre seul » sans unité, détection des doublons d'aliments + suppression définitive + aliments récents en tête de l'autocomplétion, démarrage robuste ; + facteurs contextuels stress/sommeil/cycle, modèles de repas, rapport IA de période + tendances, recherche dans le journal, suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris, scan de produit par code-barres, quantités d'aliments, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 154 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -288,6 +288,31 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
 
+## v0.12.0 — visite guidée par écran, quantité « nombre seul » & robustesse
+
+- **Visite guidée par écran (coach-marks)** : `lib/tour.ts` (`TOURS[tab]` : étapes ciblant un
+  élément par son attribut `data-tour="…"`, ou bulle centrée si la cible est absente) +
+  `components/Tour.tsx` (superposition : assombrit l'écran, **halo** sur la cible via
+  `box-shadow: 0 0 0 9999px`, bulle ancrée — position **mesurée puis clampée** dans le viewport,
+  au-dessus / en dessous selon la place ; navigation Suivant/Précédent/Passer, points de progression,
+  flèches clavier + Échap). Auto-démarrage à la **première arrivée** sur chaque écran (une fois
+  l'onboarding passé), **mémorisé** dans `meta.toursSeen` (`getSeenTours`/`markTourSeen`/`resetTours`).
+  Rejouable : bouton « Lancer la visite guidée de cet écran » dans `HelpSheet` ; « Revoir le tutoriel &
+  les visites guidées » (menu) réinitialise tout puis rejoue. Attributs `data-tour` posés sur les
+  éléments réels (header help/menu/légende, barre d'onglets, et un point d'ancrage stable par vue :
+  date du Journal, crayon+badge de la carte, recherche d'Aliments, navigation Semaine, plage Évolution).
+  Vérifié au navigateur (Chromium piloté) : ancrage, clamp, auto-démarrage par écran, aucune erreur console.
+- **Quantité « nombre seul »** : nouvelle unité `'unite'` (`types.ts`/`QuantityUnit`, en tête de
+  `QUANTITY_UNITS`) — `formatQuantity` n'affiche **que le chiffre** (« 2 ») sans libellé, pour les
+  aliments qui se comptent (œufs…). `parseQuantity` reconnaît « unité »/« unités » explicites mais
+  **conserve** le repli existant (un nombre sans unité reste ignoré à l'import — test « unité manquante »).
+- **Aliments — doublons & récents** : détection / fusion des doublons et **suppression définitive**
+  d'un aliment ; aliments **récents** (aujourd'hui / hier / avant-hier) remontés en tête de
+  l'autocomplétion (`useRecentFoods`). Onboarding mis à jour.
+- **Démarrage robuste** : `App` n'est plus figé sur « Chargement » en cas d'erreur au boot — l'erreur
+  est capturée, affichée sous l'en-tête, et l'app se rend quand même (`ready` toujours posé en `finally`).
+- Total **154 tests** (dont `quantity.test.ts` : « nombre seul » n'affiche que le chiffre).
+
 ## v0.11.0 — facteurs contextuels, modèles de repas, rapport de période & recherche (Tier 2)
 
 Quatre fonctionnalités (cf. brainstorming « Tier 2 »).
@@ -507,7 +532,7 @@ Testé en navigateur avec un JSON réaliste « façon Claude Web » (prose + blo
 
 Table `days` (clé = date ISO `YYYY-MM-DD`) : `DayEntry { quality, meals[], symptoms{12 clés},
 symptomTiming?, notes?, hydrationL?, stool?, digestionDelayH? }`.
-Table `meta` : profil + config IA (`aiConfig`) + flag `onboardingDone` + `mealSuggestions`.
+Table `meta` : profil + config IA (`aiConfig`) + flag `onboardingDone` + `mealSuggestions` + `toursSeen`.
 Table `foodInsights` (clé = nom normalisé, index `name`) : analyses d'aliments en cache.
 Table `dayAnalyses` (clé = date) : analyses IA de journées en cache (Dexie v3).
 Détails dans `src/types.ts`.

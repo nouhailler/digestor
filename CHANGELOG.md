@@ -4,6 +4,25 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.12.0] — Visite guidée par écran, quantité « nombre seul » & robustesse
+
+Prise en main facilitée et petites corrections.
+
+- **Visite guidée par écran** (coach-marks) : à la **première arrivée sur chaque écran**, des
+  **bulles explicatives ancrées** aux vrais éléments de l'UI (halo de mise en lumière + texte court)
+  expliquent à quoi sert chaque fonction et comment l'utiliser. Mémorisée par écran (ne se rejoue pas),
+  **rejouable** via le bouton « Lancer la visite guidée de cet écran » dans l'aide (`?`) ou en
+  réinitialisant tout depuis « Revoir le tutoriel & les visites guidées » (menu).
+- **Quantité « nombre seul »** : on peut désormais saisir **juste un chiffre, sans unité** (ex. « 2 »
+  pour 2 œufs). Nouvelle unité affichée comme simple nombre, proposée en tête du sélecteur de quantité.
+- **Aliments — doublons & récents** : détection / fusion des **doublons** et **suppression définitive**
+  d'un aliment ; les aliments **récents** (aujourd'hui / hier / avant-hier) remontent en tête de
+  l'autocomplétion. Onboarding mis à jour.
+- **Démarrage robuste** : l'app ne reste plus figée sur « Chargement » si une erreur survient au
+  démarrage — l'erreur est affichée et l'app se rend quand même (les données restent en sécurité).
+- **Données** : nouvelle clé `meta.toursSeen` (écrans déjà visités en visite guidée). `lib/tour.ts`,
+  `components/Tour.tsx`. **154 tests.**
+
 ## [0.11.0] — Facteurs contextuels, modèles de repas, rapport de période & recherche
 
 Quatre fonctionnalités pour affiner le suivi et accélérer la saisie.

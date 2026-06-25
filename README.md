@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-148%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-154%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -42,7 +42,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   d'intensité), notes,
   transit & hydratation (sélecteur de selles sur l'échelle de Bristol). **Autocomplétion** des
   aliments déjà saisis (dès 3 lettres) pour éviter les doublons d'orthographe, **favoris (★)
-  proposés en tête**. **Quantité par aliment** (càc, càs, portion, g, ml…) qui pondère l'analyse.
+  proposés en tête**. **Quantité par aliment** (càc, càs, portion, g, ml… ou **juste un nombre**, ex.
+  « 2 » œufs) qui pondère l'analyse.
   Badge « qualité de journée » 🟢→🟠→🔴 selon le cumul de symptômes, surchargeable. Infobulles
   d'aide. Sauvegarde auto.
 - 🗓️ **Semaine** — **agenda cliquable** des 7 jours (couleur = qualité, clic → ouvre le jour) +
@@ -94,7 +95,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   fréquence & sévérité des symptômes, transit & hydratation, aliments les plus fréquents et défavorables,
   corrélations, journal détaillé) à **imprimer ou exporter en PDF** pour la remettre à un médecin.
 - 🎨 **Apparence** — thème **sombre** (défaut) ou **clair** (Menu → « Apparence »), mémorisé par appareil.
-- 💡 **Aide & onboarding** — bouton `?` par écran, astuces contextuelles, visite guidée au 1er lancement.
+- 💡 **Aide & visite guidée** — bouton `?` par écran, astuces contextuelles, tutoriel au 1er lancement,
+  et **visite guidée par écran** : des bulles explicatives **ancrées aux éléments** se lancent à la
+  première arrivée sur chaque écran (rejouables depuis l'aide).
 - 💾 **Export / Import JSON** complet, **export PDF** de la semaine.
 
 ## 🤖 Assistant IA (OpenRouter) — optionnel
