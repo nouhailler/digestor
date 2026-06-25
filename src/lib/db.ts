@@ -24,6 +24,7 @@ const ONBOARDING_KEY = 'onboardingDone';
 const MEAL_SUGGESTIONS_KEY = 'mealSuggestions';
 const ENCYCLOPEDIA_KEY = 'encyclopediaExtra';
 const LAST_EXPORT_KEY = 'lastExportAt';
+const TOURS_SEEN_KEY = 'toursSeen';
 
 class DigestorDB extends Dexie {
   days!: Table<DayEntry, string>; // clé primaire = date ISO
@@ -153,6 +154,24 @@ export async function isOnboardingDone(): Promise<boolean> {
 
 export async function setOnboardingDone(done: boolean): Promise<void> {
   await db.meta.put({ key: ONBOARDING_KEY, value: done });
+}
+
+// ---- Visites guidées par écran (coach-marks) ----
+
+/** Écrans dont la visite guidée a déjà été vue (pour ne pas la rejouer à chaque arrivée). */
+export async function getSeenTours(): Promise<string[]> {
+  const row = await db.meta.get(TOURS_SEEN_KEY);
+  return Array.isArray(row?.value) ? (row.value as string[]) : [];
+}
+
+export async function markTourSeen(tour: string): Promise<void> {
+  const seen = await getSeenTours();
+  if (!seen.includes(tour)) await db.meta.put({ key: TOURS_SEEN_KEY, value: [...seen, tour] });
+}
+
+/** Réinitialise toutes les visites guidées (les écrans les rejoueront). */
+export async function resetTours(): Promise<void> {
+  await db.meta.put({ key: TOURS_SEEN_KEY, value: [] });
 }
 
 // ---- Dernier export (pour le rappel de sauvegarde) ----

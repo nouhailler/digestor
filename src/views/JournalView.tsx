@@ -51,7 +51,7 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
       <TipBanner tab="journal" />
 
       {/* Navigation de date */}
-      <div className="mb-4 flex items-center justify-between gap-2">
+      <div className="mb-4 flex items-center justify-between gap-2" data-tour="journal-date">
         <button
           type="button"
           onClick={() => go(-1)}

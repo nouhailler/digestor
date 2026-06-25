@@ -201,7 +201,7 @@ export function MenuSheet({
           }}
           className="flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-muted hover:text-ink"
         >
-          <GraduationCap size={16} /> Revoir le tutoriel
+          <GraduationCap size={16} /> Revoir le tutoriel & les visites guidées
         </button>
 
         <button

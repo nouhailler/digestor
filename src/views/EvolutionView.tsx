@@ -113,7 +113,7 @@ export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
 
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xl font-semibold text-ink">Évolution</h2>
-        <div className="flex gap-1 rounded-full border border-border p-1 text-xs">
+        <div className="flex gap-1 rounded-full border border-border p-1 text-xs" data-tour="evo-range">
           {(['week', '4weeks', 'all'] as Range[]).map((r) => (
             <button
               key={r}

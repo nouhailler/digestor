@@ -70,7 +70,7 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
     <div className="mx-auto max-w-3xl px-4 pt-4 pb-28">
       <TipBanner tab="semaine" />
 
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between" data-tour="week-nav">
         <button type="button" onClick={() => goWeek(-1)} aria-label="Semaine précédente" className="rounded-full border border-border p-2 text-muted hover:text-ink">
           <ChevronLeft size={18} />
         </button>

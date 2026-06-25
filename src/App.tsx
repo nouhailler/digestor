@@ -8,6 +8,7 @@ import { AiSettingsSheet } from './components/ai/AiSettingsSheet';
 import { ProfileSheet } from './components/ProfileSheet';
 import { HelpSheet } from './components/HelpSheet';
 import { Onboarding } from './components/Onboarding';
+import { Tour } from './components/Tour';
 import { ImportMealsSheet } from './components/ImportMealsSheet';
 import { MedicalRecordSheet } from './components/MedicalRecordSheet';
 import { TreatmentsSheet } from './components/TreatmentsSheet';
@@ -27,7 +28,8 @@ import { useProfile } from './hooks/useProfile';
 const EvolutionView = lazy(() =>
   import('./views/EvolutionView').then((m) => ({ default: m.EvolutionView })),
 );
-import { isEmpty, isOnboardingDone, setOnboardingDone } from './lib/db';
+import { isEmpty, isOnboardingDone, setOnboardingDone, getSeenTours, markTourSeen, resetTours } from './lib/db';
+import { TOURS } from './lib/tour';
 import { seedIfEmpty, SEED_DAYS } from './lib/seed';
 import { ensurePersistentStorage } from './lib/storage';
 import { fromISODate, todayISO, weekLabel } from './lib/dates';
@@ -43,6 +45,8 @@ export default function App() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [tourTab, setTourTab] = useState<Tab | null>(null);
+  const [seenTours, setSeenTours] = useState<string[] | null>(null);
   const [importMealsOpen, setImportMealsOpen] = useState(false);
   const [medicalRecordOpen, setMedicalRecordOpen] = useState(false);
   const [treatmentsOpen, setTreatmentsOpen] = useState(false);
@@ -61,6 +65,7 @@ export default function App() {
         // Au tout premier lancement, ouvrir sur le rendu de référence (semaine seed).
         if (wasEmpty) setDate(SEED_DAYS[0].date);
         setShowOnboarding(!(await isOnboardingDone()));
+        setSeenTours(await getSeenTours());
       } catch (err) {
         // Ne jamais figer sur l'écran de chargement : on affiche l'erreur et on
         // laisse l'app se rendre (les données restent dans IndexedDB).
@@ -75,6 +80,28 @@ export default function App() {
   function finishOnboarding() {
     setShowOnboarding(false);
     void setOnboardingDone(true);
+  }
+
+  // Visite guidée : se lance toute seule à la première arrivée sur chaque écran
+  // (une fois l'onboarding passé). Mémorisée pour ne pas se rejouer ensuite.
+  useEffect(() => {
+    if (!ready || showOnboarding || seenTours === null || tourTab) return;
+    if (!seenTours.includes(tab)) setTourTab(tab);
+  }, [ready, showOnboarding, seenTours, tab, tourTab]);
+
+  function closeTour() {
+    const t = tourTab;
+    setTourTab(null);
+    if (t) {
+      void markTourSeen(t);
+      setSeenTours((s) => (s && !s.includes(t) ? [...s, t] : s));
+    }
+  }
+
+  function replayTours() {
+    void resetTours();
+    setSeenTours([]);
+    setShowOnboarding(true);
   }
 
   const title = `${weekLabel(fromISODate(date))} — Patient : ${profile?.patientName || 'exemple'}`;
@@ -148,7 +175,7 @@ export default function App() {
         onAbout={() => setAboutOpen(true)}
         onOpenAiSettings={() => setAiSettingsOpen(true)}
         onOpenProfile={() => setProfileOpen(true)}
-        onReplayOnboarding={() => setShowOnboarding(true)}
+        onReplayOnboarding={replayTours}
         onOpenImportMeals={() => setImportMealsOpen(true)}
         onOpenMedicalRecord={() => setMedicalRecordOpen(true)}
         onOpenTreatments={() => setTreatmentsOpen(true)}
@@ -172,7 +199,15 @@ export default function App() {
       />
       <AiSettingsSheet open={aiSettingsOpen} onClose={() => setAiSettingsOpen(false)} />
       <ProfileSheet open={profileOpen} onClose={() => setProfileOpen(false)} />
-      <HelpSheet open={helpOpen} tab={tab} onClose={() => setHelpOpen(false)} />
+      <HelpSheet
+        open={helpOpen}
+        tab={tab}
+        onClose={() => setHelpOpen(false)}
+        onStartTour={() => {
+          setHelpOpen(false);
+          setTourTab(tab);
+        }}
+      />
       <ImportMealsSheet
         open={importMealsOpen}
         defaultDate={date}
@@ -184,6 +219,7 @@ export default function App() {
       />
 
       {showOnboarding && <Onboarding onFinish={finishOnboarding} />}
+      {tourTab && !showOnboarding && <Tour steps={TOURS[tourTab]} onClose={closeTour} />}
     </div>
   );
 }

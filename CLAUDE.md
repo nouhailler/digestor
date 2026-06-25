@@ -73,6 +73,7 @@ src/
     seed.ts           # données démo Lundi/Mardi conformes aux maquettes
     profile.ts        # options profil + buildProfileContext (contexte injecté à l'IA)
     help.ts           # registre aide + tips par onglet (HELP[tab])
+    tour.ts           # visites guidées (coach-marks) par écran : étapes ancrées via data-tour (TOURS[tab])
     json.ts           # parseJsonLoose (extraction JSON tolérante, partagée)
     openFoodFacts.ts  # recherche produit par code-barres (Open Food Facts, sans clé)
     barcodeScanner.ts # lecture code-barres caméra (BarcodeDetector natif + @zxing à la demande)
@@ -86,7 +87,7 @@ src/
       mealSuggestions.ts # prompt + suggestMeals + coercition
       insightFormat.ts# libellés/couleurs FODMAP & verdicts
   components/         # UI réutilisable (Chip, SymptomGrid, DayCard, MultiChipSelect, ProfileSheet,
-                      #   HelpSheet, TipBanner, Onboarding, ImportMealsSheet, ScanProductSheet,
+                      #   HelpSheet, TipBanner, Onboarding, Tour [visite guidée ancrée], ImportMealsSheet, ScanProductSheet,
                       #   MedicalRecordSheet [dossier médical imprimable],
                       #   TreatmentsSheet, ReintroSheet, MealTemplatesSheet,
                       #   JournalSearchSheet, ContextRow, …)

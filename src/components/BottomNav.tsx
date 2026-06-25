@@ -18,7 +18,7 @@ interface BottomNavProps {
 export function BottomNav({ active, onChange }: BottomNavProps) {
   return (
     <nav className="no-print safe-bottom fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface/95 backdrop-blur-md">
-      <div className="mx-auto flex max-w-3xl">
+      <div className="mx-auto flex max-w-3xl" data-tour="nav">
         {TABS.map(({ id, label, Icon }) => {
           const on = id === active;
           return (

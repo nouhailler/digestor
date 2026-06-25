@@ -107,7 +107,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
           <CalendarDays size={18} className="text-muted" />
           {dayLongLabel(day.date)}
         </h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2" data-tour="journal-edit">
           <QualityBadge
             quality={effectiveQuality}
             suggested={isSuggested}

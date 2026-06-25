@@ -32,6 +32,7 @@ export function Legend({ title, onMenu, onHelp }: LegendProps) {
               type="button"
               onClick={onHelp}
               aria-label="Aide"
+              data-tour="header-help"
               className="rounded-full border border-border p-1.5 text-muted hover:text-ink"
             >
               <HelpCircle size={18} />
@@ -40,6 +41,7 @@ export function Legend({ title, onMenu, onHelp }: LegendProps) {
               type="button"
               onClick={onMenu}
               aria-label="Menu"
+              data-tour="header-menu"
               className="rounded-full border border-border p-1.5 text-muted hover:text-ink"
             >
               <MoreHorizontal size={18} />
@@ -47,7 +49,7 @@ export function Legend({ title, onMenu, onHelp }: LegendProps) {
           </div>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm" data-tour="header-legend">
           <span className="text-muted" title="Légende des couleurs d'aliments utilisées dans tout le journal.">
             Aliments :
           </span>

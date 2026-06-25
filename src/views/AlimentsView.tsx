@@ -296,7 +296,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       )}
 
       {/* Recherche combobox dynamique */}
-      <div className="relative mb-3">
+      <div className="relative mb-3" data-tour="aliments-search">
         <div className="flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3">
           <Search size={16} className="text-muted" />
           <input
