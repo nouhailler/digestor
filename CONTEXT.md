@@ -311,6 +311,14 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   l'autocomplétion (`useRecentFoods`). Onboarding mis à jour.
 - **Démarrage robuste** : `App` n'est plus figé sur « Chargement » en cas d'erreur au boot — l'erreur
   est capturée, affichée sous l'en-tête, et l'app se rend quand même (`ready` toujours posé en `finally`).
+- 🐞 **Rafraîchissement après import vocal** : `hooks/useDay.ts` passe en **réactif** (`useLiveQuery`).
+  Avant, le hook ne rechargeait la journée que sur changement de **date** ; un import écrivant le jour
+  **déjà affiché** (`putDay`) n'était pas reflété → il fallait naviguer au jour précédent/suivant pour
+  voir le repas. Désormais l'écran se met à jour tout seul. Garde-fous : un drapeau `dirty` empêche
+  d'écraser une édition locale non encore sauvegardée (autosave debounce intact) ; le querier renvoie
+  toujours une journée (vide au besoin) → `stored === undefined` = « chargement » sans ambiguïté (pas de
+  faux « Chargement… »). Vérifié au navigateur (flux d'import réel : chip absente → présente sans changer
+  de date, aucune erreur console).
 - Total **154 tests** (dont `quantity.test.ts` : « nombre seul » n'affiche que le chiffre).
 
 ## v0.11.0 — facteurs contextuels, modèles de repas, rapport de période & recherche (Tier 2)
@@ -482,6 +490,9 @@ Testé en navigateur avec un JSON réaliste « façon Claude Web » (prose + blo
 - 🐞 **Bug corrigé** : `FoodInsightSheet` masquait une fiche en cache quand aucune clé OpenRouter
   n'était configurée. Désormais une fiche en cache (analyse IA **ou** import) est **toujours
   consultable**, la clé n'étant requise que pour (ré)analyser.
+- 🐞 **Bug corrigé (v0.12.0)** : après import, le Journal du jour **déjà affiché** ne se rafraîchissait
+  pas (il fallait changer de date). `useDay` est passé en réactif (`useLiveQuery`) → mise à jour
+  immédiate. Cf. section v0.12.0.
 
 ## Décisions
 

@@ -90,7 +90,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 - 📋 **Modèles de repas** — enregistrez vos repas récurrents et ajoutez-les au Journal en un geste.
 - 🔎 **Recherche** — retrouvez les jours par aliment, symptôme ou note (menu).
 - 🎙️ **Entrer un repas (voix → JSON)** — dictez votre journée à Claude Web, collez le JSON généré
-  (repas + fiches FODMAP + symptômes + transit). Voir [`docs/claude-web-repas-prompt.md`](./docs/claude-web-repas-prompt.md).
+  (repas + fiches FODMAP + symptômes + transit) ; le Journal du jour **se met à jour immédiatement**,
+  sans avoir à changer de date. Voir [`docs/claude-web-repas-prompt.md`](./docs/claude-web-repas-prompt.md).
 - 🩺 **Dossier médical** *(imprimable)* — synthèse complète du journal (profil santé, période couverte,
   fréquence & sévérité des symptômes, transit & hydratation, aliments les plus fréquents et défavorables,
   corrélations, journal détaillé) à **imprimer ou exporter en PDF** pour la remettre à un médecin.
