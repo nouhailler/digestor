@@ -1,5 +1,16 @@
-import { AlertTriangle, Lightbulb, Loader2, RefreshCw, Settings2, Sparkles } from 'lucide-react';
-import type { DayEntry, DayImprovement } from '../../types';
+import { useState } from 'react';
+import {
+  AlertTriangle,
+  Check,
+  Download,
+  Lightbulb,
+  Loader2,
+  RefreshCw,
+  Settings2,
+  Share2,
+  Sparkles,
+} from 'lucide-react';
+import type { DayAnalysis, DayEntry, DayImprovement } from '../../types';
 import { Sheet } from '../Sheet';
 import { AiBusy } from './AiBusy';
 import { VERDICT_COLOR, VERDICT_LABEL } from '../../lib/ai/insightFormat';
@@ -10,6 +21,7 @@ import { useAiConfig } from '../../hooks/useAiConfig';
 import { useProfile } from '../../hooks/useProfile';
 import { useDayAnalysis } from '../../hooks/useDayAnalysis';
 import { useFoodInsightMap } from '../../hooks/useFoodInsightMap';
+import { downloadDayAnalysis, shareDayAnalysis } from '../../lib/dayAnalysisExport';
 
 interface DayAnalysisSheetProps {
   open: boolean;
@@ -67,15 +79,18 @@ export function DayAnalysisSheet({ open, day, onClose, onOpenAiSettings }: DayAn
             Généré par {analysis.model}. Repère indicatif, non médical.
           </p>
 
-          <button
-            type="button"
-            onClick={runAnalyze}
-            disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink disabled:opacity-50"
-          >
-            {loading ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
-            Réanalyser
-          </button>
+          <div className="flex flex-wrap items-center gap-2 border-t border-border/60 pt-3">
+            <button
+              type="button"
+              onClick={runAnalyze}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink disabled:opacity-50"
+            >
+              {loading ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
+              Réanalyser
+            </button>
+            <ExportButtons analysis={analysis} />
+          </div>
           {error && <p style={{ color: 'var(--color-severe)' }}>{error}</p>}
         </div>
       ) : (
@@ -98,6 +113,42 @@ export function DayAnalysisSheet({ open, day, onClose, onOpenAiSettings }: DayAn
         </div>
       )}
     </Sheet>
+  );
+}
+
+/** Récupérer l'analyse : partage natif (repli presse-papiers) + téléchargement texte. */
+function ExportButtons({ analysis }: { analysis: DayAnalysis }) {
+  const [copied, setCopied] = useState(false);
+
+  const onShare = async () => {
+    try {
+      const result = await shareDayAnalysis(analysis);
+      if (result === 'copied') {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch {
+      /* partage/copie indisponible : on ne bloque pas */
+    }
+  };
+
+  const btn =
+    'inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink';
+
+  return (
+    <>
+      <button type="button" onClick={onShare} className={btn}>
+        {copied ? (
+          <Check size={15} style={{ color: 'var(--color-leger)' }} />
+        ) : (
+          <Share2 size={15} />
+        )}
+        {copied ? 'Copié' : 'Partager'}
+      </button>
+      <button type="button" onClick={() => downloadDayAnalysis(analysis)} className={btn}>
+        <Download size={15} /> Télécharger
+      </button>
+    </>
   );
 }
 

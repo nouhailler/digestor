@@ -4,6 +4,18 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.13.0] — Récupérer l'analyse de journée (partage & téléchargement)
+
+L'analyse IA d'une journée peut désormais sortir de l'app.
+
+- **Récupérer l'analyse de journée** : sous l'analyse IA (Journal), deux boutons.
+  **Partager** ouvre la **feuille de partage native de l'OS** (mail, messagerie, Fichiers…) sur mobile,
+  avec **repli automatique sur le presse-papiers** sur desktop (« Copié ✓ »). **Télécharger** enregistre
+  un fichier texte (`digestor-analyse-AAAA-MM-JJ.txt`). L'app restant 100 % offline, il n'y a pas d'envoi
+  serveur : le partage natif est le plus proche d'un « envoyer par email ».
+- **Données** : aucune nouvelle table ; mise en forme texte pure dans `lib/dayAnalysisExport.ts`
+  (réutilise le verdict, le résumé, les déclencheurs et les pistes justifiées). **159 tests.**
+
 ## [0.12.0] — Visite guidée par écran, quantité « nombre seul » & robustesse
 
 Prise en main facilitée et petites corrections.

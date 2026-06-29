@@ -19,8 +19,9 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 154 tests : `foodClassifier`, `dates`,
+et appellent `afterEach(cleanup)` localement (pas de setup global). 159 tests : `foodClassifier`, `dates`,
 `quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
+`dayAnalysisExport`,
 `contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`, `correlations`,
 `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
 `TipBanner`, … `npm run build` typecheck aussi les tests.
@@ -64,6 +65,7 @@ src/
     reintro.ts        # libellés groupes/verdicts FODMAP + tri (tests de réintroduction)
     mealTemplates.ts  # modèles de repas : repas↔modèle (instanciation avec id neufs)
     periodReport.ts   # tendances (1re vs 2de moitié) + describePeriod (résumé pour l'IA)
+    dayAnalysisExport.ts # formatDayAnalysis (texte) + partage natif (repli presse-papiers) + téléchargement
     journalSearch.ts  # recherche dans le journal (aliments / symptômes / notes)
     aggregates.ts     # stats hebdo + séries pour graphes
     correlations.ts   # détection heuristique aliment → symptôme

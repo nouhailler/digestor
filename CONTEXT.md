@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.12.0 (visite guidée par écran avec bulles ancrées, quantité « nombre seul » sans unité, détection des doublons d'aliments + suppression définitive + aliments récents en tête de l'autocomplétion, démarrage robuste ; + facteurs contextuels stress/sommeil/cycle, modèles de repas, rapport IA de période + tendances, recherche dans le journal, suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris, scan de produit par code-barres, quantités d'aliments, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 154 tests)
+## État actuel — v0.13.0 (récupération de l'analyse de journée : partage natif OS + repli presse-papiers + téléchargement texte ; visite guidée par écran avec bulles ancrées, quantité « nombre seul » sans unité, détection des doublons d'aliments + suppression définitive + aliments récents en tête de l'autocomplétion, démarrage robuste ; + facteurs contextuels stress/sommeil/cycle, modèles de repas, rapport IA de période + tendances, recherche dans le journal, suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris, scan de produit par code-barres, quantités d'aliments, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 159 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -287,6 +287,26 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
   un aliment encore absent de la liste est **synthétisé** pour apparaître pendant sa génération.
 - Test ajouté : `describeDay` enrichit bien un aliment avec analyse, laisse les autres sur leur
   catégorie (`dayAnalysis.test.ts`). Total **96 tests**.
+
+## v0.13.0 — récupérer l'analyse de journée (partage & téléchargement)
+
+- **Sortie de l'analyse IA de journée** : `lib/dayAnalysisExport.ts` (logique pure + helpers navigateur).
+  - `formatDayAnalysis(analysis)` — met en forme en **texte simple** (markdown léger) : titre daté,
+    verdict (`VERDICT_LABEL`), résumé, **déclencheurs probables**, **pistes d'amélioration justifiées**
+    (« Pourquoi : … », tolère l'ancien format chaîne), mention « Repère indicatif, non médical ».
+    N'émet pas de section vide. Fonction **pure**, testée (`dayAnalysisExport.test.ts`).
+  - `shareDayAnalysis(analysis)` — `navigator.share` si disponible (feuille OS : mail, messagerie,
+    Fichiers…), **repli `navigator.clipboard.writeText`** sinon ; renvoie `'shared' | 'copied' |
+    'cancelled'` (une **annulation** `AbortError` ne retombe **pas** sur la copie).
+  - `downloadDayAnalysis(analysis)` — Blob `text/plain` → `digestor-analyse-AAAA-MM-JJ.txt`
+    (même mécanique que `lib/backup.ts`).
+- **UI** : `components/ai/DayAnalysisSheet.tsx` — sous l'analyse, à côté de « Réanalyser » (séparés par
+  un filet), composant `ExportButtons` : **Partager** (icône `Share2`, bascule « Copié ✓ » 2 s sur repli
+  presse-papiers) et **Télécharger** (icône `Download`). Pas de nouvelle table Dexie.
+- **Rappel** : app 100 % offline → aucun envoi serveur ; le partage natif est le plus proche d'un
+  « envoyer par email ».
+- Total **159 tests** (dont `dayAnalysisExport.test.ts` : formatage, justifications vides, ancien format
+  chaîne, sections vides, nom de fichier).
 
 ## v0.12.0 — visite guidée par écran, quantité « nombre seul » & robustesse
 

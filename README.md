@@ -76,6 +76,8 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 - 🧠 **Analyse de journée** *(IA)* — verdict global, déclencheurs probables, pistes d'amélioration
   **justifiées** (chaque recommandation explique le bénéfice recherché). Tient compte des **fiches
   d'aliments déjà analysées** (niveau FODMAP, verdicts SIBO/candida) injectées dans le prompt.
+  **Récupérez l'analyse** : bouton **Partager** (feuille native de l'OS → mail, messagerie, Fichiers… ;
+  repli sur le presse-papiers) ou **Télécharger** en fichier texte.
 - ⏳ **Analyses IA en arrière-plan** — une analyse lancée **continue même si vous changez d'écran** ;
   un indicateur global dans l'en-tête (sablier + secondes, puis ✓ vert) montre l'activité en cours.
 - 👤 **Profil santé** — âge, sexe, conditions, phase FODMAP, intolérances, allergies, antécédents,
