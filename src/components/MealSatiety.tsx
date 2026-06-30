@@ -50,6 +50,7 @@ function DurationLine({ meal, insights }: { meal: Meal; insights?: Map<string, F
  */
 export function MealSatiety({ meal, editing, onChange, insights }: MealSatietyProps) {
   const [open, setOpen] = useState(false);
+  const [readOpen, setReadOpen] = useState(true);
   const [helpOpen, setHelpOpen] = useState(false);
   const checks = sortChecks(meal.satiety ?? []);
   const missing = SATIETY_CHECKPOINTS.filter((cp) => !checks.some((c) => c.checkpoint === cp));
@@ -61,22 +62,43 @@ export function MealSatiety({ meal, editing, onChange, insights }: MealSatietyPr
     onChange({ ...meal, satiety: removeCheck(checks, cp) });
   }
 
-  // --- Lecture seule : rien si vide ---
+  // --- Lecture seule : rien si vide, sinon zone repliable ---
   if (!editing) {
     if (checks.length === 0) return null;
     return (
-      <div className="rounded-lg border border-border/70 bg-surface-2/40 px-3 py-2">
-        <p className="mb-2 inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted">
-          <Gauge size={13} /> Satiété
-        </p>
-        <div className="space-y-3">
-          {checks.map((c) => (
-            <CheckReadRow key={c.checkpoint} check={c} />
-          ))}
-        </div>
-        <div className="mt-2">
-          <DurationLine meal={meal} insights={insights} />
-        </div>
+      <div className="rounded-lg border border-border/70 bg-surface-2/40">
+        <button
+          type="button"
+          onClick={() => setReadOpen((o) => !o)}
+          aria-expanded={readOpen}
+          title={readOpen ? 'Réduire la satiété' : 'Afficher la satiété'}
+          className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
+        >
+          <span className="flex flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted">
+              <Gauge size={13} /> Satiété
+            </span>
+            {/* Replié : rappel des checkpoints saisis. */}
+            {!readOpen &&
+              checks.map((c) => (
+                <span key={c.checkpoint} className="text-xs text-ink">
+                  {CHECKPOINT_LABEL[c.checkpoint]}
+                </span>
+              ))}
+          </span>
+          <ChevronDown
+            size={16}
+            className={`shrink-0 text-muted transition-transform ${readOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {readOpen && (
+          <div className="space-y-3 px-3 pb-3">
+            {checks.map((c) => (
+              <CheckReadRow key={c.checkpoint} check={c} />
+            ))}
+            <DurationLine meal={meal} insights={insights} />
+          </div>
+        )}
       </div>
     );
   }
