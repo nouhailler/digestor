@@ -1,5 +1,8 @@
 import type {
   AiConfig,
+  AmineGroup,
+  AmineInfo,
+  AmineLevel,
   FodmapGroups,
   FodmapLevel,
   FoodCategory,
@@ -11,6 +14,8 @@ import { chatJSON } from './openrouter';
 
 const FODMAP_LEVELS: FodmapLevel[] = ['low', 'moderate', 'high', 'unknown'];
 const VERDICTS: Verdict[] = ['favorable', 'attention', 'eviter', 'inconnu'];
+const AMINE_LEVELS: AmineLevel[] = ['low', 'moderate', 'high', 'unknown'];
+const AMINE_GROUPS: AmineGroup[] = ['alcool', 'fromage', 'charcuterie', 'fermente', 'poisson', 'autre'];
 
 const SYSTEM_PROMPT = `Tu es un assistant nutrition francophone spécialisé dans l'alimentation pauvre en FODMAP, le SIBO (pullulation bactérienne de l'intestin grêle) et la candidose intestinale.
 Tu réponds UNIQUEMENT avec un objet JSON valide, sans aucun texte avant ou après, sans balises Markdown.
@@ -33,6 +38,7 @@ Renvoie STRICTEMENT cet objet JSON (mêmes clés, mêmes valeurs autorisées) :
   },
   "sibo": { "verdict": "favorable | attention | eviter", "note": "1 phrase max, en français" },
   "candida": { "verdict": "favorable | attention | eviter", "note": "1 phrase max, en français" },
+  "amines": { "level": "low | moderate | high", "liberator": true/false (l'aliment libère l'histamine endogène), "daoBlocker": true/false (freine la DAO), "note": "amines biogènes/histamine, 1 phrase ; tiens compte de la fermentation/affinage et de la fraîcheur" },
   "safePortion": "portion habituellement tolérée en phase pauvre en FODMAP (ex. « 1/2 tasse, 75 g »), ou \\"\\" si non pertinent",
   "summary": "synthèse en 1 à 2 phrases, en français",
   "tips": ["1 à 3 conseils courts en français"]
@@ -48,6 +54,27 @@ function coerceLevel(v: unknown): FodmapLevel {
 
 function coerceVerdict(v: unknown): Verdict {
   return VERDICTS.includes(v as Verdict) ? (v as Verdict) : 'inconnu';
+}
+
+function coerceAmineLevel(v: unknown): AmineLevel {
+  return AMINE_LEVELS.includes(v as AmineLevel) ? (v as AmineLevel) : 'unknown';
+}
+
+/** Coerce un bloc amines biogènes ; renvoie undefined si rien d'exploitable. */
+function coerceAmines(v: unknown): AmineInfo | undefined {
+  if (!v || typeof v !== 'object') return undefined;
+  const o = v as Record<string, unknown>;
+  const info: AmineInfo = { level: coerceAmineLevel(o.level) };
+  if (o.liberator === true) info.liberator = true;
+  if (o.daoBlocker === true) info.daoBlocker = true;
+  if (AMINE_GROUPS.includes(o.group as AmineGroup)) info.group = o.group as AmineGroup;
+  const note = coerceString(o.note);
+  if (note) info.note = note;
+  // Rien d'utile (niveau inconnu et aucun flag/note) → on n'ajoute pas le bloc.
+  if (info.level === 'unknown' && !info.liberator && !info.daoBlocker && !info.group && !info.note) {
+    return undefined;
+  }
+  return info;
 }
 
 function coerceString(v: unknown): string {
@@ -84,6 +111,7 @@ interface RawInsight {
   fodmaps?: unknown;
   sibo?: { verdict?: unknown; note?: unknown };
   candida?: { verdict?: unknown; note?: unknown };
+  amines?: unknown;
   safePortion?: unknown;
   summary?: unknown;
   tips?: unknown;
@@ -117,6 +145,7 @@ export function buildFoodInsight(rawInput: unknown, fallbackName: string, model:
     fodmaps: coerceGroups(raw.fodmaps),
     sibo,
     candida,
+    amines: coerceAmines(raw.amines),
     safePortion: coerceString(raw.safePortion) || undefined,
     summary: coerceString(raw.summary),
     tips,

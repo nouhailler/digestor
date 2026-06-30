@@ -1,5 +1,6 @@
-import type { FodmapGroups, FodmapLevel, FoodCategory, FoodInsight, Verdict } from '../types';
+import type { AmineInfo, FodmapGroups, FodmapLevel, FoodCategory, FoodInsight, Verdict } from '../types';
 import { classifyFood } from './foodClassifier';
+import { classifyAmines } from './biogenicAmines';
 
 /**
  * Référentiel d'aliments exportable, au même format que
@@ -16,6 +17,7 @@ export interface FoodReferenceEntry {
   fodmaps: FodmapGroups;
   sibo: { verdict: Verdict; note: string };
   candida: { verdict: Verdict; note: string };
+  amines?: AmineInfo;
   safePortion?: string;
   summary?: string;
   tips?: string[];
@@ -43,6 +45,7 @@ const LEGEND: Record<string, string> = {
   fodmapLevel: 'low | moderate | high | unknown (niveau global)',
   fodmaps: 'niveau par groupe : fructose, lactose, fructans, gos, polyols',
   verdict: 'favorable | attention | eviter | inconnu (selon SIBO / candidose)',
+  amines: 'amines biogènes (histamine…) : level low|moderate|high, liberator, daoBlocker, group, note',
 };
 
 /** Aliment du catalogue : nom affiché + éventuelle fiche analysée en cache. */
@@ -51,7 +54,15 @@ export interface CatalogueFood {
   insight?: FoodInsight;
 }
 
+/** Amines de la fiche, sinon repère du dictionnaire (si niveau connu). */
+function amineFor(name: string, fromInsight?: AmineInfo): AmineInfo | undefined {
+  if (fromInsight) return fromInsight;
+  const guess = classifyAmines(name);
+  return guess.level !== 'unknown' ? guess : undefined;
+}
+
 function entryFromInsight(name: string, ins: FoodInsight): FoodReferenceEntry {
+  const amines = amineFor(name, ins.amines);
   return {
     name,
     category: ins.category,
@@ -59,6 +70,7 @@ function entryFromInsight(name: string, ins: FoodInsight): FoodReferenceEntry {
     fodmaps: { ...ins.fodmaps },
     sibo: { verdict: ins.sibo.verdict, note: ins.sibo.note },
     candida: { verdict: ins.candida.verdict, note: ins.candida.note },
+    ...(amines ? { amines } : {}),
     ...(ins.safePortion ? { safePortion: ins.safePortion } : {}),
     ...(ins.summary ? { summary: ins.summary } : {}),
     ...(ins.tips.length ? { tips: [...ins.tips] } : {}),
@@ -75,6 +87,7 @@ const UNKNOWN_GROUPS: FodmapGroups = {
 
 /** Entrée « stub » pour un aliment sans analyse : catégorie estimée, reste à compléter. */
 function stubEntry(name: string): FoodReferenceEntry {
+  const amines = amineFor(name);
   return {
     name,
     needsReview: true,
@@ -83,6 +96,7 @@ function stubEntry(name: string): FoodReferenceEntry {
     fodmaps: { ...UNKNOWN_GROUPS },
     sibo: { verdict: 'inconnu', note: '' },
     candida: { verdict: 'inconnu', note: '' },
+    ...(amines ? { amines } : {}),
   };
 }
 

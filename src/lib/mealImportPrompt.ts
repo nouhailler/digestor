@@ -36,6 +36,8 @@ sinon de ta connaissance) :
 - "fodmaps" : niveaux par groupe — { "fructose", "lactose", "fructans", "gos", "polyols" } ∈ low|moderate|high.
 - "sibo" : { "verdict": "favorable|attention|eviter", "note": "1 phrase" }.
 - "candida" : { "verdict": "favorable|attention|eviter", "note": "1 phrase" }.
+- "amines" (amines biogènes / histamine) : { "level": "low|moderate|high", "liberator": true/false (libère l'histamine endogène), "daoBlocker": true/false (freine la DAO), "note": "1 phrase" }.
+  Élevé surtout pour les fermentés/affinés (fromages affinés, charcuterie sèche, vin, bière, choucroute, miso, sauce soja, kombucha) et les poissons à risque (thon, maquereau, sardine, anchois — pire si mal conservés / en boîte). Tiens compte de la fraîcheur et de la maturité (banane/avocat très mûrs = plus élevés).
 - "safePortion" : portion tolérée (optionnel), "summary" : 1 phrase (optionnel), "tips" : [conseils] (optionnel).
 Si tu n'es pas sûr d'un champ, mets "unknown" (niveaux) ou "inconnu" (verdicts) plutôt que d'inventer.
 
@@ -46,7 +48,8 @@ viennoiserie + jus de fruit → ["sucre"]. N'ajoute que ce qui est réellement m
 
 SYMPTÔMES (optionnels, par jour) — objet "symptoms" : clé = identifiant exact, valeur ∈ absent|leger|modere|severe.
 Identifiants autorisés : ballonnements, gaz, douleurs_abdo, reflux, fatigue_apres_repas, envie_sucre,
-diarrhee, constipation, brouillard_mental, mycose_buccale, demangeaisons, nausees.
+diarrhee, constipation, brouillard_mental, mycose_buccale, demangeaisons, urticaire, rougeurs,
+maux_de_tete, nausees.
 - "symptomTiming" : moment des symptômes, ex. "2 h après le dîner" (optionnel).
 
 TRANSIT & DIVERS (optionnels, par jour)
@@ -78,6 +81,7 @@ FORMAT DE SORTIE
               "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
               "sibo": { "verdict": "favorable|attention|eviter", "note": "" },
               "candida": { "verdict": "favorable|attention|eviter", "note": "" },
+              "amines": { "level": "low|moderate|high", "liberator": false, "daoBlocker": false, "note": "" },
               "safePortion": "",
               "summary": "",
               "tips": []

@@ -13,6 +13,9 @@ export const SYMPTOM_ORDER: SymptomKey[] = [
   'brouillard_mental',
   'mycose_buccale',
   'demangeaisons',
+  'urticaire',
+  'rougeurs',
+  'maux_de_tete',
   'nausees',
 ];
 
@@ -29,6 +32,9 @@ export const SYMPTOM_HINTS: Record<SymptomKey, string> = {
   brouillard_mental: 'Difficultés de concentration, tête « dans le coton ».',
   mycose_buccale: 'Dépôt blanchâtre dans la bouche / sur la langue (muguet).',
   demangeaisons: 'Démangeaisons ou irritations cutanées.',
+  urticaire: 'Plaques rouges en relief qui démangent (réaction histaminique).',
+  rougeurs: 'Rougeurs du visage / bouffées de chaleur (flush).',
+  maux_de_tete: 'Céphalées / migraines, parfois après certains aliments.',
   nausees: 'Sensation de mal de cœur, envie de vomir.',
 };
 
@@ -44,6 +50,9 @@ export const SYMPTOM_LABELS: Record<SymptomKey, string> = {
   brouillard_mental: 'Brouillard mental',
   mycose_buccale: 'Mycose buccale',
   demangeaisons: 'Démangeaisons cutanées',
+  urticaire: 'Urticaire',
+  rougeurs: 'Rougeurs / bouffées',
+  maux_de_tete: 'Maux de tête',
   nausees: 'Nausées',
 };
 

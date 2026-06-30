@@ -21,6 +21,7 @@ import { syncSatietyNotes } from '../lib/satietyDuration';
 import { useMealTemplates } from '../hooks/useMealTemplates';
 import { DEFAULT_MEAL_TIMES, INTENSITY_COLOR, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../lib/constants';
 import { suggestDayQuality } from '../lib/quality';
+import { AMINE_LOAD_COLOR, AMINE_LOAD_LABEL, dayAmineLoad } from '../lib/biogenicAmines';
 import { QualityBadge } from './QualityBadge';
 import { MealEditor } from './MealEditor';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
@@ -53,6 +54,10 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
   const templates = useMealTemplates();
 
   const suggested = useMemo(() => suggestDayQuality(day), [day]);
+  const amineLoad = useMemo(
+    () => dayAmineLoad(day.meals.flatMap((m) => m.foods.map((f) => f.name))),
+    [day],
+  );
   const effectiveQuality = day.quality ?? suggested;
   const isSuggested = day.quality == null && effectiveQuality != null;
   // Symptômes « généraux » (non rattachés à un repas) : affichés si présents ou s'il n'y a aucun repas.
@@ -126,6 +131,30 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
           </button>
         </div>
       </div>
+
+      {/* Charge en amines biogènes (histamine) du jour */}
+      {amineLoad.band !== 'faible' && (
+        <div
+          className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-sm"
+          style={{
+            borderColor: AMINE_LOAD_COLOR[amineLoad.band],
+            backgroundColor: `color-mix(in srgb, ${AMINE_LOAD_COLOR[amineLoad.band]} 10%, transparent)`,
+          }}
+          title="Estimation de la charge en amines biogènes (histamine, tyramine…) cumulée sur la journée. L'effet dépend de l'accumulation et des combinaisons."
+        >
+          <span className="font-medium" style={{ color: AMINE_LOAD_COLOR[amineLoad.band] }}>
+            Amines : {AMINE_LOAD_LABEL[amineLoad.band].replace('Charge ', '')}
+          </span>
+          {amineLoad.combo && (
+            <span className="text-muted">
+              · combinaison à risque (alcool + fromage/charcuterie/fermenté)
+            </span>
+          )}
+          {!amineLoad.combo && amineLoad.daoBlockers > 0 && (
+            <span className="text-muted">· {amineLoad.daoBlockers} freineur(s) de DAO</span>
+          )}
+        </div>
+      )}
 
       {/* Repas */}
       <Section icon={<UtensilsCrossed size={15} />} title="Repas du jour">

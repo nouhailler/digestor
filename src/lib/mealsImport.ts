@@ -54,7 +54,7 @@ export type MergeMode = 'append' | 'replace';
 const TIME_RE = /^(\d{1,2}):(\d{2})$/;
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const CATEGORIES: FoodCategory[] = ['pro', 'beneficial', 'neutral'];
-const INSIGHT_FIELDS = ['fodmapLevel', 'fodmaps', 'sibo', 'candida', 'summary', 'tips', 'safePortion'];
+const INSIGHT_FIELDS = ['fodmapLevel', 'fodmaps', 'sibo', 'candida', 'amines', 'summary', 'tips', 'safePortion'];
 
 // ---- Résolution symptômes / intensités ----
 

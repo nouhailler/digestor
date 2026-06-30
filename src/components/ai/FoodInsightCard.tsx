@@ -8,6 +8,7 @@ import {
   VERDICT_COLOR,
   VERDICT_LABEL,
 } from '../../lib/ai/insightFormat';
+import { AMINE_LEVEL_COLOR, AMINE_LEVEL_LABEL } from '../../lib/biogenicAmines';
 
 const GROUP_KEYS = Object.keys(FODMAP_GROUP_LABEL) as (keyof FodmapGroups)[];
 
@@ -25,6 +26,12 @@ export function FoodInsightCard({ insight }: { insight: FoodInsight }) {
           label={`Candidose : ${VERDICT_LABEL[insight.candida.verdict]}`}
           color={VERDICT_COLOR[insight.candida.verdict]}
         />
+        {insight.amines && (
+          <Badge
+            label={`Amines : ${AMINE_LEVEL_LABEL[insight.amines.level]}`}
+            color={AMINE_LEVEL_COLOR[insight.amines.level]}
+          />
+        )}
       </div>
 
       {insight.summary && <p className="leading-relaxed text-ink">{insight.summary}</p>}
@@ -61,6 +68,20 @@ export function FoodInsightCard({ insight }: { insight: FoodInsight }) {
             <Note title="Candidose" text={insight.candida.note} color={VERDICT_COLOR[insight.candida.verdict]} />
           )}
         </div>
+      )}
+
+      {insight.amines && (insight.amines.note || insight.amines.liberator || insight.amines.daoBlocker) && (
+        <Note
+          title="Amines biogènes"
+          text={[
+            insight.amines.note,
+            insight.amines.liberator ? 'Histamino-libérateur.' : '',
+            insight.amines.daoBlocker ? 'Freine la DAO (dégradation de l’histamine).' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          color={AMINE_LEVEL_COLOR[insight.amines.level]}
+        />
       )}
 
       {insight.safePortion && (

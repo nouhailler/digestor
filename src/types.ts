@@ -82,6 +82,9 @@ export type SymptomKey =
   | 'brouillard_mental'
   | 'mycose_buccale'
   | 'demangeaisons'
+  | 'urticaire'
+  | 'rougeurs'
+  | 'maux_de_tete'
   | 'nausees';
 
 export type Intensity = 'absent' | 'leger' | 'modere' | 'severe';
@@ -166,6 +169,23 @@ export interface FodmapGroups {
   polyols: FodmapLevel; // sorbitol, mannitol…
 }
 
+// ---- Amines biogènes (intolérance à l'histamine) ----
+
+/** Niveau d'amines biogènes (histamine, tyramine, putrescine, cadavérine). */
+export type AmineLevel = 'low' | 'moderate' | 'high' | 'unknown';
+
+/** Famille déclencheuse, pour repérer les combinaisons à risque. */
+export type AmineGroup = 'alcool' | 'fromage' | 'charcuterie' | 'fermente' | 'poisson' | 'autre';
+
+/** Profil amines biogènes d'un aliment. */
+export interface AmineInfo {
+  level: AmineLevel;
+  liberator?: boolean; // libère l'histamine endogène
+  daoBlocker?: boolean; // freine la DAO / compétition (alcool, putrescine…)
+  group?: AmineGroup;
+  note?: string;
+}
+
 /**
  * Fiche d'analyse d'un aliment, produite par l'IA puis mise en cache (Dexie).
  * Clé primaire = nom normalisé.
@@ -178,6 +198,7 @@ export interface FoodInsight {
   fodmaps: FodmapGroups;
   sibo: { verdict: Verdict; note: string };
   candida: { verdict: Verdict; note: string };
+  amines?: AmineInfo; // amines biogènes (histamine…) — optionnel
   safePortion?: string; // portion tolérée (ex. « 1/2 tasse, 75 g »)
   summary: string; // synthèse 1-2 phrases
   tips: string[];

@@ -100,3 +100,8 @@ export function buildProfileContext(profile: Profile | undefined): string | unde
 export function hasHealthInfo(profile: Profile | undefined): boolean {
   return buildProfileContext(profile) !== undefined;
 }
+
+/** L'utilisateur a-t-il déclaré une sensibilité à l'histamine / aux amines biogènes ? */
+export function isHistamineSensitive(profile: Profile | undefined): boolean {
+  return (profile?.intolerances ?? []).some((s) => /histamine|amine/i.test(s));
+}

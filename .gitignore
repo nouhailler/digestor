@@ -5,3 +5,9 @@ dist-ssr
 .DS_Store
 .vite
 *.tsbuildinfo
+
+# Artefacts de travail (données importées / brouillons de mapping CIQUAL, exports d'autres apps)
+/ciqual-*.json
+/ciqual-*.csv
+/moleculor-*.json
+.~lock.*#

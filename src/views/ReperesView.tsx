@@ -145,6 +145,8 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
               <Info size={16} /> À propos & avertissement médical
             </button>
           </div>
+
+          <AmineExplainer />
         </>
       ) : tab === 'encyclopedie' ? (
         <EncyclopediaList
@@ -166,6 +168,58 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
         }}
         onSelectRelated={(name) => setSelected({ label: name, hint: findManifestation(name) ?? '' })}
       />
+    </div>
+  );
+}
+
+/** Fiche explicative sur les amines biogènes (intolérance à l'histamine). */
+function AmineExplainer() {
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-surface p-5 text-sm">
+      <h3 className="mb-2 flex items-center gap-2 text-base font-semibold text-ink">
+        <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: 'var(--color-severe)' }} />
+        Amines biogènes (histamine)
+      </h3>
+      <p className="mb-3 leading-relaxed text-muted">
+        Le corps dégrade ces molécules via une enzyme (la DAO). Si l'apport alimentaire est trop élevé ou la
+        dégradation insuffisante, elles s'accumulent et peuvent provoquer : démangeaisons / urticaire, rougeurs,
+        maux de tête, troubles digestifs, fatigue après repas. Outre l'histamine : tyramine, putrescine, cadavérine.
+      </p>
+      <div className="space-y-2">
+        <AmineRow color="var(--color-severe)" title="Élevé (souvent problématiques)">
+          fromages affinés (parmesan, comté, roquefort), charcuteries sèches, vin / bière / cidre, choucroute,
+          miso, sauce soja, kombucha ; poissons à risque (thon, maquereau, sardine, anchois — surtout mal conservés
+          ou en boîte) ; banane / avocat très mûrs.
+        </AmineRow>
+        <AmineRow color="var(--color-modere)" title="Modéré (variable)">
+          épinards, tomate (mûre), aubergine, chocolat, café, thé noir, pain au levain, jus de fruits industriels,
+          fraise / agrumes / ananas (histamino-libérateurs).
+        </AmineRow>
+        <AmineRow color="var(--color-leger)" title="Faible (généralement bien tolérés)">
+          viandes fraîches, poisson très frais ou congelé aussitôt, œufs, courgette, carotte, brocoli, salade,
+          concombre, pomme, poire, raisin, melon, riz, quinoa, pomme de terre.
+        </AmineRow>
+      </div>
+      <p className="mt-3 rounded-lg border border-border bg-surface-2 px-3 py-2 leading-relaxed text-ink">
+        ⚠️ L'effet dépend de l'<strong>accumulation</strong> sur la journée et des <strong>combinaisons</strong> :
+        alcool + charcuterie + fromage + fermenté déclenchent souvent, même si chaque aliment seul passe « à peu
+        près ». Certains aliments libèrent l'histamine ou freinent sa dégradation (DAO).
+      </p>
+      <p className="mt-2 text-xs text-muted">
+        La teneur en histamine varie beaucoup (fraîcheur, affinage). Repère indicatif, non médical.
+      </p>
+    </div>
+  );
+}
+
+function AmineRow({ color, title, children }: { color: string; title: string; children: React.ReactNode }) {
+  return (
+    <div className="rounded-xl border border-border bg-surface-2 px-3 py-2">
+      <span className="inline-flex items-center gap-2 font-medium" style={{ color }}>
+        <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+        {title}
+      </span>
+      <p className="mt-0.5 text-ink">{children}</p>
     </div>
   );
 }

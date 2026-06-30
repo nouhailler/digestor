@@ -8,6 +8,7 @@ import { computeWeekStats, dayHasContent, effectiveDaySymptoms } from '../lib/ag
 import { detectCorrelations, type CorrelationLevel } from '../lib/correlations';
 import { personalCorrelations } from '../lib/personalCorrelations';
 import { contextCorrelations } from '../lib/contextCorrelations';
+import { amineSymptomCorrelation } from '../lib/amineCorrelation';
 import { suggestDayQuality } from '../lib/quality';
 import { SYMPTOM_ORDER } from '../lib/constants';
 import {
@@ -64,6 +65,7 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
   const correlations = detectCorrelations(days);
   const personal = personalCorrelations(allDays ?? []);
   const context = contextCorrelations(allDays ?? []);
+  const amine = amineSymptomCorrelation(allDays ?? []);
   const today = todayISO();
 
   return (
@@ -230,6 +232,24 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+            {amine.suspected && (
+              <div>
+                <p className="mb-1.5 font-medium text-ink">Amines biogènes (histamine)</p>
+                <div className="flex items-start gap-2.5 text-ink">
+                  <span
+                    className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                    style={{ backgroundColor: 'var(--color-severe)' }}
+                  />
+                  <span>
+                    <strong>Charge élevée en amines</strong> → {Math.round(amine.rateWithHigh * 100)} % de jours à
+                    symptômes histaminiques (urticaire, rougeurs, maux de tête…){' '}
+                    <span className="text-muted">
+                      vs {Math.round(amine.rateWithoutHigh * 100)} % sinon · sur {amine.daysHighLoad} jour(s) chargés
+                    </span>
+                  </span>
+                </div>
               </div>
             )}
             <p className="text-xs text-muted">

@@ -69,6 +69,10 @@ src/
     journalSearch.ts  # recherche dans le journal (aliments / symptômes / notes)
     aggregates.ts     # stats hebdo + séries pour graphes
     correlations.ts   # détection heuristique aliment → symptôme
+    biogenicAmines.ts # amines biogènes (histamine…) : classifyAmines + charge journalière dayAmineLoad + détection de combinaison
+    amineCorrelation.ts # corrélation jours à charge amines élevée ↔ symptômes histaminiques (garde-fou conservateur)
+    nutrition.ts      # détection de carence (pure) : apports CIQUAL vs ANR, bandes, garde-fou de couverture + rankSourcesFor
+    foodReference.ts  # buildFoodReference + downloadFoodReference (export du catalogue au format Claude Web, avec amines)
     db.ts             # Dexie v8 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites/treatments/reintroChallenges/mealTemplates/periodAnalyses, export/import, config IA
     encyclopedia.ts   # socle statique des symptômes digestifs (catégorisé) — Repères
     aggregates.ts     # (+ dayHasContent / latestActiveDate, réutilisés par db.ts)

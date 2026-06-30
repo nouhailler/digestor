@@ -67,6 +67,17 @@ describe('buildFoodReference', () => {
     expect(entry.tips).toBeUndefined();
   });
 
+  it('ajoute le profil amines via le dictionnaire pour un stub connu', () => {
+    const [entry] = buildFoodReference([{ name: 'Roquefort' }], now).foods;
+    expect(entry.amines?.level).toBe('high');
+    expect(entry.amines?.group).toBe('fromage');
+  });
+
+  it('n’ajoute pas d’amines pour un aliment inconnu du dictionnaire', () => {
+    const [entry] = buildFoodReference([{ name: 'Aliment martien' }], now).foods;
+    expect(entry.amines).toBeUndefined();
+  });
+
   it('trie les aliments par nom (fr)', () => {
     const foods: CatalogueFood[] = [{ name: 'Banane' }, { name: 'Abricot' }, { name: 'Carotte' }];
     const names = buildFoodReference(foods, now).foods.map((f) => f.name);
