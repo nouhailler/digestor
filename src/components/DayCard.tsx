@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import {
   CalendarDays,
   Check,
+  ChevronDown,
   ClipboardList,
   Droplets,
   HeartPulse,
@@ -18,7 +19,7 @@ import { mealFromTemplate, templateFromMeal } from '../lib/mealTemplates';
 import { putMealTemplate } from '../lib/db';
 import { syncSatietyNotes } from '../lib/satietyDuration';
 import { useMealTemplates } from '../hooks/useMealTemplates';
-import { DEFAULT_MEAL_TIMES, SYMPTOM_ORDER } from '../lib/constants';
+import { DEFAULT_MEAL_TIMES, INTENSITY_COLOR, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../lib/constants';
 import { suggestDayQuality } from '../lib/quality';
 import { QualityBadge } from './QualityBadge';
 import { MealEditor } from './MealEditor';
@@ -193,11 +194,30 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
         )}
       </Section>
 
-      {/* Symptômes généraux (hors repas) — n'apparaît que si pertinent. */}
+      {/* Symptômes généraux (hors repas) — n'apparaît que si pertinent ; repliée par défaut. */}
       {(showGeneralSymptoms || editing) && (
         <Section
           icon={<Sparkles size={15} />}
           title={day.meals.length === 0 ? 'Symptômes' : 'Symptômes (hors repas)'}
+          collapsible
+          defaultOpen={false}
+          summary={
+            <span className="flex flex-wrap items-center gap-x-3 gap-y-1 normal-case tracking-normal">
+              {SYMPTOM_ORDER.filter((k) => day.symptoms[k] !== 'absent').length === 0 ? (
+                <span className="font-normal text-muted">aucun</span>
+              ) : (
+                SYMPTOM_ORDER.filter((k) => day.symptoms[k] !== 'absent').map((k) => (
+                  <span key={k} className="inline-flex items-center gap-1.5 font-normal text-ink">
+                    <span
+                      className="inline-block h-2 w-2 rounded-full"
+                      style={{ backgroundColor: INTENSITY_COLOR[day.symptoms[k]] }}
+                    />
+                    {SYMPTOM_LABELS[k]}
+                  </span>
+                ))
+              )}
+            </span>
+          }
           suffix={
             !editing && day.symptomTiming ? (
               <span className="text-xs uppercase tracking-wide text-muted">({day.symptomTiming})</span>
@@ -262,21 +282,55 @@ function Section({
   icon,
   title,
   suffix,
+  collapsible = false,
+  defaultOpen = true,
+  summary,
   children,
 }: {
   icon: React.ReactNode;
   title: string;
   suffix?: React.ReactNode;
+  /** Rend la section pliable (en-tête cliquable + chevron). */
+  collapsible?: boolean;
+  /** État initial si pliable (défaut : ouvert). */
+  defaultOpen?: boolean;
+  /** Aperçu affiché dans l'en-tête quand la section est repliée. */
+  summary?: React.ReactNode;
   children: React.ReactNode;
 }) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  if (!collapsible) {
+    return (
+      <section className="mt-5">
+        <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
+          <span className="text-muted">{icon}</span>
+          {title}
+          {suffix}
+        </h3>
+        {children}
+      </section>
+    );
+  }
+
   return (
     <section className="mt-5">
-      <h3 className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="mb-3 flex w-full items-center gap-2 text-left text-xs font-semibold uppercase tracking-wider text-muted hover:text-ink"
+      >
         <span className="text-muted">{icon}</span>
         {title}
         {suffix}
-      </h3>
-      {children}
+        {!open && summary}
+        <ChevronDown
+          size={14}
+          className={`ml-auto shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && children}
     </section>
   );
 }
