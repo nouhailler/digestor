@@ -29,6 +29,7 @@ import { CATEGORY_COLOR } from '../lib/constants';
 import { dateLabel } from '../lib/dates';
 import { FODMAP_LEVEL_COLOR, FODMAP_LEVEL_LABEL } from '../lib/ai/insightFormat';
 import { classifyFood, dictionaryFoods, looseKey, normalize } from '../lib/foodClassifier';
+import { AMINE_LEVEL_COLOR, AMINE_LEVEL_LABEL, classifyAmines } from '../lib/biogenicAmines';
 import { downloadFoodReference } from '../lib/foodReference';
 import { analyzeFood } from '../lib/ai/foodInsight';
 import { runAiTask } from '../lib/ai/aiActivity';
@@ -483,6 +484,8 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
           {rows.map((r) => {
             const isGenerating = generatingKeys.has(r.key);
             const isFavorite = favoriteKeys.has(r.key);
+            // Amines biogènes : depuis l'analyse si dispo, sinon le dictionnaire.
+            const amine = r.insight?.amines ?? classifyAmines(r.name);
             const subtitle = isGenerating
               ? 'Génération en cours…'
               : r.insight
@@ -530,6 +533,20 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                 ) : (
                   <span className="shrink-0 rounded-full border border-dashed border-border px-2 py-0.5 text-xs text-muted">
                     à analyser
+                  </span>
+                )}
+                {!isGenerating && (amine.level === 'high' || amine.level === 'moderate') && (
+                  <span
+                    className="shrink-0 rounded-full px-2 py-0.5 text-xs"
+                    style={{
+                      color: AMINE_LEVEL_COLOR[amine.level],
+                      backgroundColor: `color-mix(in srgb, ${AMINE_LEVEL_COLOR[amine.level]} 14%, transparent)`,
+                    }}
+                    title={`Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[amine.level].toLowerCase()}${
+                      amine.daoBlocker ? ' · freine la DAO' : ''
+                    }${amine.liberator ? ' · histamino-libérateur' : ''}`}
+                  >
+                    Amines {AMINE_LEVEL_LABEL[amine.level].toLowerCase()}
                   </span>
                 )}
                 <button
