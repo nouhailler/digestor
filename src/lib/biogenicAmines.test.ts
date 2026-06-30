@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { classifyAmines, dayAmineLoad } from './biogenicAmines';
+import { amineBreakdown, classifyAmines, dayAmineLoad } from './biogenicAmines';
 
 describe('classifyAmines', () => {
   it('classe les aliments fermentés/affinés en élevé', () => {
@@ -71,5 +71,21 @@ describe('dayAmineLoad', () => {
   it('charge modérée entre les seuils', () => {
     const r = dayAmineLoad(['tomate', 'epinard']); // 1 + 1(liberator tomate) + 1 = 3 → modéré
     expect(r.band).toBe('modere');
+  });
+});
+
+describe('amineBreakdown', () => {
+  it('liste les contributeurs (élevé d’abord), les freineurs de DAO et les libérateurs', () => {
+    const b = amineBreakdown(['Vin rouge', 'Tomate', 'Riz', 'Courgette']);
+    // contributeurs = niveau modéré/élevé, trié élevé d'abord
+    expect(b.contributors.map((c) => c.name)).toEqual(['Vin rouge', 'Tomate']);
+    expect(b.daoBlockers.map((c) => c.name)).toEqual(['Vin rouge']); // vin = freine la DAO
+    expect(b.liberators.map((c) => c.name)).toEqual(['Tomate']); // tomate = libératrice
+    expect(b.load.band).toBe('eleve'); // vin(3)+dao(1)+tomate(1)+lib(1) = 6
+  });
+
+  it('dédoublonne par nom normalisé', () => {
+    const b = amineBreakdown(['Roquefort', 'roquefort', 'ROQUEFORT']);
+    expect(b.contributors).toHaveLength(1);
   });
 });

@@ -231,6 +231,50 @@ export function dayAmineLoad(names: string[]): AmineLoad {
   return { score, band, highCount, liberators, daoBlockers, groups: [...groups], combo };
 }
 
+/** Un aliment du jour qui contribue à la charge (avec son profil amines). */
+export interface AmineContributor {
+  name: string; // nom affiché (1re occurrence)
+  info: AmineInfo;
+}
+
+export interface AmineBreakdown {
+  load: AmineLoad;
+  /** Aliments à niveau modéré/élevé, les plus chargés d'abord. */
+  contributors: AmineContributor[];
+  /** Aliments qui freinent la DAO. */
+  daoBlockers: AmineContributor[];
+  /** Aliments histamino-libérateurs. */
+  liberators: AmineContributor[];
+}
+
+const LEVEL_RANK: Record<AmineLevel, number> = { high: 3, moderate: 2, low: 1, unknown: 0 };
+
+/**
+ * Décompose la charge d'une journée : pourquoi elle est élevée (aliments
+ * contributeurs) et quels aliments freinent la DAO / libèrent l'histamine.
+ * Dédoublonne par nom normalisé (1re occurrence conservée pour l'affichage).
+ */
+export function amineBreakdown(names: string[]): AmineBreakdown {
+  const seen = new Set<string>();
+  const contributors: AmineContributor[] = [];
+  const daoBlockers: AmineContributor[] = [];
+  const liberators: AmineContributor[] = [];
+
+  for (const name of names) {
+    const key = normalize(name);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    const info = classifyAmines(name);
+    const entry: AmineContributor = { name, info };
+    if (info.level === 'high' || info.level === 'moderate') contributors.push(entry);
+    if (info.daoBlocker) daoBlockers.push(entry);
+    if (info.liberator) liberators.push(entry);
+  }
+
+  contributors.sort((a, b) => LEVEL_RANK[b.info.level] - LEVEL_RANK[a.info.level]);
+  return { load: dayAmineLoad(names), contributors, daoBlockers, liberators };
+}
+
 export const AMINE_LOAD_LABEL: Record<AmineLoadBand, string> = {
   faible: 'Charge faible',
   modere: 'Charge modérée',

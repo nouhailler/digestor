@@ -21,7 +21,13 @@ import { syncSatietyNotes } from '../lib/satietyDuration';
 import { useMealTemplates } from '../hooks/useMealTemplates';
 import { DEFAULT_MEAL_TIMES, INTENSITY_COLOR, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../lib/constants';
 import { suggestDayQuality } from '../lib/quality';
-import { AMINE_LOAD_COLOR, AMINE_LOAD_LABEL, dayAmineLoad } from '../lib/biogenicAmines';
+import {
+  AMINE_LEVEL_COLOR,
+  AMINE_LEVEL_LABEL,
+  AMINE_LOAD_COLOR,
+  AMINE_LOAD_LABEL,
+  amineBreakdown,
+} from '../lib/biogenicAmines';
 import { QualityBadge } from './QualityBadge';
 import { MealEditor } from './MealEditor';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
@@ -51,13 +57,15 @@ interface DayCardProps {
 export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, recentFoods, favorites, insights }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
   const [tplOpen, setTplOpen] = useState(false);
+  const [amineOpen, setAmineOpen] = useState(false);
   const templates = useMealTemplates();
 
   const suggested = useMemo(() => suggestDayQuality(day), [day]);
-  const amineLoad = useMemo(
-    () => dayAmineLoad(day.meals.flatMap((m) => m.foods.map((f) => f.name))),
+  const amine = useMemo(
+    () => amineBreakdown(day.meals.flatMap((m) => m.foods.map((f) => f.name))),
     [day],
   );
+  const amineLoad = amine.load;
   const effectiveQuality = day.quality ?? suggested;
   const isSuggested = day.quality == null && effectiveQuality != null;
   // Symptômes « généraux » (non rattachés à un repas) : affichés si présents ou s'il n'y a aucun repas.
@@ -132,26 +140,93 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
         </div>
       </div>
 
-      {/* Charge en amines biogènes (histamine) du jour */}
+      {/* Charge en amines biogènes (histamine) du jour — cliquable pour le détail */}
       {amineLoad.band !== 'faible' && (
         <div
-          className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-sm"
+          className="mt-3 rounded-xl border text-sm"
           style={{
             borderColor: AMINE_LOAD_COLOR[amineLoad.band],
             backgroundColor: `color-mix(in srgb, ${AMINE_LOAD_COLOR[amineLoad.band]} 10%, transparent)`,
           }}
-          title="Estimation de la charge en amines biogènes (histamine, tyramine…) cumulée sur la journée. L'effet dépend de l'accumulation et des combinaisons."
         >
-          <span className="font-medium" style={{ color: AMINE_LOAD_COLOR[amineLoad.band] }}>
-            Amines : {AMINE_LOAD_LABEL[amineLoad.band].replace('Charge ', '')}
-          </span>
-          {amineLoad.combo && (
-            <span className="text-muted">
-              · combinaison à risque (alcool + fromage/charcuterie/fermenté)
+          <button
+            type="button"
+            onClick={() => setAmineOpen((o) => !o)}
+            aria-expanded={amineOpen}
+            className="flex w-full flex-wrap items-center gap-2 px-3 py-2 text-left"
+            title="Pourquoi cette charge ? Toucher pour le détail (aliments concernés, freineurs de DAO)."
+          >
+            <span className="font-medium" style={{ color: AMINE_LOAD_COLOR[amineLoad.band] }}>
+              Amines : {AMINE_LOAD_LABEL[amineLoad.band].replace('Charge ', '')}
             </span>
-          )}
-          {!amineLoad.combo && amineLoad.daoBlockers > 0 && (
-            <span className="text-muted">· {amineLoad.daoBlockers} freineur(s) de DAO</span>
+            {amineLoad.combo && (
+              <span className="text-muted">· combinaison à risque (alcool + fromage/charcuterie/fermenté)</span>
+            )}
+            {!amineLoad.combo && amineLoad.daoBlockers > 0 && (
+              <span className="text-muted">· {amineLoad.daoBlockers} freineur(s) de DAO</span>
+            )}
+            <ChevronDown
+              size={16}
+              className="ml-auto shrink-0 text-muted transition-transform"
+              style={{ transform: amineOpen ? 'rotate(180deg)' : 'none' }}
+            />
+          </button>
+
+          {amineOpen && (
+            <div className="space-y-3 border-t px-3 py-3" style={{ borderColor: 'var(--color-border)' }}>
+              <p className="leading-relaxed text-muted">
+                Les amines biogènes (histamine, tyramine…) s'accumulent sur la journée. La réaction dépend de la
+                quantité, des <strong>combinaisons</strong> et de la dégradation par la <strong>DAO</strong>.
+              </p>
+
+              {amine.contributors.length > 0 && (
+                <AmineDetailGroup title="Pourquoi élevée — aliments concernés">
+                  {amine.contributors.map((c, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span
+                        className="mt-1 inline-block h-2 w-2 shrink-0 rounded-full"
+                        style={{ backgroundColor: AMINE_LEVEL_COLOR[c.info.level] }}
+                      />
+                      <span className="text-ink">
+                        {c.name}{' '}
+                        <span className="text-muted">— {AMINE_LEVEL_LABEL[c.info.level].toLowerCase()}</span>
+                        {c.info.note && <span className="text-muted"> · {c.info.note}</span>}
+                      </span>
+                    </li>
+                  ))}
+                </AmineDetailGroup>
+              )}
+
+              {amine.daoBlockers.length > 0 && (
+                <AmineDetailGroup title="Freineurs de DAO (gênent la dégradation de l’histamine)">
+                  {amine.daoBlockers.map((c, i) => (
+                    <li key={i} className="text-ink">
+                      {c.name}
+                      {c.info.note && <span className="text-muted"> · {c.info.note}</span>}
+                    </li>
+                  ))}
+                </AmineDetailGroup>
+              )}
+
+              {amine.liberators.length > 0 && (
+                <AmineDetailGroup title="Histamino-libérateurs (libèrent l’histamine endogène)">
+                  {amine.liberators.map((c, i) => (
+                    <li key={i} className="text-ink">{c.name}</li>
+                  ))}
+                </AmineDetailGroup>
+              )}
+
+              {amineLoad.combo && (
+                <p className="rounded-lg border border-border bg-surface-2 px-3 py-2 leading-relaxed text-ink">
+                  ⚠️ Combinaison à risque détectée : <strong>alcool + fromage affiné / charcuterie / fermenté</strong>.
+                  Ces associations déclenchent souvent, même si chaque aliment seul passe « à peu près ».
+                </p>
+              )}
+
+              <p className="text-xs text-muted">
+                Estimation indicative (la teneur réelle varie selon fraîcheur et affinage), non médicale.
+              </p>
+            </div>
           )}
         </div>
       )}
@@ -361,5 +436,15 @@ function Section({
       </button>
       {open && children}
     </section>
+  );
+}
+
+/** Groupe titré du détail « amines » (liste à puces). */
+function AmineDetailGroup({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted">{title}</p>
+      <ul className="space-y-1">{children}</ul>
+    </div>
   );
 }
