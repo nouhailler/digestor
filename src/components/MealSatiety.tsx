@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Anchor, ChevronDown, Feather, Gauge, Plus, Timer, Trash2, Wind } from 'lucide-react';
+import { Anchor, ChevronDown, Feather, Gauge, HelpCircle, Plus, Timer, Trash2, Wind } from 'lucide-react';
 import type { FoodInsight, Meal, SatietyCheck, SatietyCheckpoint, SatietyType } from '../types';
 import { VasSlider } from './VasSlider';
+import { SatietyHelpSheet } from './SatietyHelp';
 import { satietyDurationCore } from '../lib/satietyDuration';
 import {
   CHECKPOINT_LABEL,
@@ -49,6 +50,7 @@ function DurationLine({ meal, insights }: { meal: Meal; insights?: Map<string, F
  */
 export function MealSatiety({ meal, editing, onChange, insights }: MealSatietyProps) {
   const [open, setOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const checks = sortChecks(meal.satiety ?? []);
   const missing = SATIETY_CHECKPOINTS.filter((cp) => !checks.some((c) => c.checkpoint === cp));
 
@@ -81,6 +83,7 @@ export function MealSatiety({ meal, editing, onChange, insights }: MealSatietyPr
 
   // --- Édition : zone repliable ---
   return (
+    <>
     <div className="rounded-lg border border-border/70 bg-surface-2/40">
       <button
         type="button"
@@ -110,7 +113,13 @@ export function MealSatiety({ meal, editing, onChange, insights }: MealSatietyPr
         <div className="space-y-4 px-3 pb-3">
           {checks.length > 0 && <DurationLine meal={meal} insights={insights} />}
           {checks.map((c) => (
-            <CheckEditRow key={c.checkpoint} check={c} onChange={setCheck} onRemove={() => delCheck(c.checkpoint)} />
+            <CheckEditRow
+              key={c.checkpoint}
+              check={c}
+              onChange={setCheck}
+              onRemove={() => delCheck(c.checkpoint)}
+              onHelp={() => setHelpOpen(true)}
+            />
           ))}
 
           {missing.length > 0 && (
@@ -130,6 +139,8 @@ export function MealSatiety({ meal, editing, onChange, insights }: MealSatietyPr
         </div>
       )}
     </div>
+    <SatietyHelpSheet open={helpOpen} onClose={() => setHelpOpen(false)} />
+    </>
   );
 }
 
@@ -137,10 +148,12 @@ function CheckEditRow({
   check,
   onChange,
   onRemove,
+  onHelp,
 }: {
   check: SatietyCheck;
   onChange: (c: SatietyCheck) => void;
   onRemove: () => void;
+  onHelp?: () => void;
 }) {
   return (
     <div className="rounded-lg border border-border bg-surface px-3 py-3">
@@ -172,7 +185,20 @@ function CheckEditRow({
 
       {typeApplies(check.checkpoint) && (
         <div className="mt-3">
-          <p className="mb-1.5 text-xs font-medium text-muted">Type de satiété</p>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <p className="text-xs font-medium text-muted">Type de satiété</p>
+            {onHelp && (
+              <button
+                type="button"
+                onClick={onHelp}
+                aria-label="Comprendre la satiété et sa durée"
+                title="Comment Digestor évalue la satiété (faim, énergie) et sa durée tenue / attendue"
+                className="inline-flex items-center gap-1 text-xs text-muted hover:text-ink"
+              >
+                <HelpCircle size={14} /> Aide
+              </button>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
             {SATIETY_TYPES.map((t) => {
               const Icon = TYPE_ICON[t];

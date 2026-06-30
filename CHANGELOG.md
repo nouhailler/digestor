@@ -28,6 +28,9 @@ Nouveau suivi temporel de la satiété après chaque repas, corrélé localement
   Journal, et champ `tags` ajouté à l'import vocal des repas (**prompt v3** — `mealImportPrompt` &
   `docs/claude-web-repas-prompt.md`). Ces tags **affinent la durée de satiété attendue** (protéiné/
   fibres → longue, sucré → courte) ; à défaut, l'heuristique des catégories s'applique.
+- **Aide intégrée** : un bouton **Aide** à droite de « Type de satiété » (édition d'un repas) ouvre
+  une explication « mesurée vs attendue » + rôle des tags ; la même explication figure dans l'aide
+  contextuelle « ? » du Journal (source unique `SATIETY_HELP`).
 - **Données** : champs `Meal.satiety` et `Meal.tags` **imbriqués dans le repas** (comme
   `Meal.symptoms`) — aucune migration Dexie, export/import déjà couverts via les jours. **209 tests.**
 

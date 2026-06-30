@@ -1,6 +1,7 @@
-import { Lightbulb, PlayCircle } from 'lucide-react';
+import { Gauge, Lightbulb, PlayCircle } from 'lucide-react';
 import { Sheet } from './Sheet';
-import { HELP } from '../lib/help';
+import { SatietyHelpContent } from './SatietyHelp';
+import { HELP, SATIETY_HELP } from '../lib/help';
 import type { Tab } from './BottomNav';
 
 interface HelpSheetProps {
@@ -36,6 +37,15 @@ export function HelpSheet({ open, tab, onClose, onStartTour }: HelpSheetProps) {
             </li>
           ))}
         </ul>
+
+        {tab === 'journal' && (
+          <div className="border-t border-border pt-4">
+            <h3 className="mb-2 inline-flex items-center gap-2 text-sm font-semibold text-ink">
+              <Gauge size={15} style={{ color: 'var(--color-leger)' }} /> {SATIETY_HELP.title}
+            </h3>
+            <SatietyHelpContent />
+          </div>
+        )}
       </div>
     </Sheet>
   );
