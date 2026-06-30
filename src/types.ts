@@ -30,10 +30,17 @@ export interface FoodItem {
   quantity?: FoodQuantity; // portion optionnelle (sinon non précisée)
 }
 
+/**
+ * Tag de composition d'un repas (saisi à la main / par l'import). Sert à affiner
+ * la durée de satiété *attendue* (protéiné/fibres → satiété longue ; sucré → courte).
+ */
+export type MealTag = 'proteine' | 'fibres' | 'sucre';
+
 export interface Meal {
   id: string;
   time: string; // "07:30"
   foods: FoodItem[];
+  tags?: MealTag[]; // composition dominante (protéiné / fibres / sucré) — multi-sélection
   symptoms?: Record<SymptomKey, Intensity>; // symptômes ressentis après ce repas
   satiety?: SatietyCheck[]; // suivi de satiété aux différents checkpoints (immédiat → +3 h)
 }

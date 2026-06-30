@@ -44,6 +44,16 @@ describe('parseMealsImport', () => {
     expect(r.warnings.length).toBeGreaterThan(0);
   });
 
+  it('parse les tags de composition du repas (synonymes, dédoublonnage)', () => {
+    const r = parseMealsImport(
+      '{ "meals": [ { "time": "08:00", "tags": ["protéiné", "fibres", "gras"], "foods": ["œufs"] } ] }',
+      '2026-06-13',
+    );
+    expect(r.days[0].meals[0].tags).toEqual(['proteine', 'fibres']);
+    const merged = mergeImportedDay(emptyDay('2026-06-13'), r.days[0], 'append');
+    expect(merged.meals[0].tags).toEqual(['proteine', 'fibres']);
+  });
+
   it('accepte un aliment objet avec catégorie explicite', () => {
     const r = parseMealsImport(
       '{ "meals": [ { "time": "08:00", "foods": [ { "name": "miel maison", "category": "pro" } ] } ] }',

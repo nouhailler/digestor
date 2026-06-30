@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { FodmapLevel, FoodCategory, FoodInsight, Meal, SatietyCheck } from '../types';
+import type { FodmapLevel, FoodCategory, FoodInsight, Meal, MealTag, SatietyCheck } from '../types';
 import { normalize } from './foodClassifier';
 import {
   expectedSatiety,
@@ -71,6 +71,14 @@ describe('expectedSatiety', () => {
   it('raccourcit si un aliment est FODMAP élevé', () => {
     const insights = new Map([[normalize('salade'), insight('salade', 'high')]]);
     expect(expectedSatiety(meal([['salade', 'beneficial']], []), insights)).toEqual({ minH: 3, maxH: 4 });
+  });
+
+  it('les tags de composition priment sur la catégorie', () => {
+    const tagged = (tags: MealTag[]): Meal => ({ ...meal([['sucre', 'pro']], []), tags });
+    expect(expectedSatiety(tagged(['proteine']))).toEqual({ minH: 4, maxH: 5 });
+    expect(expectedSatiety(tagged(['proteine', 'fibres']))).toEqual({ minH: 4, maxH: 6 });
+    expect(expectedSatiety(tagged(['sucre']))).toEqual({ minH: 2, maxH: 3 });
+    expect(expectedSatiety(tagged(['proteine', 'sucre']))).toEqual({ minH: 3, maxH: 4 });
   });
 });
 

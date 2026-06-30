@@ -1,4 +1,4 @@
-import type { DayEntry, FoodInsight, Meal, SatietyCheck, SatietyCheckpoint } from '../types';
+import type { DayEntry, FoodInsight, Meal, MealTag, SatietyCheck, SatietyCheckpoint } from '../types';
 import { normalize } from './foodClassifier';
 import { sortChecks } from './satiety';
 import { dominantCategory } from './satietyCorrelation';
@@ -57,12 +57,29 @@ export interface ExpectedSatiety {
 }
 
 /**
- * Durée de satiété *attendue*, approximée d'après la composition. Digestor n'a
- * pas les macros : on s'appuie sur la catégorie dominante (bénéfique ~ protéines/
- * fibres → long ; pro ~ sucres/raffinés → court) et, si dispo, le FODMAP élevé
- * (raccourcit). Approximation assumée.
+ * Durée attendue d'après les tags de composition (protéiné/fibres → longue,
+ * sucré → courte). `null` si aucun tag — on retombe alors sur la catégorie.
+ */
+function expectedFromTags(tags: MealTag[]): ExpectedSatiety | null {
+  if (tags.length === 0) return null;
+  const lasting = tags.includes('proteine') || tags.includes('fibres');
+  const both = tags.includes('proteine') && tags.includes('fibres');
+  const sugary = tags.includes('sucre');
+  if (lasting && sugary) return { minH: 3, maxH: 4 };
+  if (lasting) return both ? { minH: 4, maxH: 6 } : { minH: 4, maxH: 5 };
+  if (sugary) return { minH: 2, maxH: 3 };
+  return null;
+}
+
+/**
+ * Durée de satiété *attendue*, approximée d'après la composition. Priorité aux
+ * tags de repas saisis (protéiné/fibres/sucré) ; à défaut, on s'appuie sur la
+ * catégorie dominante (bénéfique → long ; pro → court) et, si dispo, le FODMAP
+ * élevé (raccourcit). Approximation assumée.
  */
 export function expectedSatiety(meal: Meal, insights?: Map<string, FoodInsight>): ExpectedSatiety {
+  const fromTags = expectedFromTags(meal.tags ?? []);
+  if (fromTags) return fromTags;
   if (meal.foods.length === 0) return { minH: 3, maxH: 4 };
   const cat = dominantCategory(meal);
   let range: ExpectedSatiety =

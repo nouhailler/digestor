@@ -24,8 +24,12 @@ Nouveau suivi temporel de la satiété après chaque repas, corrélé localement
   « encore rassasié à +3 h » si la faim n'est pas revenue) et *attendue* d'après la composition
   (catégories + FODMAP : « attendu ~4–5 h »). Affichée sous le repas **et** consignée dans une ligne
   auto des **Notes du jour** (`⏱ Satiété (HH:MM) : …`, idempotente, préservant le texte libre).
-- **Données** : champ `Meal.satiety` **imbriqué dans le repas** (comme `Meal.symptoms`) — aucune
-  migration Dexie, export/import déjà couverts via les jours. **204 tests.**
+- **Tags de composition par repas** : chips **Protéiné / Fibres / Sucré** (multi-sélection) dans le
+  Journal, et champ `tags` ajouté à l'import vocal des repas (**prompt v3** — `mealImportPrompt` &
+  `docs/claude-web-repas-prompt.md`). Ces tags **affinent la durée de satiété attendue** (protéiné/
+  fibres → longue, sucré → courte) ; à défaut, l'heuristique des catégories s'applique.
+- **Données** : champs `Meal.satiety` et `Meal.tags` **imbriqués dans le repas** (comme
+  `Meal.symptoms`) — aucune migration Dexie, export/import déjà couverts via les jours. **209 tests.**
 
 ## [0.13.0] — Récupérer l'analyse de journée (partage & téléchargement)
 

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { BookmarkPlus, ChevronDown, Plus, Scale, Star, Trash2, X } from 'lucide-react';
-import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, SymptomKey } from '../types';
+import { BookmarkPlus, Candy, ChevronDown, Egg, Plus, Scale, Star, Trash2, Wheat, X } from 'lucide-react';
+import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, MealTag, SymptomKey } from '../types';
 import { Chip } from './Chip';
 import { FoodQuantityEditor } from './FoodQuantityEditor';
 import { formatQuantity } from '../lib/quantity';
@@ -13,6 +13,7 @@ import {
   SYMPTOM_ORDER,
 } from '../lib/constants';
 import { emptySymptoms, makeFood } from '../lib/factory';
+import { MEAL_TAGS, MEAL_TAG_COLOR, MEAL_TAG_LABEL } from '../lib/mealTags';
 import { normalize } from '../lib/foodClassifier';
 import { foodSuggestions } from '../lib/foodSuggestions';
 import { FODMAP_LEVEL_LABEL, insightChipColor } from '../lib/ai/insightFormat';
@@ -283,6 +284,9 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
         )}
       </div>
 
+      {/* Tags de composition (protéiné / fibres / sucré) — affinent la durée de satiété attendue. */}
+      <MealTagRow meal={meal} editing={editing} onChange={onChange} />
+
       {/* Zone symptômes du repas — repliée par défaut pour économiser l'espace. */}
       {editing ? (
         <div className="rounded-lg border border-border/70 bg-surface-2/40">
@@ -354,6 +358,65 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
 
       {/* Suivi de satiété (faim / énergie / sucre aux checkpoints) — vide tant que non saisi. */}
       <MealSatiety meal={meal} editing={editing} onChange={onChange} insights={insights} />
+    </div>
+  );
+}
+
+const TAG_ICON: Record<MealTag, typeof Egg> = { proteine: Egg, fibres: Wheat, sucre: Candy };
+
+/** Tags de composition d'un repas (multi-sélection). Lecture : chips actives seulement. */
+function MealTagRow({ meal, editing, onChange }: { meal: Meal; editing: boolean; onChange: (m: Meal) => void }) {
+  const tags = meal.tags ?? [];
+
+  if (!editing) {
+    if (tags.length === 0) return null;
+    return (
+      <div className="flex flex-wrap items-center gap-1.5 pl-1">
+        {tags.map((t) => {
+          const Icon = TAG_ICON[t];
+          return (
+            <span
+              key={t}
+              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px]"
+              style={{ color: '#0e0e0f', backgroundColor: MEAL_TAG_COLOR[t] }}
+            >
+              <Icon size={11} /> {MEAL_TAG_LABEL[t]}
+            </span>
+          );
+        })}
+      </div>
+    );
+  }
+
+  function toggle(t: MealTag) {
+    const next = tags.includes(t) ? tags.filter((x) => x !== t) : [...tags, t];
+    onChange({ ...meal, tags: next.length ? next : undefined });
+  }
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-xs font-medium uppercase tracking-wide text-muted">Composition</span>
+      {MEAL_TAGS.map((t) => {
+        const Icon = TAG_ICON[t];
+        const active = tags.includes(t);
+        return (
+          <button
+            key={t}
+            type="button"
+            onClick={() => toggle(t)}
+            aria-pressed={active}
+            title="Dominante du repas. Affine la durée de satiété attendue : protéiné/fibres → longue, sucré → courte."
+            className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs"
+            style={{
+              color: active ? '#0e0e0f' : 'var(--color-muted)',
+              borderColor: active ? MEAL_TAG_COLOR[t] : 'var(--color-border)',
+              backgroundColor: active ? MEAL_TAG_COLOR[t] : 'transparent',
+            }}
+          >
+            <Icon size={13} /> {MEAL_TAG_LABEL[t]}
+          </button>
+        );
+      })}
     </div>
   );
 }

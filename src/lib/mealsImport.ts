@@ -5,12 +5,14 @@ import type {
   FoodInsight,
   FoodQuantity,
   Intensity,
+  MealTag,
   Stool,
   SymptomKey,
 } from '../types';
 import { parseJsonLoose } from './json';
 import { makeFood, uid } from './factory';
 import { parseQuantity } from './quantity';
+import { parseMealTags } from './mealTags';
 import { normalize } from './foodClassifier';
 import { SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
 import { buildFoodInsight } from './ai/foodInsight';
@@ -27,6 +29,7 @@ export interface ImportedFood {
 export interface ImportedMeal {
   time: string; // "HH:MM"
   foods: ImportedFood[];
+  tags?: MealTag[]; // composition (protéiné / fibres / sucré)
 }
 
 export interface ImportedDay {
@@ -158,7 +161,8 @@ function parseMeal(raw: unknown, warnings: string[]): ImportedMeal | null {
     warnings.push('Repas sans aliment ignoré.');
     return null;
   }
-  return { time: normalizeTime(o.time, warnings), foods };
+  const tags = parseMealTags(o.tags);
+  return { time: normalizeTime(o.time, warnings), foods, ...(tags.length ? { tags } : {}) };
 }
 
 function parseSymptoms(raw: unknown, warnings: string[]): Partial<Record<SymptomKey, Intensity>> | undefined {
@@ -272,6 +276,7 @@ function toMeal(meal: ImportedMeal) {
   return {
     id: uid(),
     time: meal.time,
+    ...(meal.tags && meal.tags.length ? { tags: meal.tags } : {}),
     foods: meal.foods.map((f) => {
       const base = f.category ? { id: uid(), name: f.name, category: f.category } : makeFood(f.name);
       return f.quantity ? { ...base, quantity: f.quantity } : base;

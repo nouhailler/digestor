@@ -55,6 +55,11 @@ ALIMENTS — fournis pour CHAQUE aliment un objet avec son analyse (c'est toi qu
 - "safePortion" : portion tolérée (optionnel), "summary" : 1 phrase (optionnel), "tips" : [conseils] (optionnel).
 Si tu n'es pas sûr d'un champ, mets "unknown" (niveaux) ou "inconnu" (verdicts) plutôt que d'inventer.
 
+TAGS DE COMPOSITION (par repas, optionnel mais recommandé) — "tags" : liste parmi
+"proteine", "fibres", "sucre". Indique la dominante du repas, utilisée pour estimer la durée de
+satiété (protéiné/fibres → satiété longue ; sucré → courte). Ex. œufs + légumes → ["proteine","fibres"] ;
+viennoiserie + jus de fruit → ["sucre"]. N'ajoute que ce qui est réellement marquant dans le repas.
+
 SYMPTÔMES (optionnels, par jour) — objet "symptoms" : clé = identifiant exact, valeur ∈ absent|leger|modere|severe.
 Identifiants autorisés : ballonnements, gaz, douleurs_abdo, reflux, fatigue_apres_repas, envie_sucre,
 diarrhee, constipation, brouillard_mental, mycose_buccale, demangeaisons, nausees.
@@ -72,13 +77,14 @@ FORMAT DE SORTIE
 {
   "app": "digestor",
   "type": "meals",
-  "version": 2,
+  "version": 3,
   "days": [
     {
       "date": "AAAA-MM-JJ",
       "meals": [
         {
           "time": "HH:MM",
+          "tags": ["proteine", "fibres"],
           "foods": [
             {
               "name": "aliment",
@@ -115,6 +121,9 @@ FORMAT DE SORTIE
   ou une chaîne libre tolérée (« 1 càc », « 150 g »).
   Quand l'analyse est fournie, elle est **mise en cache** (consultable dans l'onglet Aliments et
   au tap sur la chip), sans appel d'API.
+- **Tags de composition** *(nouveau, v3)* : `tags` par repas — liste parmi `proteine`, `fibres`,
+  `sucre` (synonymes accentués tolérés). Sert à estimer la **durée de satiété attendue** (zone Satiété
+  + Notes). Facultatif : un repas sans tag retombe sur l'heuristique des catégories.
 - **Symptômes** : clés exactes listées ci-dessus ; intensités `absent|leger|modere|severe`
   (les accents et quelques synonymes français sont tolérés à l'import).
 - **Transit** : `hydrationL`, `stool { label, count, bristol }`, `digestionDelayH`, `quality`.
