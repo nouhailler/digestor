@@ -17,9 +17,11 @@ RÈGLES GÉNÉRALES
 - Date : "date" au format "AAAA-MM-JJ" (défaut = aujourd'hui ; "hier" = jour précédent). Plusieurs jours possibles dans "days".
 
 FICHIER DE RÉFÉRENCE (prioritaire)
-- Si le fichier « digestor-aliments-reference.json » est présent dans le projet, cherche-y D'ABORD chaque
-  aliment cité (par "name" ou "aliases", insensible aux accents/majuscules/pluriels). S'il y figure, REPRENDS
-  tel quel ses champs (category, fodmapLevel, fodmaps, sibo, candida, safePortion) — n'invente pas de valeurs.
+- Si un fichier de référence d'aliments Digestor est joint au projet (JSON contenant "type": "food-reference"
+  et une liste "foods"), quel que soit son nom, cherche-y D'ABORD chaque aliment cité (par "name" ou "aliases",
+  insensible aux accents/majuscules/pluriels). S'il y figure, REPRENDS tel quel ses champs (category,
+  fodmapLevel, fodmaps, sibo, candida, safePortion) — n'invente pas de valeurs.
+- Une entrée marquée "needsReview": true n'a pas d'analyse complète : complète-la selon ta connaissance.
 - N'élabore une fiche toi-même que pour un aliment ABSENT du fichier (selon les règles ci-dessous).
 
 ALIMENTS — fournis pour CHAQUE aliment un objet avec son analyse (issue du fichier de référence si possible,
