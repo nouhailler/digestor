@@ -1,0 +1,1424 @@
+{
+  "app": "digestor",
+  "type": "food-reference",
+  "version": 1,
+  "about": "Référentiel des aliments connus de Digestor, avec leurs caractéristiques FODMAP / SIBO / candidose. À déposer dans la zone Fichiers d'un Projet Claude Web. Lors de la saisie vocale d'un repas, chercher d'abord l'aliment ici (par 'name' ou 'aliases', insensible aux accents/majuscules/pluriels) et reprendre tel quel category/fodmapLevel/fodmaps/sibo/candida/safePortion. N'inventer une fiche que si l'aliment est absent.",
+  "legend": {
+    "category": "pro = défavorable (pro-candidose/SIBO) · beneficial = favorable/anti-fongique · neutral",
+    "fodmapLevel": "low | moderate | high (niveau global)",
+    "fodmaps": "niveau par groupe : fructose, lactose, fructans, gos, polyols",
+    "verdict": "favorable | attention | eviter (selon SIBO / candidose)",
+    "note": "Une catégorie 'beneficial' peut rester FODMAP élevé (ex. ail, oignon, chou-fleur) : bon pour la candidose mais à surveiller pour le SIBO/SII."
+  },
+  "foods": [
+    {
+      "name": "sucre blanc",
+      "aliases": ["sucre"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Sucre simple qui nourrit la flore de l'intestin grêle." },
+      "candida": { "verdict": "eviter", "note": "Le sucre raffiné est le principal carburant des levures." },
+      "summary": "Saccharose : pauvre en FODMAP mais à éviter en candidose."
+    },
+    {
+      "name": "sucre de canne",
+      "aliases": ["cassonade"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Sucre simple, même impact que le sucre blanc." },
+      "candida": { "verdict": "eviter", "note": "Sucre, nourrit les levures malgré l'aspect 'moins raffiné'." },
+      "summary": "Sucre roux : pauvre en FODMAP mais déconseillé en candidose."
+    },
+    {
+      "name": "confiture",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "eviter", "note": "Très riche en fructose et sucres simples." },
+      "candida": { "verdict": "eviter", "note": "Concentré de sucre de fruits." },
+      "safePortion": "1 càc tolérée si peu sucrée",
+      "summary": "Concentré de sucre : excès de fructose, à éviter."
+    },
+    {
+      "name": "miel",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Excès de fructose marqué." },
+      "candida": { "verdict": "eviter", "note": "Sucre simple, nourrit les levures." },
+      "summary": "Excès de fructose : FODMAP élevé et pro-candidose."
+    },
+    {
+      "name": "pâtisserie",
+      "aliases": ["gateau", "gâteau"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Blé (fructanes) + sucre + lait." },
+      "candida": { "verdict": "eviter", "note": "Farine blanche et sucre." },
+      "summary": "Blé raffiné, sucre et lait : défavorable sur tous les plans."
+    },
+    {
+      "name": "biscuits sucrés",
+      "aliases": ["biscuits", "cookie", "madeleine", "donut"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Blé et sucre." },
+      "candida": { "verdict": "eviter", "note": "Farine blanche et sucre." },
+      "summary": "Biscuiterie sucrée à base de blé."
+    },
+    {
+      "name": "bonbon",
+      "aliases": ["confiserie", "pralines"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "eviter", "note": "Sucres simples, parfois polyols (sans sucre)." },
+      "candida": { "verdict": "eviter", "note": "Sucre quasi pur." },
+      "summary": "Sucre pur (ou polyols dans les versions 'sans sucre')."
+    },
+    {
+      "name": "chocolat au lait",
+      "aliases": ["chocolat"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Sucre et lactose ; petite portion tolérable." },
+      "candida": { "verdict": "eviter", "note": "Sucre ajouté." },
+      "safePortion": "Le chocolat noir ≥85 % est mieux toléré",
+      "summary": "Sucre + lactose ; préférer le chocolat noir non sucré."
+    },
+    {
+      "name": "croissant",
+      "aliases": ["viennoiserie", "pain au chocolat", "brioche"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Blé (fructanes) et beurre." },
+      "candida": { "verdict": "eviter", "note": "Farine blanche, parfois sucre." },
+      "summary": "Viennoiserie au blé : fructanes élevés."
+    },
+    {
+      "name": "pain blanc",
+      "aliases": ["pain", "baguette", "pain de mie", "pain blanc industriel"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Fructanes du blé ; 1 tranche tolérable, plus = élevé." },
+      "candida": { "verdict": "eviter", "note": "Farine blanche raffinée." },
+      "safePortion": "1 tranche (≈ 24 g)",
+      "summary": "Blé raffiné : fructanes modérés selon la quantité."
+    },
+    {
+      "name": "farine blanche",
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Fructanes du blé." },
+      "candida": { "verdict": "eviter", "note": "Glucides raffinés." },
+      "summary": "Blé raffiné : fructanes."
+    },
+    {
+      "name": "pâtes blanches",
+      "aliases": ["pates", "pâtes", "pates blanches", "spaghetti"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Fructanes du blé ; petite portion mieux tolérée." },
+      "candida": { "verdict": "attention", "note": "Glucides raffinés." },
+      "safePortion": "≈ 1/2 bol cuit",
+      "summary": "Pâtes de blé : fructanes selon la portion."
+    },
+    {
+      "name": "riz blanc",
+      "aliases": ["riz"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP, bien digéré." },
+      "candida": { "verdict": "attention", "note": "Index glycémique élevé ; préférer le riz complet." },
+      "summary": "Pauvre en FODMAP ; classé 'pro' pour son IG élevé en candidose."
+    },
+    {
+      "name": "jus d'orange",
+      "aliases": ["jus orange", "jus d orange"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Fructose concentré sans les fibres du fruit." },
+      "candida": { "verdict": "eviter", "note": "Sucre rapide." },
+      "safePortion": "1/2 verre",
+      "summary": "Fructose concentré : préférer l'orange entière."
+    },
+    {
+      "name": "jus de pomme",
+      "aliases": ["jus de fruits", "jus de fruit"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Excès de fructose et sorbitol." },
+      "candida": { "verdict": "eviter", "note": "Sucre rapide concentré." },
+      "summary": "Jus de fruits : fructose + polyols élevés."
+    },
+    {
+      "name": "soda",
+      "aliases": ["cola", "boisson sucree", "boisson sucrée", "limonade", "ice tea", "energy drink"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Sucres ajoutés (fructose si sirop de maïs)." },
+      "candida": { "verdict": "eviter", "note": "Boisson sucrée, carburant des levures." },
+      "summary": "Boisson sucrée : à éviter pour la candidose (FODMAP variable selon le sucre)."
+    },
+    {
+      "name": "sirop",
+      "aliases": ["sirop d agave", "sirop d'agave", "sauce sucree", "sauce sucrée"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Sirop d'agave : très riche en fructose." },
+      "candida": { "verdict": "eviter", "note": "Sucre liquide concentré." },
+      "summary": "Sirop sucré : excès de fructose."
+    },
+    {
+      "name": "banane",
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Banane mûre = fructanes ; verte/pas mûre = pauvre en FODMAP." },
+      "candida": { "verdict": "eviter", "note": "Fruit sucré, surtout très mûr." },
+      "safePortion": "1/3 de banane mûre (ou banane bien ferme)",
+      "summary": "Mûre = FODMAP modéré ; ferme = mieux tolérée."
+    },
+    {
+      "name": "raisin",
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP à portion normale." },
+      "candida": { "verdict": "eviter", "note": "Fruit très sucré." },
+      "summary": "Pauvre en FODMAP mais sucré : 'pro' pour la candidose."
+    },
+    {
+      "name": "mangue",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Excès de fructose." },
+      "candida": { "verdict": "eviter", "note": "Fruit très sucré." },
+      "summary": "Excès de fructose."
+    },
+    {
+      "name": "datte",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Fructanes et sucres concentrés (fruit séché)." },
+      "candida": { "verdict": "eviter", "note": "Très sucrée." },
+      "summary": "Fruit séché très sucré : fructanes élevés."
+    },
+    {
+      "name": "fruits secs sucrés",
+      "aliases": ["raisin sec", "fruit confit", "fruits secs sucres"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "eviter", "note": "Sucres concentrés par déshydratation." },
+      "candida": { "verdict": "eviter", "note": "Sucre très concentré." },
+      "summary": "Fruits séchés/confits : sucres et FODMAP concentrés."
+    },
+    {
+      "name": "yaourt aux fruits",
+      "aliases": ["yaourt sucre", "yaourt sucré"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Lactose + sucre/fruits ajoutés." },
+      "candida": { "verdict": "eviter", "note": "Sucre ajouté." },
+      "summary": "Lactose + sucre ajouté ; préférer le yaourt nature."
+    },
+    {
+      "name": "lait concentré",
+      "aliases": ["lait concentre"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "high", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Lactose très concentré (souvent sucré)." },
+      "candida": { "verdict": "eviter", "note": "Sucre + lactose." },
+      "summary": "Lactose concentré, souvent sucré."
+    },
+    {
+      "name": "glace",
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Lactose + sucre." },
+      "candida": { "verdict": "eviter", "note": "Sucre ajouté." },
+      "summary": "Crème glacée : lactose et sucre."
+    },
+    {
+      "name": "bière",
+      "aliases": ["biere"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Alcool + glucides fermentescibles, irritant pour le grêle." },
+      "candida": { "verdict": "eviter", "note": "Alcool + levure + glucides." },
+      "summary": "Alcool et levure : défavorable malgré un FODMAP bas."
+    },
+    {
+      "name": "vin",
+      "aliases": ["vin blanc", "vin rouge", "champagne", "cidre"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Alcool irritant (le cidre ajoute du fructose/sorbitol)." },
+      "candida": { "verdict": "eviter", "note": "Alcool + sucres résiduels." },
+      "summary": "Alcool : à éviter (cidre = FODMAP plus élevé)."
+    },
+    {
+      "name": "alcool",
+      "aliases": ["rhum", "whisky", "vodka", "cocktail", "apero", "apéro"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Alcool irritant pour l'intestin (cocktails = sucre en plus)." },
+      "candida": { "verdict": "eviter", "note": "L'alcool favorise les levures." },
+      "summary": "Alcool : défavorable (cocktails sucrés pire encore)."
+    },
+    {
+      "name": "levure de boulanger",
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Peu de FODMAP en soi." },
+      "candida": { "verdict": "eviter", "note": "Souvent évitée en protocole anti-candidose." },
+      "summary": "Pauvre en FODMAP mais classiquement évitée en candidose."
+    },
+    {
+      "name": "pizza",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Pâte de blé + fromage + souvent oignon/ail." },
+      "candida": { "verdict": "eviter", "note": "Farine blanche + levure." },
+      "summary": "Blé, fromage, oignon/ail : FODMAP élevé."
+    },
+    {
+      "name": "frites",
+      "aliases": ["pomme de terre frite"],
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Pomme de terre pauvre en FODMAP, mais friture lourde." },
+      "candida": { "verdict": "attention", "note": "Glucides + cuisson grasse." },
+      "summary": "Pomme de terre frite : pauvre en FODMAP mais lourde à digérer."
+    },
+    {
+      "name": "chips",
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Nature = ok ; aromatisées = oignon/ail." },
+      "candida": { "verdict": "attention", "note": "Produit gras et raffiné." },
+      "summary": "Nature tolérables ; aromatisées = oignon/ail."
+    },
+    {
+      "name": "céréales sucrées",
+      "aliases": ["cereales sucrees", "cereales petit dejeuner", "céréales petit déjeuner"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Blé/froment + sucre ajouté." },
+      "candida": { "verdict": "eviter", "note": "Sucre du petit-déjeuner." },
+      "summary": "Céréales raffinées et sucrées."
+    },
+    {
+      "name": "muesli",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "high", "gos": "moderate", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Blé + fruits secs + parfois miel." },
+      "candida": { "verdict": "attention", "note": "Souvent sucré (fruits secs)." },
+      "summary": "Mélange céréales + fruits secs : FODMAP élevé."
+    },
+    {
+      "name": "barre de céréales",
+      "aliases": ["barre cereales", "barre de cereales"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Céréales + sirop sucrant." },
+      "candida": { "verdict": "eviter", "note": "Sucre ajouté." },
+      "summary": "Snack sucré à base de céréales."
+    },
+    {
+      "name": "ketchup",
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Sucre + souvent oignon/ail ; 1 càs tolérée." },
+      "candida": { "verdict": "eviter", "note": "Sucre ajouté." },
+      "safePortion": "1 sachet (≈ 13 g)",
+      "summary": "Sucre + oignon/ail ; petite dose acceptable."
+    },
+    {
+      "name": "gaufre",
+      "aliases": ["crepe", "crêpe"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "moderate", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Blé + lait." },
+      "candida": { "verdict": "eviter", "note": "Farine blanche, souvent sucrée." },
+      "summary": "Pâte de blé au lait, souvent sucrée."
+    },
+    {
+      "name": "pâte à tartiner",
+      "aliases": ["nutella", "pate a tartiner"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "low", "gos": "moderate", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Sucre + lait + noisette." },
+      "candida": { "verdict": "eviter", "note": "Sucre majoritaire." },
+      "summary": "Sucre, lait et noisette : à éviter."
+    },
+    {
+      "name": "tarte aux pommes",
+      "aliases": ["tarte", "tarte aux fruits"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Pâte de blé + pomme (fructose/sorbitol)." },
+      "candida": { "verdict": "eviter", "note": "Farine blanche + sucre + fruit." },
+      "summary": "Pâte de blé et fruits sucrés."
+    },
+    {
+      "name": "flan",
+      "aliases": ["creme dessert", "crème dessert"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "moderate", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Lait + sucre." },
+      "candida": { "verdict": "eviter", "note": "Dessert sucré." },
+      "summary": "Dessert lacté sucré."
+    },
+    {
+      "name": "semoule",
+      "aliases": ["couscous"],
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Blé dur : fructanes." },
+      "candida": { "verdict": "attention", "note": "Glucides raffinés de blé." },
+      "safePortion": "≈ 1/2 bol cuit",
+      "summary": "Blé dur : fructanes selon la portion."
+    },
+    {
+      "name": "gnocchi",
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Pomme de terre + blé." },
+      "candida": { "verdict": "attention", "note": "Glucides raffinés." },
+      "summary": "Pomme de terre + blé : fructanes modérés."
+    },
+    {
+      "name": "ravioli",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Pâte de blé + farce (souvent oignon/fromage)." },
+      "candida": { "verdict": "attention", "note": "Farine blanche." },
+      "summary": "Pâtes farcies de blé : FODMAP élevé."
+    },
+    {
+      "name": "pastèque",
+      "aliases": ["pasteque"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "eviter", "note": "Fructose + fructanes + polyols." },
+      "candida": { "verdict": "eviter", "note": "Fruit très sucré." },
+      "summary": "Un des fruits les plus riches en FODMAP."
+    },
+    {
+      "name": "melon",
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Melon d'eau/jaune : fructose modéré (le cantaloup est plus bas)." },
+      "candida": { "verdict": "eviter", "note": "Fruit sucré." },
+      "summary": "Fructose modéré selon la variété."
+    },
+    {
+      "name": "cerise",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Fructose + sorbitol." },
+      "candida": { "verdict": "eviter", "note": "Fruit sucré." },
+      "summary": "Fructose et polyols élevés."
+    },
+    {
+      "name": "figue",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Excès de fructose." },
+      "candida": { "verdict": "eviter", "note": "Fruit très sucré." },
+      "summary": "Excès de fructose."
+    },
+    {
+      "name": "compote sucrée",
+      "aliases": ["compote sucree"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "eviter", "note": "Base pomme + sucre ajouté." },
+      "candida": { "verdict": "eviter", "note": "Sucre ajouté." },
+      "summary": "Compote de pomme sucrée : fructose élevé."
+    },
+    {
+      "name": "smoothie",
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "moderate", "fructans": "moderate", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "eviter", "note": "Plusieurs fruits concentrés en un verre." },
+      "candida": { "verdict": "eviter", "note": "Sucre de fruits concentré." },
+      "summary": "Concentré de fruits : FODMAP cumulés."
+    },
+    {
+      "name": "lait de riz",
+      "category": "pro",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (1 verre)." },
+      "candida": { "verdict": "attention", "note": "Index glycémique élevé." },
+      "summary": "Pauvre en FODMAP mais IG élevé (candidose)."
+    },
+    {
+      "name": "nuggets",
+      "category": "pro",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Panure de blé." },
+      "candida": { "verdict": "attention", "note": "Panure raffinée, friture." },
+      "summary": "Volaille panée et frite (blé)."
+    },
+    {
+      "name": "hamburger",
+      "aliases": ["hotdog", "hot dog", "kebab"],
+      "category": "pro",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "moderate", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Pain de blé + oignon + sauces." },
+      "candida": { "verdict": "attention", "note": "Pain blanc + sauces sucrées." },
+      "summary": "Pain de blé, oignon et sauces : FODMAP élevé."
+    },
+
+    {
+      "name": "ail",
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Une des sources de fructanes les plus élevées." },
+      "candida": { "verdict": "favorable", "note": "Antifongique reconnu (allicine)." },
+      "safePortion": "Huile infusée à l'ail (sans morceaux)",
+      "summary": "Antifongique mais très riche en fructanes : à doser en SIBO/SII.",
+      "tips": ["Utiliser de l'huile infusée à l'ail pour l'arôme sans les fructanes."]
+    },
+    {
+      "name": "gingembre",
+      "aliases": ["tisane de gingembre"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Aide la motilité gastrique, pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Anti-inflammatoire, sans sucre." },
+      "summary": "Favorable digestion ; pauvre en FODMAP."
+    },
+    {
+      "name": "huile d'olive",
+      "aliases": ["huile olive", "huile d olive", "huile de colza", "huile de coco", "huile de lin", "ghee"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Lipides sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre (l'huile de coco a un effet antifongique)." },
+      "summary": "Matière grasse de qualité, sans FODMAP."
+    },
+    {
+      "name": "brocoli",
+      "aliases": ["brocoli vapeur"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Têtes pauvres en FODMAP ; tiges = fructanes modérés." },
+      "candida": { "verdict": "favorable", "note": "Légume vert sans sucre." },
+      "safePortion": "≈ 75 g de têtes",
+      "summary": "Têtes bien tolérées ; tiges plus riches en fructanes."
+    },
+    {
+      "name": "courgette",
+      "aliases": ["courgettes sautees", "courgettes sautées"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP à portion normale." },
+      "candida": { "verdict": "favorable", "note": "Légume sans sucre." },
+      "safePortion": "≈ 75 g",
+      "summary": "Légume bien toléré."
+    },
+    {
+      "name": "épinard",
+      "aliases": ["epinard", "epinards", "épinards"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Légume vert, sans sucre." },
+      "summary": "Feuille verte bien tolérée."
+    },
+    {
+      "name": "salade verte",
+      "aliases": ["salade", "roquette", "mache", "mâche", "endive"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Feuilles pauvres en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Salades vertes : bien tolérées."
+    },
+    {
+      "name": "concombre",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Légume très bien toléré."
+    },
+    {
+      "name": "chou",
+      "aliases": ["chou kale", "blette", "blettes"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Chou vert/kale pauvres en FODMAP (1 tasse)." },
+      "candida": { "verdict": "favorable", "note": "Légume sans sucre." },
+      "safePortion": "≈ 75 g",
+      "summary": "Choux verts à feuilles : bien tolérés à portion modérée."
+    },
+    {
+      "name": "chou-fleur",
+      "aliases": ["chou fleur"],
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Riche en mannitol (polyols)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Sans sucre mais polyols élevés : à surveiller en SIBO/SII."
+    },
+    {
+      "name": "haricots verts",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "favorable", "note": "Pauvres en FODMAP (polyols à grande portion)." },
+      "candida": { "verdict": "favorable", "note": "Légume sans sucre." },
+      "safePortion": "≈ 75 g",
+      "summary": "Bien tolérés à portion normale."
+    },
+    {
+      "name": "poireau",
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Bulbe très riche en fructanes (le vert l'est moins)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "safePortion": "Partie verte uniquement",
+      "summary": "Bulbe = fructanes élevés ; n'utiliser que le vert."
+    },
+    {
+      "name": "poulet",
+      "aliases": ["poulet roti", "poulet rôti", "blanc de poulet"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Protéine sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Protéine maigre bien tolérée."
+    },
+    {
+      "name": "dinde",
+      "aliases": ["escalope de dinde"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Protéine sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Volaille maigre bien tolérée."
+    },
+    {
+      "name": "poisson",
+      "aliases": ["cabillaud", "thon", "thon en boite", "thon en boîte", "maquereau", "sardine", "hareng", "truite"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Protéine sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre (les poissons gras apportent des oméga-3)." },
+      "summary": "Poisson : protéine bien tolérée."
+    },
+    {
+      "name": "saumon",
+      "aliases": ["saumon grille", "saumon grillé"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Sans FODMAP, riche en oméga-3." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Poisson gras anti-inflammatoire."
+    },
+    {
+      "name": "crevette",
+      "aliases": ["crevettes", "moules", "huitres", "huîtres"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Fruits de mer sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Fruits de mer : protéine bien tolérée."
+    },
+    {
+      "name": "œuf",
+      "aliases": ["oeuf", "oeufs", "œufs", "oeufs brouilles", "œufs brouillés", "oeuf dur", "oeuf a la coque", "omelette"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Protéine sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Protéine de référence, bien tolérée."
+    },
+    {
+      "name": "avocat",
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Sorbitol (polyols) si grande portion." },
+      "candida": { "verdict": "favorable", "note": "Bon gras, sans sucre." },
+      "safePortion": "1/8 d'avocat",
+      "summary": "Bon gras ; polyols à surveiller au-delà d'1/8."
+    },
+    {
+      "name": "amande",
+      "aliases": ["amandes"],
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "moderate", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "GOS au-delà de ~10 amandes." },
+      "candida": { "verdict": "favorable", "note": "Oléagineux sans sucre." },
+      "safePortion": "10 amandes (≈ 12 g)",
+      "summary": "Bien tolérées en petite poignée (GOS sinon)."
+    },
+    {
+      "name": "noix",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvres en FODMAP (≈ 30 g)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre, bon gras." },
+      "safePortion": "≈ 30 g",
+      "summary": "Oléagineux bien tolérés."
+    },
+    {
+      "name": "noisette",
+      "aliases": ["noisettes"],
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "moderate", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "GOS au-delà de ~10 noisettes." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "safePortion": "10 noisettes",
+      "summary": "Petite poignée tolérée."
+    },
+    {
+      "name": "noix de cajou",
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "high", "gos": "high", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Riche en GOS et fructanes." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Oléagineux mais FODMAP élevé (GOS/fructanes)."
+    },
+    {
+      "name": "graines de courge",
+      "aliases": ["graines de tournesol", "graines de chia"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvres en FODMAP (2 càs)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Graines bien tolérées en petite quantité."
+    },
+    {
+      "name": "vinaigre de cidre",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP à petite dose." },
+      "candida": { "verdict": "favorable", "note": "Souvent utilisé en protocole digestif." },
+      "summary": "Petite dose bien tolérée."
+    },
+    {
+      "name": "herbes aromatiques",
+      "aliases": ["persil", "coriandre", "thym", "origan", "basilic", "menthe", "romarin"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Herbes fraîches sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre, aromatisent sans oignon/ail." },
+      "summary": "Herbes : assaisonnement sûr."
+    },
+    {
+      "name": "épices",
+      "aliases": ["curcuma", "cannelle", "clou de girofle"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Épices pauvres en FODMAP à dose usuelle." },
+      "candida": { "verdict": "favorable", "note": "Curcuma anti-inflammatoire, cannelle régule la glycémie." },
+      "summary": "Épices favorables à dose normale."
+    },
+    {
+      "name": "tisane",
+      "aliases": ["tisane de thym", "infusion menthe", "infusion de menthe"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Infusion sans sucre (éviter chicorée/camomille forte)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Infusion apaisante, sans sucre."
+    },
+    {
+      "name": "bouillon d'os",
+      "aliases": ["bouillon d os"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP s'il est fait sans oignon/ail." },
+      "candida": { "verdict": "favorable", "note": "Réparateur de la muqueuse, sans sucre." },
+      "summary": "Réconfortant et réparateur (sans oignon/ail)."
+    },
+    {
+      "name": "olive",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvres en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Bon gras, sans sucre." },
+      "summary": "Olives bien tolérées."
+    },
+    {
+      "name": "asperge",
+      "aliases": ["asperges"],
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Fructose + fructanes élevés." },
+      "candida": { "verdict": "favorable", "note": "Légume sans sucre." },
+      "summary": "Légume sain mais FODMAP élevé (fructose/fructanes)."
+    },
+    {
+      "name": "aubergine",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (≈ 75 g)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Légume bien toléré."
+    },
+    {
+      "name": "poivron",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Poivron rouge pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Bien toléré à portion normale."
+    },
+    {
+      "name": "fenouil",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Bulbe : fructanes au-delà d'1/2 tasse." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre, carminatif." },
+      "safePortion": "≈ 1/2 bulbe",
+      "summary": "Bien toléré en demi-portion."
+    },
+    {
+      "name": "céleri",
+      "aliases": ["celeri"],
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Mannitol au-delà d'1/2 branche." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "safePortion": "1/2 branche",
+      "summary": "Petite portion ok ; polyols sinon."
+    },
+    {
+      "name": "radis",
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Légume croquant bien toléré."
+    },
+    {
+      "name": "chou de Bruxelles",
+      "aliases": ["chou de bruxelles"],
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Fructanes au-delà de ~2 choux." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "safePortion": "≈ 2 choux",
+      "summary": "Petite portion tolérée ; fructanes sinon."
+    },
+    {
+      "name": "artichaut",
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Très riche en fructanes." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre, soutien hépatique." },
+      "summary": "Sain mais fructanes très élevés."
+    },
+    {
+      "name": "champignon",
+      "aliases": ["champignons"],
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Riche en mannitol (polyols)." },
+      "candida": { "verdict": "attention", "note": "Sans sucre, mais nature fongique parfois déconseillée." },
+      "summary": "Polyols élevés : à surveiller en SIBO/SII."
+    },
+    {
+      "name": "oignon",
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Source majeure de fructanes." },
+      "candida": { "verdict": "favorable", "note": "Propriétés antimicrobiennes, sans sucre." },
+      "safePortion": "Partie verte de l'oignon nouveau",
+      "summary": "Antimicrobien mais fructanes très élevés : à éviter en SIBO/SII."
+    },
+    {
+      "name": "échalote",
+      "aliases": ["echalote"],
+      "category": "beneficial",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "high", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Fructanes élevés comme l'oignon." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Fructanes élevés : à éviter en SIBO/SII."
+    },
+    {
+      "name": "citron",
+      "aliases": ["jus de citron"],
+      "category": "beneficial",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (jus)." },
+      "candida": { "verdict": "favorable", "note": "Peu sucré, alcalinisant." },
+      "summary": "Jus de citron : assaisonnement sûr."
+    },
+    {
+      "name": "kombucha",
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "moderate", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Fermenté ; sucre résiduel variable." },
+      "candida": { "verdict": "attention", "note": "Probiotique mais contient du sucre/levures." },
+      "safePortion": "≈ 1/2 verre",
+      "summary": "Probiotique fermenté ; sucre résiduel à surveiller."
+    },
+    {
+      "name": "choucroute",
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Fermentée : FODMAP au-delà d'1 càs." },
+      "candida": { "verdict": "favorable", "note": "Probiotique, sans sucre." },
+      "safePortion": "≈ 1 càs",
+      "summary": "Probiotique ; petite portion conseillée."
+    },
+    {
+      "name": "kéfir",
+      "aliases": ["kefir"],
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "moderate", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Lactose réduit par fermentation mais présent." },
+      "candida": { "verdict": "favorable", "note": "Probiotique (préférer nature non sucré)." },
+      "summary": "Probiotique lacté ; lactose partiellement digéré."
+    },
+    {
+      "name": "yaourt nature",
+      "category": "beneficial",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "moderate", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Lactose ; versions sans lactose mieux tolérées." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre, probiotique." },
+      "summary": "Probiotique sans sucre ; lactose à surveiller."
+    },
+
+    {
+      "name": "café",
+      "aliases": ["cafe", "cafe noir", "café noir"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Sans FODMAP mais stimulant du transit." },
+      "candida": { "verdict": "attention", "note": "Sans sucre noir, mais acide/excitant à modérer." },
+      "summary": "Noir : pauvre en FODMAP ; à modérer."
+    },
+    {
+      "name": "thé",
+      "aliases": ["the", "the noir", "thé noir", "the vert", "thé vert", "the matcha", "thé matcha"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (thé fort = un peu plus)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre ; thé vert antioxydant." },
+      "summary": "Pauvre en FODMAP sans sucre."
+    },
+    {
+      "name": "eau",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Neutre ; l'hydratation aide le transit." },
+      "candida": { "verdict": "favorable", "note": "Neutre." },
+      "summary": "Hydratation : toujours favorable."
+    },
+    {
+      "name": "quinoa",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pseudo-céréale pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans gluten, IG modéré." },
+      "summary": "Féculent sans gluten bien toléré."
+    },
+    {
+      "name": "patate douce",
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Mannitol au-delà de ~75 g." },
+      "candida": { "verdict": "attention", "note": "Glucides ; IG modéré." },
+      "safePortion": "≈ 75 g",
+      "summary": "Demi-portion ok ; polyols au-delà."
+    },
+    {
+      "name": "lentilles",
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "moderate", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "GOS ; en conserve rincées = mieux tolérées." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre, riches en fibres." },
+      "safePortion": "≈ 1/4 tasse cuites/rincées",
+      "summary": "Légumineuse : GOS, préférer en conserve rincée."
+    },
+    {
+      "name": "pois chiches",
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "moderate", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "GOS ; 1/4 tasse en conserve rincés ok." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "safePortion": "≈ 1/4 tasse en conserve",
+      "summary": "GOS : portion limitée, en conserve rincés."
+    },
+    {
+      "name": "haricots rouges",
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "high", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Riches en GOS." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Légumineuse riche en GOS."
+    },
+    {
+      "name": "pois cassés",
+      "aliases": ["pois casses", "feves", "fèves"],
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "high", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Légumineuses riches en GOS." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Pois cassés / fèves : GOS élevés."
+    },
+    {
+      "name": "riz complet",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Complet : IG plus bas que le riz blanc." },
+      "summary": "Féculent complet bien toléré."
+    },
+    {
+      "name": "pain complet",
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Blé complet : fructanes." },
+      "candida": { "verdict": "attention", "note": "Complet = IG plus bas, mais blé." },
+      "safePortion": "1 tranche",
+      "summary": "Blé complet : fructanes selon la portion."
+    },
+    {
+      "name": "sarrasin",
+      "aliases": ["galette de sarrasin"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Sans gluten, pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Pseudo-céréale, IG modéré." },
+      "summary": "Alternative sans gluten bien tolérée."
+    },
+    {
+      "name": "fromage",
+      "aliases": ["mozzarella", "feta"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Fromages affinés/fermes : lactose négligeable." },
+      "candida": { "verdict": "attention", "note": "Sans sucre ; certains protocoles limitent les laitages." },
+      "summary": "Fromages affinés : pauvres en lactose."
+    },
+    {
+      "name": "fromage de chèvre",
+      "aliases": ["fromage de chevre"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Chèvre ferme : peu de lactose." },
+      "candida": { "verdict": "attention", "note": "Laitage à modérer selon le protocole." },
+      "summary": "Chèvre ferme : bien toléré."
+    },
+    {
+      "name": "fromage blanc",
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "moderate", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Lactose présent." },
+      "candida": { "verdict": "attention", "note": "Laitage frais à modérer." },
+      "summary": "Laitage frais : lactose modéré."
+    },
+    {
+      "name": "beurre",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Lactose en trace." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Matière grasse : lactose négligeable."
+    },
+    {
+      "name": "tomate",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Tomate fraîche pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Peu sucrée." },
+      "summary": "Bien tolérée (concentré plus riche)."
+    },
+    {
+      "name": "carotte",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Peu sucrée." },
+      "summary": "Légume racine bien toléré."
+    },
+    {
+      "name": "pomme",
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Excès de fructose et sorbitol." },
+      "candida": { "verdict": "attention", "note": "Fruit sucré." },
+      "summary": "FODMAP élevé (fructose + polyols) malgré l'image 'saine'."
+    },
+    {
+      "name": "fraise",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "attention", "note": "Fruit peu sucré, à modérer en candidose." },
+      "summary": "Fruit pauvre en FODMAP."
+    },
+    {
+      "name": "lait d'amande",
+      "aliases": ["lait d amande"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (1 verre)." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre si non sucré." },
+      "summary": "Alternative au lait bien tolérée (non sucrée)."
+    },
+    {
+      "name": "lait de coco",
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Sorbitol au-delà de ~1/4 tasse." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre, bon gras." },
+      "safePortion": "≈ 1/4 tasse",
+      "summary": "Petite quantité ok ; polyols sinon."
+    },
+    {
+      "name": "lait de vache",
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "high", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Lactose élevé ; préférer sans lactose." },
+      "candida": { "verdict": "attention", "note": "Laitage à modérer selon le protocole." },
+      "summary": "Lactose élevé : préférer le sans-lactose ou végétal."
+    },
+    {
+      "name": "flocons d'avoine",
+      "aliases": ["flocons d avoine", "avoine"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "≈ 1/2 tasse ok ; fructanes au-delà." },
+      "candida": { "verdict": "attention", "note": "Glucides ; IG modéré." },
+      "safePortion": "≈ 1/2 tasse cuits",
+      "summary": "Demi-portion bien tolérée."
+    },
+    {
+      "name": "millet",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP, sans gluten." },
+      "candida": { "verdict": "favorable", "note": "Céréale douce." },
+      "summary": "Céréale sans gluten bien tolérée."
+    },
+    {
+      "name": "betterave",
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "moderate", "polyols": "low" },
+      "sibo": { "verdict": "attention", "note": "Fructanes/GOS au-delà de ~2 tranches." },
+      "candida": { "verdict": "attention", "note": "Plus sucrée que la moyenne des légumes." },
+      "safePortion": "≈ 2 tranches",
+      "summary": "Petite portion ok ; fructanes sinon."
+    },
+    {
+      "name": "maïs",
+      "aliases": ["mais"],
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "moderate", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Sorbitol/GOS au-delà d'1/2 épi." },
+      "candida": { "verdict": "attention", "note": "Glucides sucrés." },
+      "safePortion": "≈ 1/2 épi",
+      "summary": "Demi-épi ok ; polyols/GOS au-delà."
+    },
+    {
+      "name": "potiron",
+      "aliases": ["courge", "potimarron"],
+      "category": "neutral",
+      "fodmapLevel": "moderate",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "moderate", "polyols": "moderate" },
+      "sibo": { "verdict": "attention", "note": "Courge musquée plus riche ; potimarron mieux toléré." },
+      "candida": { "verdict": "attention", "note": "Légèrement sucrée." },
+      "safePortion": "≈ 75 g",
+      "summary": "Selon la variété ; portion modérée."
+    },
+    {
+      "name": "navet",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (1/2 portion)." },
+      "candida": { "verdict": "favorable", "note": "Peu sucré." },
+      "summary": "Légume racine bien toléré."
+    },
+    {
+      "name": "panais",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "attention", "note": "Légèrement sucré." },
+      "summary": "Racine bien tolérée."
+    },
+    {
+      "name": "pomme de terre",
+      "aliases": ["pomme de terre vapeur"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP." },
+      "candida": { "verdict": "attention", "note": "IG élevé ; à modérer en candidose." },
+      "summary": "Pauvre en FODMAP ; IG à surveiller."
+    },
+    {
+      "name": "poire",
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "high", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Fructose + sorbitol élevés." },
+      "candida": { "verdict": "attention", "note": "Fruit sucré." },
+      "summary": "FODMAP élevé (fructose + polyols)."
+    },
+    {
+      "name": "pêche",
+      "aliases": ["peche"],
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Riche en polyols (sorbitol)." },
+      "candida": { "verdict": "attention", "note": "Fruit sucré." },
+      "summary": "Polyols élevés."
+    },
+    {
+      "name": "abricot",
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Riche en sorbitol." },
+      "candida": { "verdict": "attention", "note": "Fruit sucré." },
+      "summary": "Polyols élevés."
+    },
+    {
+      "name": "kiwi",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP ; aide le transit." },
+      "candida": { "verdict": "attention", "note": "Fruit modérément sucré." },
+      "summary": "Fruit pauvre en FODMAP."
+    },
+    {
+      "name": "orange",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (1 fruit)." },
+      "candida": { "verdict": "attention", "note": "Fruit sucré, à modérer." },
+      "summary": "Agrume pauvre en FODMAP."
+    },
+    {
+      "name": "pamplemousse",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "≈ 1/2 fruit pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Peu sucré." },
+      "safePortion": "≈ 1/2 fruit",
+      "summary": "Demi-portion bien tolérée."
+    },
+    {
+      "name": "myrtille",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (≈ 1 poignée)." },
+      "candida": { "verdict": "attention", "note": "Fruit modérément sucré." },
+      "summary": "Baie pauvre en FODMAP."
+    },
+    {
+      "name": "framboise",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Pauvre en FODMAP (≈ 30 baies)." },
+      "candida": { "verdict": "favorable", "note": "Peu sucrée." },
+      "summary": "Baie pauvre en FODMAP."
+    },
+    {
+      "name": "mûre",
+      "aliases": ["mure"],
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "high" },
+      "sibo": { "verdict": "eviter", "note": "Riche en sorbitol." },
+      "candida": { "verdict": "attention", "note": "Fruit sucré." },
+      "summary": "Polyols élevés (contrairement aux autres baies)."
+    },
+    {
+      "name": "jambon",
+      "aliases": ["jambon blanc"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Sans FODMAP (vérifier additifs)." },
+      "candida": { "verdict": "attention", "note": "Charcuterie ; sucres/additifs possibles." },
+      "summary": "Protéine sans FODMAP ; surveiller les additifs."
+    },
+    {
+      "name": "viande",
+      "aliases": ["steak", "boeuf", "bœuf", "porc", "veau", "agneau"],
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Protéine sans FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "summary": "Viande nature : protéine sans FODMAP."
+    },
+    {
+      "name": "tofu",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Tofu ferme égoutté pauvre en FODMAP (soyeux = élevé)." },
+      "candida": { "verdict": "favorable", "note": "Protéine végétale sans sucre." },
+      "summary": "Tofu ferme : bien toléré."
+    },
+    {
+      "name": "tempeh",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Fermenté, pauvre en FODMAP." },
+      "candida": { "verdict": "favorable", "note": "Protéine végétale sans sucre." },
+      "summary": "Soja fermenté bien toléré."
+    },
+    {
+      "name": "houmous",
+      "category": "neutral",
+      "fodmapLevel": "high",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "high", "gos": "high", "polyols": "low" },
+      "sibo": { "verdict": "eviter", "note": "Pois chiches + ail : GOS et fructanes." },
+      "candida": { "verdict": "favorable", "note": "Sans sucre." },
+      "safePortion": "≈ 1 càs",
+      "summary": "Pois chiches + ail : FODMAP élevé."
+    },
+    {
+      "name": "pain au levain",
+      "category": "neutral",
+      "fodmapLevel": "low",
+      "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "moderate", "gos": "low", "polyols": "low" },
+      "sibo": { "verdict": "favorable", "note": "Levain (surtout épeautre) : fructanes réduits par fermentation." },
+      "candida": { "verdict": "attention", "note": "Reste un pain (glucides), mais mieux toléré." },
+      "safePortion": "1 à 2 tranches",
+      "summary": "Fermentation longue : mieux toléré que le pain classique."
+    }
+  ]
+}

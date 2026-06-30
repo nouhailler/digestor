@@ -16,7 +16,14 @@ RÈGLES GÉNÉRALES
   goûter ≈ "16:00", dîner ≈ "19:30".
 - Date : "date" au format "AAAA-MM-JJ" (défaut = aujourd'hui ; "hier" = jour précédent). Plusieurs jours possibles dans "days".
 
-ALIMENTS — fournis pour CHAQUE aliment un objet avec son analyse (c'est toi qui apportes ces données) :
+FICHIER DE RÉFÉRENCE (prioritaire)
+- Si le fichier « digestor-aliments-reference.json » est présent dans le projet, cherche-y D'ABORD chaque
+  aliment cité (par "name" ou "aliases", insensible aux accents/majuscules/pluriels). S'il y figure, REPRENDS
+  tel quel ses champs (category, fodmapLevel, fodmaps, sibo, candida, safePortion) — n'invente pas de valeurs.
+- N'élabore une fiche toi-même que pour un aliment ABSENT du fichier (selon les règles ci-dessous).
+
+ALIMENTS — fournis pour CHAQUE aliment un objet avec son analyse (issue du fichier de référence si possible,
+sinon de ta connaissance) :
 - "name" : nom de l'aliment.
 - "quantity" (optionnel mais recommandé si la personne précise une dose) : { "amount": nombre, "unit": ... }
   où "unit" ∈ cac (cuillère à café), cas (cuillère à soupe), pincee, portion, poignee, tranche, verre, bol, g, ml.

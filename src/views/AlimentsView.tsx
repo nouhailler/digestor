@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import {
   ChefHat,
   Copy,
+  Download,
   Eraser,
   Loader2,
   ScanLine,
@@ -28,6 +29,7 @@ import { CATEGORY_COLOR } from '../lib/constants';
 import { dateLabel } from '../lib/dates';
 import { FODMAP_LEVEL_COLOR, FODMAP_LEVEL_LABEL } from '../lib/ai/insightFormat';
 import { classifyFood, dictionaryFoods, looseKey, normalize } from '../lib/foodClassifier';
+import { downloadFoodReference } from '../lib/foodReference';
 import { analyzeFood } from '../lib/ai/foodInsight';
 import { runAiTask } from '../lib/ai/aiActivity';
 import { buildProfileContext } from '../lib/profile';
@@ -406,6 +408,14 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
           }}
         >
           <Copy size={15} /> Trouver les doublons{duplicateCount > 0 ? ` (${duplicateCount})` : ''}
+        </button>
+        <button
+          type="button"
+          onClick={() => downloadFoodReference(catalogueRows)}
+          title="Télécharge tout le catalogue (dictionnaire + vos repas + analyses) au format de référence, à déposer dans la zone Fichiers d'un Projet Claude Web pour fiabiliser la saisie vocale."
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-4 py-2 text-sm font-medium text-ink"
+        >
+          <Download size={15} /> Exporter le référentiel d'aliments ({catalogueRows.length})
         </button>
       </div>
 
