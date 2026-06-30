@@ -353,7 +353,7 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
       )}
 
       {/* Suivi de satiété (faim / énergie / sucre aux checkpoints) — vide tant que non saisi. */}
-      <MealSatiety meal={meal} editing={editing} onChange={onChange} />
+      <MealSatiety meal={meal} editing={editing} onChange={onChange} insights={insights} />
     </div>
   );
 }

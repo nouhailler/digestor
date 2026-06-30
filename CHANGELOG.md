@@ -19,8 +19,13 @@ Nouveau suivi temporel de la satiété après chaque repas, corrélé localement
 - **Corrélation locale** (onglet Évolution) : courbe de satiété moyenne (Recharts) + comparatif
   faim/sucre selon la **catégorie dominante** et le **niveau FODMAP** des repas. Affiché seulement
   au-delà d'un seuil minimal de repas suivis (honnêteté des corrélations).
+- **Durée de satiété** : pour chaque repas suivi, Digestor estime **combien de temps la satiété a
+  tenu** — *mesurée* (interpolation du retour de la faim entre les checkpoints : « tenue ~2 h »,
+  « encore rassasié à +3 h » si la faim n'est pas revenue) et *attendue* d'après la composition
+  (catégories + FODMAP : « attendu ~4–5 h »). Affichée sous le repas **et** consignée dans une ligne
+  auto des **Notes du jour** (`⏱ Satiété (HH:MM) : …`, idempotente, préservant le texte libre).
 - **Données** : champ `Meal.satiety` **imbriqué dans le repas** (comme `Meal.symptoms`) — aucune
-  migration Dexie, export/import déjà couverts via les jours. **190 tests.**
+  migration Dexie, export/import déjà couverts via les jours. **204 tests.**
 
 ## [0.13.0] — Récupérer l'analyse de journée (partage & téléchargement)
 

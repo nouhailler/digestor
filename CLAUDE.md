@@ -19,9 +19,9 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 190 tests : `foodClassifier`, `dates`,
+et appellent `afterEach(cleanup)` localement (pas de setup global). 204 tests : `foodClassifier`, `dates`,
 `quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
-`dayAnalysisExport`, `satiety`, `satietyImport`, `satietyCorrelation`,
+`dayAnalysisExport`, `satiety`, `satietyImport`, `satietyCorrelation`, `satietyDuration`,
 `contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`, `correlations`,
 `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
 `VasSlider`, `TipBanner`, … `npm run build` typecheck aussi les tests.
@@ -85,6 +85,7 @@ src/
     satietyImport.ts  # parse/merge du JSON satiété (rattache au repas par date + heure)
     satietyImportPrompt.ts # CLAUDE_WEB_SATIETY_PROMPT (projet Claude Web dédié)
     satietyCorrelation.ts # courbe moyenne + regroupement par catégorie / niveau FODMAP (corrélation locale)
+    satietyDuration.ts # durée de satiété mesurée (retour de la faim) + attendue (composition) + sync Notes du jour
     ai/               # couche IA (OpenRouter), optionnelle
       openrouter.ts   # client : fetchFreeModels, chatJSON (parse JSON robuste)
       foodInsight.ts  # prompt + analyzeFood + buildFoodInsight (réutilisé par l'import) + deriveCategory

@@ -2,6 +2,7 @@ import type { DayEntry, Meal, SatietyCheck, SatietyCheckpoint, SatietyType } fro
 import { parseJsonLoose } from './json';
 import { normalize } from './foodClassifier';
 import { clampVas, upsertCheck, VAS_NEUTRAL } from './satiety';
+import { syncSatietyNotes } from './satietyDuration';
 
 /** Un relevé de satiété importé, ciblant un repas par sa date + son heure. */
 export interface ImportedSatietySet {
@@ -219,7 +220,7 @@ export function applySatietyToDay(day: DayEntry, set: ImportedSatietySet): Apply
     return { ...m, satiety };
   });
 
-  return { day: { ...day, meals }, warning };
+  return { day: syncSatietyNotes({ ...day, meals }), warning };
 }
 
 export interface SatietyImportCounts {

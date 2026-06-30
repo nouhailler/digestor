@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Anchor, ChevronDown, Feather, Gauge, Plus, Trash2, Wind } from 'lucide-react';
-import type { Meal, SatietyCheck, SatietyCheckpoint, SatietyType } from '../types';
+import { Anchor, ChevronDown, Feather, Gauge, Plus, Timer, Trash2, Wind } from 'lucide-react';
+import type { FoodInsight, Meal, SatietyCheck, SatietyCheckpoint, SatietyType } from '../types';
 import { VasSlider } from './VasSlider';
+import { satietyDurationCore } from '../lib/satietyDuration';
 import {
   CHECKPOINT_LABEL,
   SATIETY_CHECKPOINTS,
@@ -26,6 +27,19 @@ interface MealSatietyProps {
   meal: Meal;
   editing: boolean;
   onChange: (meal: Meal) => void;
+  /** Analyses IA des aliments (par nom normalisé) : affinent la durée attendue (FODMAP). */
+  insights?: Map<string, FoodInsight>;
+}
+
+/** Ligne « durée de satiété » (mesurée + attendue), calculée en direct. */
+function DurationLine({ meal, insights }: { meal: Meal; insights?: Map<string, FoodInsight> }) {
+  const core = satietyDurationCore(meal, insights);
+  if (!core) return null;
+  return (
+    <p className="inline-flex items-center gap-1.5 text-xs text-muted">
+      <Timer size={13} /> Satiété {core}
+    </p>
+  );
 }
 
 /**
@@ -33,7 +47,7 @@ interface MealSatietyProps {
  * plusieurs checkpoints + type de satiété). Vide par défaut : n'affiche rien en
  * lecture tant qu'aucun relevé n'a été saisi.
  */
-export function MealSatiety({ meal, editing, onChange }: MealSatietyProps) {
+export function MealSatiety({ meal, editing, onChange, insights }: MealSatietyProps) {
   const [open, setOpen] = useState(false);
   const checks = sortChecks(meal.satiety ?? []);
   const missing = SATIETY_CHECKPOINTS.filter((cp) => !checks.some((c) => c.checkpoint === cp));
@@ -57,6 +71,9 @@ export function MealSatiety({ meal, editing, onChange }: MealSatietyProps) {
           {checks.map((c) => (
             <CheckReadRow key={c.checkpoint} check={c} />
           ))}
+        </div>
+        <div className="mt-2">
+          <DurationLine meal={meal} insights={insights} />
         </div>
       </div>
     );
@@ -91,6 +108,7 @@ export function MealSatiety({ meal, editing, onChange }: MealSatietyProps) {
 
       {open && (
         <div className="space-y-4 px-3 pb-3">
+          {checks.length > 0 && <DurationLine meal={meal} insights={insights} />}
           {checks.map((c) => (
             <CheckEditRow key={c.checkpoint} check={c} onChange={setCheck} onRemove={() => delCheck(c.checkpoint)} />
           ))}

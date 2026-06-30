@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-190%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-204%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 

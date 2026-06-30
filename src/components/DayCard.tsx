@@ -16,6 +16,7 @@ import { dayLongLabel } from '../lib/dates';
 import { makeMeal } from '../lib/factory';
 import { mealFromTemplate, templateFromMeal } from '../lib/mealTemplates';
 import { putMealTemplate } from '../lib/db';
+import { syncSatietyNotes } from '../lib/satietyDuration';
 import { useMealTemplates } from '../hooks/useMealTemplates';
 import { DEFAULT_MEAL_TIMES, SYMPTOM_ORDER } from '../lib/constants';
 import { suggestDayQuality } from '../lib/quality';
@@ -58,10 +59,10 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
   const showGeneralSymptoms = day.meals.length === 0 || hasGeneralSymptoms;
 
   function setMeal(meal: Meal) {
-    update((d) => ({ ...d, meals: d.meals.map((m) => (m.id === meal.id ? meal : m)) }));
+    update((d) => syncSatietyNotes({ ...d, meals: d.meals.map((m) => (m.id === meal.id ? meal : m)) }, insights));
   }
   function removeMeal(id: string) {
-    update((d) => ({ ...d, meals: d.meals.filter((m) => m.id !== id) }));
+    update((d) => syncSatietyNotes({ ...d, meals: d.meals.filter((m) => m.id !== id) }, insights));
   }
   function addMeal() {
     update((d) => {
