@@ -35,6 +35,32 @@ export interface Meal {
   time: string; // "07:30"
   foods: FoodItem[];
   symptoms?: Record<SymptomKey, Intensity>; // symptômes ressentis après ce repas
+  satiety?: SatietyCheck[]; // suivi de satiété aux différents checkpoints (immédiat → +3 h)
+}
+
+// ---- Suivi de la satiété (post-repas) ----
+
+/** Moment du relevé de satiété, relatif au repas. */
+export type SatietyCheckpoint = 'immediate' | '1h' | '2h' | '3h';
+
+/**
+ * Type qualitatif de satiété (normalisé sans accent, cf. Intensity). Surtout
+ * pertinent aux checkpoints proches du repas (immediate / 1h).
+ */
+export type SatietyType = 'legere' | 'lourde' | 'ballonnement';
+
+/**
+ * Un relevé de satiété à un checkpoint donné. Les trois mesures sont des VAS
+ * (Visual Analogue Scale) : entiers 0-100, ancres textuelles côté UI.
+ */
+export interface SatietyCheck {
+  checkpoint: SatietyCheckpoint;
+  timestamp?: string; // ISO — moment de la saisie (optionnel)
+  hungerIntensity: number; // 0 = aucune faim → 100 = faim extrême
+  energyLevel: number; // 0 = coup de barre / fébrile → 100 = énergie stable et claire
+  sugarCraving: number; // 0 = aucune envie → 100 = envie irrépressible
+  satietyType?: SatietyType | null; // pertinent surtout immediate / 1h
+  notes?: string;
 }
 
 export type SymptomKey =

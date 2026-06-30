@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-154%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-190%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -94,6 +94,12 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 - 🎙️ **Entrer un repas (voix → JSON)** — dictez votre journée à Claude Web, collez le JSON généré
   (repas + fiches FODMAP + symptômes + transit) ; le Journal du jour **se met à jour immédiatement**,
   sans avoir à changer de date. Voir [`docs/claude-web-repas-prompt.md`](./docs/claude-web-repas-prompt.md).
+- 🍽️ **Suivi de la satiété** — après un repas, relevez **faim, énergie et envie de sucre** (échelles
+  VAS 0-100) aux moments **immédiat / +1 h / +2 h / +3 h**, plus un **type de satiété**. Saisie
+  manuelle dans le Journal **ou** par dictée vocale (**Entrer votre satiété (voix → JSON)**, rattachée
+  au repas par son heure). La **courbe de satiété** et sa **corrélation** avec la composition du repas
+  (catégorie, niveau FODMAP) s'affichent dans Évolution. Voir
+  [`docs/claude-web-satiete-prompt.md`](./docs/claude-web-satiete-prompt.md).
 - 🩺 **Dossier médical** *(imprimable)* — synthèse complète du journal (profil santé, période couverte,
   fréquence & sévérité des symptômes, transit & hydratation, aliments les plus fréquents et défavorables,
   corrélations, journal détaillé) à **imprimer ou exporter en PDF** pour la remettre à un médecin.

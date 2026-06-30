@@ -4,6 +4,24 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.14.0] — Suivi de la satiété (faim / énergie / envie de sucre)
+
+Nouveau suivi temporel de la satiété après chaque repas, corrélé localement à la composition.
+
+- **Saisie vocale → JSON** : nouveau bouton **« Entrer votre satiété (voix → JSON) »** (menu ⋯),
+  calqué sur l'import des repas. Un Projet Claude Web dédié transcrit votre ressenti ; le JSON est
+  rattaché au bon repas par sa **date + heure** (`mealTime`). Prompt copiable + `docs/claude-web-satiete-prompt.md`.
+- **Relevés multi-points** : checkpoints **immédiat / +1 h / +2 h / +3 h** mesurant la **faim**,
+  l'**énergie** et l'**envie de sucre** en VAS 0-100, plus un **type de satiété** (légère / lourde /
+  ballonnement) sur les checkpoints proches du repas.
+- **Saisie & édition manuelles** dans le Journal : sous chaque repas, une zone Satiété (vide par défaut)
+  avec un composant **`<VasSlider>`** réutilisable (slider natif, thème, accessible).
+- **Corrélation locale** (onglet Évolution) : courbe de satiété moyenne (Recharts) + comparatif
+  faim/sucre selon la **catégorie dominante** et le **niveau FODMAP** des repas. Affiché seulement
+  au-delà d'un seuil minimal de repas suivis (honnêteté des corrélations).
+- **Données** : champ `Meal.satiety` **imbriqué dans le repas** (comme `Meal.symptoms`) — aucune
+  migration Dexie, export/import déjà couverts via les jours. **190 tests.**
+
 ## [0.13.0] — Récupérer l'analyse de journée (partage & téléchargement)
 
 L'analyse IA d'une journée peut désormais sortir de l'app.

@@ -10,6 +10,7 @@ import { HelpSheet } from './components/HelpSheet';
 import { Onboarding } from './components/Onboarding';
 import { Tour } from './components/Tour';
 import { ImportMealsSheet } from './components/ImportMealsSheet';
+import { SatietyImportSheet } from './components/SatietyImportSheet';
 import { MedicalRecordSheet } from './components/MedicalRecordSheet';
 import { TreatmentsSheet } from './components/TreatmentsSheet';
 import { ReintroSheet } from './components/ReintroSheet';
@@ -48,6 +49,7 @@ export default function App() {
   const [tourTab, setTourTab] = useState<Tab | null>(null);
   const [seenTours, setSeenTours] = useState<string[] | null>(null);
   const [importMealsOpen, setImportMealsOpen] = useState(false);
+  const [satietyImportOpen, setSatietyImportOpen] = useState(false);
   const [medicalRecordOpen, setMedicalRecordOpen] = useState(false);
   const [treatmentsOpen, setTreatmentsOpen] = useState(false);
   const [reintroOpen, setReintroOpen] = useState(false);
@@ -177,6 +179,7 @@ export default function App() {
         onOpenProfile={() => setProfileOpen(true)}
         onReplayOnboarding={replayTours}
         onOpenImportMeals={() => setImportMealsOpen(true)}
+        onOpenSatietyImport={() => setSatietyImportOpen(true)}
         onOpenMedicalRecord={() => setMedicalRecordOpen(true)}
         onOpenTreatments={() => setTreatmentsOpen(true)}
         onOpenReintro={() => setReintroOpen(true)}
@@ -212,6 +215,15 @@ export default function App() {
         open={importMealsOpen}
         defaultDate={date}
         onClose={() => setImportMealsOpen(false)}
+        onImported={(d) => {
+          setDate(d);
+          setTab('journal');
+        }}
+      />
+      <SatietyImportSheet
+        open={satietyImportOpen}
+        defaultDate={date}
+        onClose={() => setSatietyImportOpen(false)}
         onImported={(d) => {
           setDate(d);
           setTab('journal');

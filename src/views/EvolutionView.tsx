@@ -8,6 +8,7 @@ import {
   ComposedChart,
   Legend as ReLegend,
   Line,
+  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -23,10 +24,20 @@ import {
   topSymptoms,
 } from '../lib/aggregates';
 import { HYDRATION_TARGET_L } from '../lib/constants';
+import { CHECKPOINT_SHORT } from '../lib/satiety';
+import {
+  averageCurve,
+  bucketByCategory,
+  bucketByFodmap,
+  collectSatietyMeals,
+  MIN_SATIETY_MEALS,
+  overallAverages,
+} from '../lib/satietyCorrelation';
 import { dayShortLabel, fromISODate, toISODate } from '../lib/dates';
 import { dayHasContent } from '../lib/aggregates';
 import { TipBanner } from '../components/TipBanner';
 import { PeriodReportSheet } from '../components/ai/PeriodReportSheet';
+import { useFoodInsightMap } from '../hooks/useFoodInsightMap';
 import { useTheme } from '../hooks/useTheme';
 import { Sparkles } from 'lucide-react';
 
@@ -62,6 +73,7 @@ export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
   const [range, setRange] = useState<Range>('4weeks');
   const [reportOpen, setReportOpen] = useState(false);
   const { theme } = useTheme();
+  const insights = useFoodInsightMap();
   const chrome = CHROME[theme];
   const axisTick = { fill: chrome.muted, fontSize: 11 };
   const tooltip = {
@@ -101,6 +113,23 @@ export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
   const hydration = hydrationByDay(days).map(withLabel);
   const categories = categoryCountsByDay(days).map(withLabel);
   const tops = topSymptoms(days);
+
+  // --- Satiété : courbe moyenne + corrélation avec la composition du repas ---
+  const satietyMeals = collectSatietyMeals(days);
+  const satietyCurve = averageCurve(satietyMeals).map((p) => ({
+    label: CHECKPOINT_SHORT[p.checkpoint],
+    hungerIntensity: p.hungerIntensity,
+    energyLevel: p.energyLevel,
+    sugarCraving: p.sugarCraving,
+  }));
+  const categoryGroups = bucketByCategory(satietyMeals).map((b) => {
+    const a = overallAverages(b.meals);
+    return { label: b.label, hungerIntensity: a.hungerIntensity, sugarCraving: a.sugarCraving };
+  });
+  const fodmapGroups = bucketByFodmap(satietyMeals, insights).map((b) => {
+    const a = overallAverages(b.meals);
+    return { label: b.label, hungerIntensity: a.hungerIntensity, sugarCraving: a.sugarCraving };
+  });
 
   // Plage réelle (jours renseignés) pour la clé de cache du rapport de période.
   const recorded = days.filter(dayHasContent);
@@ -218,6 +247,73 @@ export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
               </BarChart>
             </ResponsiveContainer>
           </ChartCard>
+
+          {satietyMeals.length > 0 && (
+            <>
+              <h3 className="pt-2 text-base font-semibold text-ink">Satiété après les repas</h3>
+
+              {satietyMeals.length < MIN_SATIETY_MEALS ? (
+                <div className="rounded-2xl border border-border bg-surface p-6 text-center text-sm text-muted">
+                  Pas encore assez de repas suivis pour une corrélation fiable
+                  ({satietyMeals.length}/{MIN_SATIETY_MEALS}). Continuez à renseigner votre satiété.
+                </div>
+              ) : (
+                <>
+                  <ChartCard title="Courbe de satiété moyenne (faim / énergie / envie de sucre)">
+                    <ResponsiveContainer width="100%" height={240}>
+                      <LineChart data={satietyCurve} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={chrome.grid} vertical={false} />
+                        <XAxis dataKey="label" tick={axisTick} />
+                        <YAxis tick={axisTick} domain={[0, 100]} />
+                        <Tooltip {...tooltip} />
+                        <ReLegend {...legendProps} />
+                        <Line type="monotone" dataKey="hungerIntensity" name="Faim" stroke={COL.severe} strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                        <Line type="monotone" dataKey="energyLevel" name="Énergie" stroke={COL.leger} strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                        <Line type="monotone" dataKey="sugarCraving" name="Envie de sucre" stroke={COL.modere} strokeWidth={2} dot={{ r: 3 }} connectNulls />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartCard>
+
+                  {categoryGroups.length >= 2 && (
+                    <ChartCard title="Faim & envie de sucre selon la catégorie dominante du repas">
+                      <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={categoryGroups} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={chrome.grid} vertical={false} />
+                          <XAxis dataKey="label" tick={axisTick} />
+                          <YAxis tick={axisTick} domain={[0, 100]} />
+                          <Tooltip {...tooltip} />
+                          <ReLegend {...legendProps} />
+                          <Bar dataKey="hungerIntensity" name="Faim (moy.)" fill={COL.severe} radius={[3, 3, 0, 0]} />
+                          <Bar dataKey="sugarCraving" name="Sucre (moy.)" fill={COL.modere} radius={[3, 3, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartCard>
+                  )}
+
+                  {fodmapGroups.length >= 2 ? (
+                    <ChartCard title="Faim & envie de sucre selon le niveau FODMAP du repas">
+                      <ResponsiveContainer width="100%" height={220}>
+                        <BarChart data={fodmapGroups} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={chrome.grid} vertical={false} />
+                          <XAxis dataKey="label" tick={axisTick} />
+                          <YAxis tick={axisTick} domain={[0, 100]} />
+                          <Tooltip {...tooltip} />
+                          <ReLegend {...legendProps} />
+                          <Bar dataKey="hungerIntensity" name="Faim (moy.)" fill={COL.severe} radius={[3, 3, 0, 0]} />
+                          <Bar dataKey="sugarCraving" name="Sucre (moy.)" fill={COL.modere} radius={[3, 3, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartCard>
+                  ) : (
+                    <p className="text-xs text-muted">
+                      Analysez vos aliments avec l'IA (onglet Aliments) pour comparer aussi la satiété
+                      par niveau FODMAP des repas.
+                    </p>
+                  )}
+                </>
+              )}
+            </>
+          )}
         </div>
       )}
 

@@ -19,12 +19,12 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 159 tests : `foodClassifier`, `dates`,
+et appellent `afterEach(cleanup)` localement (pas de setup global). 190 tests : `foodClassifier`, `dates`,
 `quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
-`dayAnalysisExport`,
+`dayAnalysisExport`, `satiety`, `satietyImport`, `satietyCorrelation`,
 `contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`, `correlations`,
 `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
-`TipBanner`, … `npm run build` typecheck aussi les tests.
+`VasSlider`, `TipBanner`, … `npm run build` typecheck aussi les tests.
 
 `tsconfig.app.json` active `strict`, `noUnusedLocals`, `noUnusedParameters` :
 les imports/variables inutilisés **cassent le build**.
@@ -81,6 +81,10 @@ src/
     barcodeScanner.ts # lecture code-barres caméra (BarcodeDetector natif + @zxing à la demande)
     mealsImport.ts    # parse/merge du JSON importé (repas + fiches FODMAP + symptômes + transit)
     mealImportPrompt.ts # CLAUDE_WEB_PROMPT (prompt copiable dans la sheet)
+    satiety.ts        # satiété : constantes (checkpoints/types), VAS_METRICS, clampVas, upsertCheck
+    satietyImport.ts  # parse/merge du JSON satiété (rattache au repas par date + heure)
+    satietyImportPrompt.ts # CLAUDE_WEB_SATIETY_PROMPT (projet Claude Web dédié)
+    satietyCorrelation.ts # courbe moyenne + regroupement par catégorie / niveau FODMAP (corrélation locale)
     ai/               # couche IA (OpenRouter), optionnelle
       openrouter.ts   # client : fetchFreeModels, chatJSON (parse JSON robuste)
       foodInsight.ts  # prompt + analyzeFood + buildFoodInsight (réutilisé par l'import) + deriveCategory
@@ -92,6 +96,7 @@ src/
                       #   HelpSheet, TipBanner, Onboarding, Tour [visite guidée ancrée], ImportMealsSheet, ScanProductSheet,
                       #   MedicalRecordSheet [dossier médical imprimable],
                       #   TreatmentsSheet, ReintroSheet, MealTemplatesSheet,
+                      #   VasSlider [échelle VAS 0-100], MealSatiety [satiété par repas], SatietyImportSheet,
                       #   JournalSearchSheet, ContextRow, …)
     ai/               # AiSettingsSheet, FoodInsightCard, FoodInsightSheet, PeriodReportSheet
   views/              # un écran par onglet (Journal/Aliments/Week/Evolution/Reperes)

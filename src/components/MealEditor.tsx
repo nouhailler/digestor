@@ -17,6 +17,7 @@ import { normalize } from '../lib/foodClassifier';
 import { foodSuggestions } from '../lib/foodSuggestions';
 import { FODMAP_LEVEL_LABEL, insightChipColor } from '../lib/ai/insightFormat';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
+import { MealSatiety } from './MealSatiety';
 
 /** Nb de suggestions d'autocomplétion affichées au maximum. */
 const MAX_SUGGESTIONS = 6;
@@ -350,6 +351,9 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
           </div>
         )
       )}
+
+      {/* Suivi de satiété (faim / énergie / sucre aux checkpoints) — vide tant que non saisi. */}
+      <MealSatiety meal={meal} editing={editing} onChange={onChange} />
     </div>
   );
 }

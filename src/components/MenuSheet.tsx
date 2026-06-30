@@ -3,6 +3,7 @@ import {
   ClipboardList,
   FileText,
   FlaskConical,
+  Gauge,
   GraduationCap,
   Info,
   Mic,
@@ -32,6 +33,7 @@ interface MenuSheetProps {
   onOpenProfile: () => void;
   onReplayOnboarding: () => void;
   onOpenImportMeals: () => void;
+  onOpenSatietyImport: () => void;
   onOpenMedicalRecord: () => void;
   onOpenTreatments: () => void;
   onOpenReintro: () => void;
@@ -47,6 +49,7 @@ export function MenuSheet({
   onOpenProfile,
   onReplayOnboarding,
   onOpenImportMeals,
+  onOpenSatietyImport,
   onOpenMedicalRecord,
   onOpenTreatments,
   onOpenReintro,
@@ -117,6 +120,17 @@ export function MenuSheet({
           className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
         >
           <Mic size={16} className="text-muted" /> Entrer un repas (voix → JSON)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            onClose();
+            onOpenSatietyImport();
+          }}
+          className="flex w-full items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
+        >
+          <Gauge size={16} className="text-muted" /> Entrer votre satiété (voix → JSON)
         </button>
 
         <button
