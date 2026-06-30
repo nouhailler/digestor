@@ -1,4 +1,5 @@
-import { HelpCircle, MoreHorizontal } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, HelpCircle, MoreHorizontal } from 'lucide-react';
 import { Chip } from './Chip';
 import { AiActivityBadge } from './ai/AiActivityBadge';
 import {
@@ -13,14 +14,40 @@ import type { Intensity } from '../types';
 
 const INTENSITIES: Intensity[] = ['severe', 'modere', 'leger', 'absent'];
 
+// Préférence d'affichage propre à l'appareil (comme le thème) : la légende du
+// bandeau est repliée par défaut ; le choix est mémorisé en localStorage.
+const LEGEND_KEY = 'digestor-legend-open';
+function getStoredLegendOpen(): boolean {
+  try {
+    return localStorage.getItem(LEGEND_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+function setStoredLegendOpen(open: boolean): void {
+  try {
+    localStorage.setItem(LEGEND_KEY, open ? '1' : '0');
+  } catch {
+    /* localStorage indisponible */
+  }
+}
+
 interface LegendProps {
   title: string;
   onMenu: () => void;
   onHelp: () => void;
 }
 
-/** En-tête sticky : titre + légende aliments & intensités + aide + menu ⋯. */
+/** En-tête sticky : titre + légende aliments & intensités (repliable) + aide + menu ⋯. */
 export function Legend({ title, onMenu, onHelp }: LegendProps) {
+  const [legendOpen, setLegendOpen] = useState(getStoredLegendOpen);
+
+  function toggleLegend() {
+    const next = !legendOpen;
+    setLegendOpen(next);
+    setStoredLegendOpen(next);
+  }
+
   return (
     <header className="safe-top sticky top-0 z-20 border-b border-border bg-bg/90 backdrop-blur-md">
       <div className="mx-auto max-w-3xl px-4 py-3">
@@ -49,7 +76,20 @@ export function Legend({ title, onMenu, onHelp }: LegendProps) {
           </div>
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm" data-tour="header-legend">
+        <button
+          type="button"
+          onClick={toggleLegend}
+          aria-expanded={legendOpen}
+          data-tour="header-legend"
+          title="Légende des couleurs (aliments & intensités). Touchez pour afficher/réduire."
+          className="mt-2 inline-flex items-center gap-1 text-xs text-muted hover:text-ink"
+        >
+          Légende des couleurs
+          <ChevronDown size={14} className={legendOpen ? 'rotate-180 transition' : 'transition'} />
+        </button>
+
+        {legendOpen && (
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
           <span className="text-muted" title="Légende des couleurs d'aliments utilisées dans tout le journal.">
             Aliments :
           </span>
@@ -82,6 +122,7 @@ export function Legend({ title, onMenu, onHelp }: LegendProps) {
             ))}
           </div>
         </div>
+        )}
       </div>
     </header>
   );

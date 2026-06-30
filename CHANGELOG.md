@@ -31,6 +31,9 @@ Nouveau suivi temporel de la satiété après chaque repas, corrélé localement
 - **Aide intégrée** : un bouton **Aide** à droite de « Type de satiété » (édition d'un repas) ouvre
   une explication « mesurée vs attendue » + rôle des tags ; la même explication figure dans l'aide
   contextuelle « ? » du Journal (source unique `SATIETY_HELP`).
+- **Bandeau allégé** : la légende des couleurs (Aliments + Intensité) du bandeau collant devient
+  **repliable** (chevron, repliée par défaut, choix mémorisé par appareil) — plus de place sur le
+  Journal et les autres écrans.
 - **Données** : champs `Meal.satiety` et `Meal.tags` **imbriqués dans le repas** (comme
   `Meal.symptoms`) — aucune migration Dexie, export/import déjà couverts via les jours. **209 tests.**
 
