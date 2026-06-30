@@ -16,6 +16,7 @@ import type {
   Treatment,
 } from '../types';
 import { dayHasContent } from './aggregates';
+import { withCompleteSymptoms } from './factory';
 import { normalize } from './foodClassifier';
 
 const PROFILE_KEY = 'profile';
@@ -383,7 +384,8 @@ export async function putPeriodAnalysis(a: PeriodAnalysis): Promise<void> {
 }
 
 export async function getDay(date: string): Promise<DayEntry | undefined> {
-  return db.days.get(date);
+  const d = await db.days.get(date);
+  return d ? withCompleteSymptoms(d) : d;
 }
 
 export async function putDay(day: DayEntry): Promise<void> {
@@ -392,11 +394,12 @@ export async function putDay(day: DayEntry): Promise<void> {
 
 export async function getDays(dates: string[]): Promise<DayEntry[]> {
   const rows = await db.days.bulkGet(dates);
-  return rows.filter((r): r is DayEntry => !!r);
+  return rows.filter((r): r is DayEntry => !!r).map(withCompleteSymptoms);
 }
 
 export async function getAllDays(): Promise<DayEntry[]> {
-  return db.days.orderBy('date').toArray();
+  const rows = await db.days.orderBy('date').toArray();
+  return rows.map(withCompleteSymptoms);
 }
 
 export async function isEmpty(): Promise<boolean> {

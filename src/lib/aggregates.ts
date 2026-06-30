@@ -12,12 +12,15 @@ function* foodsOf(day: DayEntry) {
  * (saisie générale / import / seed) et chaque repas (symptômes par repas).
  */
 export function effectiveDaySymptoms(day: DayEntry): Record<SymptomKey, Intensity> {
-  const out = { ...day.symptoms };
+  // Base complète : tout à « absent ». Indispensable pour les jours enregistrés
+  // avant l'ajout d'un symptôme (leur objet symptoms ne contient pas la clé).
+  const out = {} as Record<SymptomKey, Intensity>;
+  for (const k of SYMPTOM_ORDER) out[k] = day.symptoms[k] ?? 'absent';
   for (const meal of day.meals) {
     const ms = meal.symptoms;
     if (!ms) continue;
     for (const k of SYMPTOM_ORDER) {
-      if (INTENSITY_WEIGHT[ms[k]] > INTENSITY_WEIGHT[out[k]]) out[k] = ms[k];
+      if ((INTENSITY_WEIGHT[ms[k]] ?? 0) > INTENSITY_WEIGHT[out[k]]) out[k] = ms[k];
     }
   }
   return out;

@@ -27,6 +27,16 @@ describe('describeDay', () => {
     expect(describeDay(emptyDay('2025-06-09'))).toContain('Symptômes : aucun');
   });
 
+  it('ne plante pas sur un jour enregistré avant l’ajout d’un symptôme (clés manquantes)', () => {
+    // Ancien jour : objet symptoms partiel (sans urticaire/rougeurs/maux_de_tete).
+    const oldDay = {
+      ...emptyDay('2024-01-01'),
+      symptoms: { ballonnements: 'modere' } as never,
+    };
+    expect(() => describeDay(oldDay)).not.toThrow();
+    expect(describeDay(oldDay)).toContain('Ballonnements (modéré)');
+  });
+
   it('enrichit un aliment avec son analyse IA quand elle existe', () => {
     const insight: FoodInsight = {
       key: normalize('pain blanc'),

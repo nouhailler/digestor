@@ -8,6 +8,7 @@ import type {
   Verdict,
 } from '../../types';
 import { INTENSITY_LABEL, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../constants';
+import { effectiveDaySymptoms } from '../aggregates';
 import { normalize } from '../foodClassifier';
 import { formatQuantity } from '../quantity';
 import { FODMAP_LEVEL_LABEL, VERDICT_LABEL } from './insightFormat';
@@ -48,8 +49,9 @@ export function describeDay(day: DayEntry, insights?: Map<string, FoodInsight>):
     })
     .join('\n');
 
-  const symptoms = SYMPTOM_ORDER.filter((k) => day.symptoms[k] !== 'absent')
-    .map((k) => `${SYMPTOM_LABELS[k]} (${INTENSITY_LABEL[day.symptoms[k]].toLowerCase()})`)
+  const sym = effectiveDaySymptoms(day);
+  const symptoms = SYMPTOM_ORDER.filter((k) => sym[k] !== 'absent')
+    .map((k) => `${SYMPTOM_LABELS[k]} (${INTENSITY_LABEL[sym[k]].toLowerCase()})`)
     .join(', ');
 
   const lines = [`Date : ${day.date}`, `Repas :\n${meals || '  (aucun)'}`];

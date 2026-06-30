@@ -25,7 +25,8 @@ export function SymptomGrid({ symptoms, editing, onCycle, onInfo }: SymptomGridP
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-4">
       {SYMPTOM_ORDER.map((key) => {
-        const intensity = symptoms[key];
+        // Défaut « absent » : un jour enregistré avant l'ajout d'un symptôme n'a pas la clé.
+        const intensity = symptoms[key] ?? 'absent';
         const dot = (
           <span
             className="mt-1 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
