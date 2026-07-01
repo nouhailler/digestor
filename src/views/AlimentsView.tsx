@@ -535,16 +535,20 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                     à analyser
                   </span>
                 )}
-                {!isGenerating && (amine.level === 'high' || amine.level === 'moderate') && (
+                {!isGenerating && (
                   <span
                     className="shrink-0 rounded-full px-2 py-0.5 text-xs"
                     style={{
                       color: AMINE_LEVEL_COLOR[amine.level],
                       backgroundColor: `color-mix(in srgb, ${AMINE_LEVEL_COLOR[amine.level]} 14%, transparent)`,
                     }}
-                    title={`Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[amine.level].toLowerCase()}${
-                      amine.daoBlocker ? ' · freine la DAO' : ''
-                    }${amine.liberator ? ' · histamino-libérateur' : ''}`}
+                    title={
+                      amine.level === 'unknown'
+                        ? 'Amines biogènes (histamine…) : teneur non renseignée (pas supposée sûre).'
+                        : `Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[amine.level].toLowerCase()}${
+                            amine.daoBlocker ? ' · freine la DAO' : ''
+                          }${amine.liberator ? ' · histamino-libérateur' : ''}`
+                    }
                   >
                     Amines {AMINE_LEVEL_LABEL[amine.level].toLowerCase()}
                   </span>
