@@ -262,8 +262,8 @@ function AmineRiskSection({ onOpenAmine }: { onOpenAmine: (name: string) => void
       </button>
       {open && (
         <>
-          <div className="mt-3 overflow-hidden rounded-xl border border-border">
-            <table className="w-full border-collapse text-sm">
+          <div className="mt-3 overflow-x-auto rounded-xl border border-border">
+            <table className="w-full min-w-[30rem] border-collapse text-sm">
               <thead>
                 <tr className="bg-surface-2 text-left">
                   <th className="border-b border-border px-3 py-2 font-semibold text-ink">Amine</th>

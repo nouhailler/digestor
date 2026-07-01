@@ -570,6 +570,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
             const isFavorite = favoriteKeys.has(r.key);
             // Amines biogènes : depuis l'analyse si dispo, sinon le dictionnaire.
             const amine = r.insight?.amines ?? classifyAmines(r.name);
+            const badge = amineBadge(amine);
             const subtitle = isGenerating
               ? 'Génération en cours…'
               : r.insight
@@ -596,6 +597,12 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                     {r.scannedAt && (
                       <span style={{ color: 'var(--color-modere)' }}>Scanné le {dateLabel(r.scannedAt)} · </span>
                     )}
+                    {!isGenerating && (
+                      <span style={{ color: badge.color }} title={badge.title}>
+                        {badge.label}
+                        {badge.portion ? ` · ${badge.portion}` : ''} ·{' '}
+                      </span>
+                    )}
                     {subtitle}
                   </span>
                 </button>
@@ -619,26 +626,6 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                     à analyser
                   </span>
                 )}
-                {!isGenerating &&
-                  (() => {
-                    const badge = amineBadge(amine);
-                    return (
-                      <span className="flex min-w-0 shrink items-center gap-1" title={badge.title}>
-                        <span
-                          className="shrink-0 rounded-full px-2 py-0.5 text-xs"
-                          style={{
-                            color: badge.color,
-                            backgroundColor: `color-mix(in srgb, ${badge.color} 14%, transparent)`,
-                          }}
-                        >
-                          {badge.label}
-                        </span>
-                        {badge.portion && (
-                          <span className="truncate text-[11px] text-muted">· {badge.portion}</span>
-                        )}
-                      </span>
-                    );
-                  })()}
                 <button
                   type="button"
                   onClick={() => toggleFavorite(r.name)}
