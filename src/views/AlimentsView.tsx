@@ -31,7 +31,7 @@ import { CATEGORY_COLOR } from '../lib/constants';
 import { dateLabel } from '../lib/dates';
 import { FODMAP_LEVEL_COLOR, FODMAP_LEVEL_LABEL } from '../lib/ai/insightFormat';
 import { classifyFood, dictionaryFoods, looseKey, normalize } from '../lib/foodClassifier';
-import { AMINE_LEVEL_COLOR, AMINE_LEVEL_LABEL, classifyAmines } from '../lib/biogenicAmines';
+import { amineBadge, classifyAmines } from '../lib/biogenicAmines';
 import { downloadFoodReference } from '../lib/foodReference';
 import { analyzeFood } from '../lib/ai/foodInsight';
 import { runAiTask } from '../lib/ai/aiActivity';
@@ -149,6 +149,13 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   const rows = [...generating, ...baseRows.filter((r) => !generatingKeys.has(r.key))];
   const unanalyzed = rows.filter((r) => !r.insight);
 
+  // Fiches analysées sans profil amines que le dictionnaire ne peut pas combler
+  // (aliments hors dictionnaire) → cibles de l'enrichissement IA. Global (toutes portées).
+  const amineIaTargets = useMemo(
+    () => (insights ?? []).filter((i) => !i.amines && classifyAmines(i.name).level === 'unknown'),
+    [insights],
+  );
+
   // Clés présentes dans les repas du journal (pour étiqueter la provenance et
   // savoir si une suppression doit aussi nettoyer l'historique).
   const mealKeys = useMemo(() => new Set(mealRows.map((r) => r.key)), [mealRows]);
@@ -206,31 +213,40 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
     setSelected(name);
   }
 
-  // Enrichit les fiches en amines biogènes : d'abord hors-ligne depuis le
-  // dictionnaire (instantané), puis — si l'IA est configurée — analyse celles
-  // qui restent sans profil (aliments hors dictionnaire).
-  async function completeAmines() {
+  // Complète hors-ligne, depuis le dictionnaire, les fiches sans profil amines.
+  async function backfillOffline() {
+    setBulkError(null);
+    const filled = await backfillFoodAmines();
+    setAmineMsg(
+      filled > 0
+        ? `${filled} aliment(s) complété(s) en amines depuis le dictionnaire (hors-ligne).`
+        : 'Aucun complément hors-ligne : les aliments connus du dictionnaire ont déjà leur profil amines.',
+    );
+  }
+
+  // Enrichit via l'IA les fiches encore sans profil amines (aliments hors
+  // dictionnaire). On complète d'abord ce que le dictionnaire sait (gratuit).
+  async function enrichAminesIa() {
+    if (!config) return;
     setBulkError(null);
     setAmineMsg(null);
-    const filled = await backfillFoodAmines();
-    if (!config) {
-      setAmineMsg(`${filled} aliment(s) complété(s) depuis le dictionnaire (hors-ligne).`);
-      return;
-    }
+    await backfillFoodAmines();
     const targets = (await getAllFoodInsights()).filter((i) => !i.amines);
     if (targets.length === 0) {
-      setAmineMsg(`${filled} complété(s) hors-ligne. Aucun autre à enrichir.`);
+      setAmineMsg('Aucun aliment à enrichir : tous ont un profil amines.');
       return;
     }
     stopRef.current = false;
     setBulk({ done: 0, total: targets.length });
     const ctx = buildProfileContext(profile);
+    let done = 0;
     for (let i = 0; i < targets.length; i++) {
       if (stopRef.current) break;
       try {
         await runAiTask(`Aliment · ${targets[i].name}`, (signal) =>
           analyzeFood(targets[i].name, config, { profileContext: ctx, signal }).then(putFoodInsight),
         );
+        done++;
       } catch (e) {
         setBulkError(`« ${targets[i].name} » : ${e instanceof Error ? e.message : 'échec'}`);
         break;
@@ -238,7 +254,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       setBulk({ done: i + 1, total: targets.length });
     }
     setBulk(null);
-    setAmineMsg(`${filled} complété(s) hors-ligne, ${targets.length} enrichi(s) via l'IA.`);
+    setAmineMsg(`${done} aliment(s) enrichi(s) en amines via l'IA.`);
   }
 
   async function runBulk() {
@@ -448,14 +464,29 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
         >
           <Copy size={15} /> Trouver les doublons{duplicateCount > 0 ? ` (${duplicateCount})` : ''}
         </button>
+        {amineIaTargets.length > 0 && !bulk && (
+          <button
+            type="button"
+            onClick={ready ? enrichAminesIa : onOpenAiSettings}
+            title={
+              ready
+                ? "Analyse via l'IA les aliments encore sans profil amines (hors dictionnaire) pour renseigner teneur, histamino-libération, inhibition de la DAO et portion tolérée."
+                : 'Configurez l’IA d’abord.'
+            }
+            className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium"
+            style={{ backgroundColor: 'var(--color-modere)', color: '#0e0e0f' }}
+          >
+            <Activity size={15} /> Enrichir {amineIaTargets.length} amines avec l'IA
+          </button>
+        )}
         <button
           type="button"
-          onClick={completeAmines}
+          onClick={backfillOffline}
           disabled={!!bulk}
-          title="Complète le profil amines biogènes (histamine) des aliments : d'abord hors-ligne depuis le dictionnaire, puis via l'IA pour les aliments hors dictionnaire (si configurée)."
+          title="Complète hors-ligne, depuis le dictionnaire embarqué, le profil amines biogènes (histamine) des aliments déjà analysés. Sans clé ni réseau."
           className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-4 py-2 text-sm font-medium text-ink disabled:opacity-50"
         >
-          <Activity size={15} /> Compléter les amines
+          <Activity size={15} /> Compléter les amines (hors-ligne)
         </button>
         <button
           type="button"
@@ -588,24 +619,26 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
                     à analyser
                   </span>
                 )}
-                {!isGenerating && (
-                  <span
-                    className="shrink-0 rounded-full px-2 py-0.5 text-xs"
-                    style={{
-                      color: AMINE_LEVEL_COLOR[amine.level],
-                      backgroundColor: `color-mix(in srgb, ${AMINE_LEVEL_COLOR[amine.level]} 14%, transparent)`,
-                    }}
-                    title={
-                      amine.level === 'unknown'
-                        ? 'Amines biogènes (histamine…) : teneur non renseignée (pas supposée sûre).'
-                        : `Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[amine.level].toLowerCase()}${
-                            amine.daoBlocker ? ' · freine la DAO' : ''
-                          }${amine.liberator ? ' · histamino-libérateur' : ''}`
-                    }
-                  >
-                    Amines {AMINE_LEVEL_LABEL[amine.level].toLowerCase()}
-                  </span>
-                )}
+                {!isGenerating &&
+                  (() => {
+                    const badge = amineBadge(amine);
+                    return (
+                      <span className="flex min-w-0 shrink items-center gap-1" title={badge.title}>
+                        <span
+                          className="shrink-0 rounded-full px-2 py-0.5 text-xs"
+                          style={{
+                            color: badge.color,
+                            backgroundColor: `color-mix(in srgb, ${badge.color} 14%, transparent)`,
+                          }}
+                        >
+                          {badge.label}
+                        </span>
+                        {badge.portion && (
+                          <span className="truncate text-[11px] text-muted">· {badge.portion}</span>
+                        )}
+                      </span>
+                    );
+                  })()}
                 <button
                   type="button"
                   onClick={() => toggleFavorite(r.name)}

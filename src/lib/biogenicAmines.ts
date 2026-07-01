@@ -71,6 +71,30 @@ export function amineTolerance(info: AmineInfo): { level: AmineTolerance; note?:
   return level ? { level, note: info.toleranceNote } : undefined;
 }
 
+/**
+ * Contenu prêt à afficher d'une pastille amines : couleur, libellé, tooltip
+ * détaillé (niveau, DAO, libérateur, portion tolérée) et la note de portion
+ * concrète (`portion`) à montrer quand elle existe. Partagé Journal / Aliments.
+ */
+export function amineBadge(info: AmineInfo): {
+  color: string;
+  label: string;
+  title: string;
+  portion?: string;
+} {
+  const color = AMINE_LEVEL_COLOR[info.level];
+  const label = `Amines ${AMINE_LEVEL_LABEL[info.level].toLowerCase()}`;
+  if (info.level === 'unknown') {
+    return { color, label, title: 'Amines biogènes (histamine…) : teneur non renseignée (pas supposée sûre).' };
+  }
+  const tol = amineTolerance(info);
+  const parts = [`Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[info.level].toLowerCase()}`];
+  if (info.daoBlocker) parts.push('freine la DAO');
+  if (info.liberator) parts.push('histamino-libérateur');
+  if (tol) parts.push(`consommation : ${AMINE_TOLERANCE_LABEL[tol.level].toLowerCase()}${tol.note ? ` (${tol.note})` : ''}`);
+  return { color, label, title: parts.join(' · '), portion: tol?.note };
+}
+
 const H = (level: AmineLevel, extra: Omit<AmineInfo, 'level'> = {}): AmineInfo => ({ level, ...extra });
 
 /**

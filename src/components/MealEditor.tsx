@@ -15,7 +15,7 @@ import {
 import { emptySymptoms, makeFood } from '../lib/factory';
 import { MEAL_TAGS, MEAL_TAG_COLOR, MEAL_TAG_LABEL } from '../lib/mealTags';
 import { normalize } from '../lib/foodClassifier';
-import { AMINE_LEVEL_COLOR, AMINE_LEVEL_LABEL, classifyAmines } from '../lib/biogenicAmines';
+import { amineBadge, classifyAmines } from '../lib/biogenicAmines';
 import { foodSuggestions } from '../lib/foodSuggestions';
 import { FODMAP_LEVEL_LABEL, insightChipColor } from '../lib/ai/insightFormat';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
@@ -230,23 +230,19 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
             </Chip>
             {!editing &&
               (() => {
-                const amine = foodAmines(food);
+                const badge = amineBadge(foodAmines(food));
                 return (
-                  <span
-                    className="ml-1 inline-flex shrink-0 items-center self-center rounded-full px-1.5 py-0.5 text-[10px] leading-none"
-                    style={{
-                      color: AMINE_LEVEL_COLOR[amine.level],
-                      backgroundColor: `color-mix(in srgb, ${AMINE_LEVEL_COLOR[amine.level]} 14%, transparent)`,
-                    }}
-                    title={
-                      amine.level === 'unknown'
-                        ? 'Amines biogènes (histamine…) : teneur non renseignée (pas supposée sûre).'
-                        : `Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[amine.level].toLowerCase()}${
-                            amine.daoBlocker ? ' · freine la DAO' : ''
-                          }${amine.liberator ? ' · histamino-libérateur' : ''}`
-                    }
-                  >
-                    Amines {AMINE_LEVEL_LABEL[amine.level].toLowerCase()}
+                  <span className="ml-1 inline-flex shrink-0 items-center gap-1 self-center" title={badge.title}>
+                    <span
+                      className="rounded-full px-1.5 py-0.5 text-[10px] leading-none"
+                      style={{
+                        color: badge.color,
+                        backgroundColor: `color-mix(in srgb, ${badge.color} 14%, transparent)`,
+                      }}
+                    >
+                      {badge.label}
+                    </span>
+                    {badge.portion && <span className="text-[10px] leading-none text-muted">· {badge.portion}</span>}
                   </span>
                 );
               })()}
