@@ -15,6 +15,7 @@ import {
 import { emptySymptoms, makeFood } from '../lib/factory';
 import { MEAL_TAGS, MEAL_TAG_COLOR, MEAL_TAG_LABEL } from '../lib/mealTags';
 import { normalize } from '../lib/foodClassifier';
+import { AMINE_LEVEL_COLOR, AMINE_LEVEL_LABEL, classifyAmines } from '../lib/biogenicAmines';
 import { foodSuggestions } from '../lib/foodSuggestions';
 import { FODMAP_LEVEL_LABEL, insightChipColor } from '../lib/ai/insightFormat';
 import { SymptomGrid, cycleIntensity } from './SymptomGrid';
@@ -128,6 +129,11 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
     });
   }
 
+  // Amines biogènes d'un aliment : depuis l'analyse IA si dispo, sinon le dictionnaire.
+  function foodAmines(food: FoodItem) {
+    return insights?.get(normalize(food.name))?.amines ?? classifyAmines(food.name);
+  }
+
   const symptoms = meal.symptoms ?? emptySymptoms();
   const activeSymptoms = SYMPTOM_ORDER.filter((k) => symptoms[k] !== 'absent');
 
@@ -222,6 +228,28 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
                 </>
               )}
             </Chip>
+            {!editing &&
+              (() => {
+                const amine = foodAmines(food);
+                return (
+                  <span
+                    className="ml-1 inline-flex shrink-0 items-center self-center rounded-full px-1.5 py-0.5 text-[10px] leading-none"
+                    style={{
+                      color: AMINE_LEVEL_COLOR[amine.level],
+                      backgroundColor: `color-mix(in srgb, ${AMINE_LEVEL_COLOR[amine.level]} 14%, transparent)`,
+                    }}
+                    title={
+                      amine.level === 'unknown'
+                        ? 'Amines biogènes (histamine…) : teneur non renseignée (pas supposée sûre).'
+                        : `Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[amine.level].toLowerCase()}${
+                            amine.daoBlocker ? ' · freine la DAO' : ''
+                          }${amine.liberator ? ' · histamino-libérateur' : ''}`
+                    }
+                  >
+                    Amines {AMINE_LEVEL_LABEL[amine.level].toLowerCase()}
+                  </span>
+                );
+              })()}
             {editing && qtyOpen === food.id && (
               <FoodQuantityEditor
                 value={food.quantity}
