@@ -37,7 +37,7 @@ const ABOUT =
   "Référentiel des aliments connus de Digestor, avec leurs caractéristiques FODMAP / SIBO / candidose. " +
   'À déposer dans la zone Fichiers d\'un Projet Claude Web. Lors de la saisie vocale d\'un repas, chercher ' +
   "d'abord l'aliment ici (par 'name', insensible aux accents/majuscules/pluriels) et reprendre tel quel " +
-  'category/fodmapLevel/fodmaps/sibo/candida/safePortion. Une entrée "needsReview": true n\'a pas encore ' +
+  'category/fodmapLevel/fodmaps/sibo/candida/amines/safePortion. Une entrée "needsReview": true n\'a pas encore ' +
   "d'analyse : compléter selon ta connaissance. N'inventer une fiche que si l'aliment est absent.";
 
 const LEGEND: Record<string, string> = {
