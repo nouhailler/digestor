@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { BookOpen, ChevronDown, HeartPulse, Info, Table2 } from 'lucide-react';
+import { AlertTriangle, BookOpen, ChevronDown, HeartPulse, Info, Table2 } from 'lucide-react';
 import { TipBanner } from '../components/TipBanner';
 import { SymptomDetailSheet } from '../components/SymptomDetailSheet';
 import { EncyclopediaList } from '../components/EncyclopediaList';
 import { DigestiveGuide } from '../components/DigestiveGuide';
 import { findManifestation } from '../lib/encyclopedia';
-import { BIOGENIC_AMINES_REFERENCE } from '../lib/biogenicAmines';
+import { AMINE_RISK_REFERENCE, BIOGENIC_AMINES_REFERENCE } from '../lib/biogenicAmines';
 
 interface Cell {
   label: string;
@@ -148,6 +148,7 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
           </div>
 
           <AmineExplainer />
+          <AmineRiskSection />
           <AmineReferenceSection />
         </>
       ) : tab === 'encyclopedie' ? (
@@ -210,6 +211,74 @@ function AmineExplainer() {
       <p className="mt-2 text-xs text-muted">
         La teneur en histamine varie beaucoup (fraîcheur, affinage). Repère indicatif, non médical.
       </p>
+    </div>
+  );
+}
+
+/** Couleur du niveau de risque d'une amine (★1→5) selon la palette sémantique. */
+function amineRiskColor(stars: number): string {
+  if (stars >= 4) return 'var(--color-severe)';
+  if (stars >= 2) return 'var(--color-modere)';
+  return 'var(--color-leger)';
+}
+
+/** Tableau dépliable des amines les plus problématiques (niveau de risque + effets). */
+function AmineRiskSection() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-4 rounded-2xl border border-border bg-surface p-5 text-sm">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2 text-left text-base font-semibold text-ink"
+      >
+        <AlertTriangle size={16} className="text-muted" />
+        Amines les plus problématiques
+        <ChevronDown
+          size={16}
+          className={`ml-auto shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && (
+        <>
+          <div className="mt-3 overflow-hidden rounded-xl border border-border">
+            <table className="w-full border-collapse text-sm">
+              <thead>
+                <tr className="bg-surface-2 text-left">
+                  <th className="border-b border-border px-3 py-2 font-semibold text-ink">Amine</th>
+                  <th className="border-b border-l border-border px-3 py-2 font-semibold text-ink">Risque</th>
+                  <th className="border-b border-l border-border px-3 py-2 font-semibold text-ink">Principaux effets</th>
+                </tr>
+              </thead>
+              <tbody>
+                {AMINE_RISK_REFERENCE.map((a) => {
+                  const color = amineRiskColor(a.stars);
+                  return (
+                    <tr key={a.name} className="align-top">
+                      <td className="border-b border-border bg-surface px-3 py-2 font-medium text-ink">{a.name}</td>
+                      <td className="whitespace-nowrap border-b border-l border-border bg-surface px-3 py-2">
+                        <span aria-label={`${a.stars} sur 5`} title={a.riskLabel}>
+                          <span style={{ color }}>{'★'.repeat(a.stars)}</span>
+                          <span className="text-muted">{'☆'.repeat(5 - a.stars)}</span>
+                        </span>
+                        <span className="mt-0.5 block text-xs" style={{ color }}>
+                          {a.riskLabel}
+                        </span>
+                      </td>
+                      <td className="border-b border-l border-border bg-surface px-3 py-2 text-ink">{a.effects}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-muted">
+            Classement indicatif du risque alimentaire (l'effet dépend de l'accumulation et de la sensibilité
+            individuelle). Non médical.
+          </p>
+        </>
+      )}
     </div>
   );
 }

@@ -395,3 +395,70 @@ export const BIOGENIC_AMINES_REFERENCE: BiogenicAmineRef[] = [
     excess: 'Généralement bénéfique, peu d’effets indésirables aux doses alimentaires.',
   },
 ];
+
+// ---- Référence : amines biogènes classées par niveau de risque alimentaire ----
+
+/** Fiche « risque » d'une amine biogène problématique (écran Repères). */
+export interface AmineRiskRef {
+  name: string;
+  stars: number; // niveau de risque alimentaire, de 1 (très faible) à 5 (très élevé)
+  riskLabel: string; // libellé du niveau (ex. « Très élevé »)
+  effects: string; // principaux effets
+}
+
+/**
+ * Amines biogènes classées de la plus problématique à la mieux tolérée sur le
+ * plan alimentaire. Repère indicatif (le risque réel dépend de l'accumulation et
+ * de la sensibilité individuelle), non médical.
+ */
+export const AMINE_RISK_REFERENCE: AmineRiskRef[] = [
+  {
+    name: 'Histamine',
+    stars: 5,
+    riskLabel: 'Très élevé',
+    effects: 'Migraines, urticaire, rougeurs, démangeaisons, diarrhée, hypotension, tachycardie.',
+  },
+  {
+    name: 'Tyramine',
+    stars: 4,
+    riskLabel: 'Élevé',
+    effects: 'Hypertension, migraines, interaction potentiellement grave avec les antidépresseurs IMAO.',
+  },
+  {
+    name: 'Putrescine',
+    stars: 3,
+    riskLabel: 'Modéré',
+    effects:
+      "Favorise l'absorption de l'histamine, augmente les réactions chez les personnes sensibles, troubles digestifs possibles.",
+  },
+  {
+    name: 'Cadavérine',
+    stars: 3,
+    riskLabel: 'Modéré',
+    effects: "Renforce les effets toxiques de l'histamine, peut provoquer des troubles digestifs.",
+  },
+  {
+    name: 'Phényléthylamine',
+    stars: 2,
+    riskLabel: 'Faible à modéré',
+    effects: 'Stimulation du système nerveux, migraines chez les personnes sensibles.',
+  },
+  {
+    name: 'Tryptamine',
+    stars: 2,
+    riskLabel: 'Faible à modéré',
+    effects: 'Céphalées, vasoconstriction chez les personnes sensibles.',
+  },
+  {
+    name: 'Spermidine',
+    stars: 1,
+    riskLabel: 'Très faible',
+    effects: "Généralement considérée comme bénéfique : participe à l'autophagie et au renouvellement cellulaire.",
+  },
+  {
+    name: 'Spermine',
+    stars: 1,
+    riskLabel: 'Très faible',
+    effects: "Généralement considérée comme bénéfique : protège l'ADN et possède des propriétés antioxydantes.",
+  },
+];
