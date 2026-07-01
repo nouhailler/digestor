@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Printer, Stethoscope, X } from 'lucide-react';
-import type { CorrelationLevel } from '../lib/correlations';
 import type { RecordFood, RecordSymptom } from '../lib/medicalRecord';
 import { buildMedicalRecord } from '../lib/medicalRecord';
 import { getAllDays } from '../lib/db';
@@ -20,13 +19,6 @@ import { FODMAP_PHASE_LABEL, SEX_LABEL } from '../lib/profile';
 import { TREATMENT_KIND_LABEL, isTreatmentActive } from '../lib/treatments';
 import { REINTRO_GROUP_LABEL, REINTRO_RESULT_COLOR, REINTRO_RESULT_LABEL } from '../lib/reintro';
 import { dateLabel, dayLongLabel, todayISO } from '../lib/dates';
-
-const CORRELATION_COLOR: Record<CorrelationLevel, string> = {
-  defavorable: 'var(--color-severe)',
-  surveiller: 'var(--color-modere)',
-  favorable: 'var(--color-leger)',
-  neutre: 'var(--color-absent)',
-};
 
 function joinList(arr?: string[]): string {
   return (arr ?? []).map((s) => s.trim()).filter(Boolean).join(', ');
@@ -286,25 +278,7 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
               )}
             </Section>
 
-            {/* 5. Corrélations repérées */}
-            <Section title="Corrélations repérées">
-              {record.correlations.length === 0 ? (
-                <p className="text-muted">
-                  Pas encore assez de données pour dégager des corrélations fiables (détection conservatrice).
-                </p>
-              ) : (
-                <ul className="space-y-1.5">
-                  {record.correlations.map((c) => (
-                    <li key={c.text} className="flex items-start gap-2">
-                      <Dot color={CORRELATION_COLOR[c.level]} />
-                      <span className="text-ink">{c.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </Section>
-
-            {/* 5b. Corrélations personnalisées (données réelles) */}
+            {/* 5. Corrélations personnalisées (données réelles) */}
             <Section title="Corrélations personnalisées (vos données)">
               {!record.personal.enoughData ? (
                 <p className="text-muted">

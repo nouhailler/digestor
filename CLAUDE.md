@@ -22,7 +22,7 @@ Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/
 et appellent `afterEach(cleanup)` localement (pas de setup global). 209 tests : `foodClassifier`, `dates`,
 `quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
 `dayAnalysisExport`, `satiety`, `satietyImport`, `satietyCorrelation`, `satietyDuration`, `mealTags`,
-`contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`, `correlations`,
+`contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`,
 `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
 `VasSlider`, `TipBanner`, … `npm run build` typecheck aussi les tests.
 
@@ -68,7 +68,6 @@ src/
     dayAnalysisExport.ts # formatDayAnalysis (texte) + partage natif (repli presse-papiers) + téléchargement
     journalSearch.ts  # recherche dans le journal (aliments / symptômes / notes)
     aggregates.ts     # stats hebdo + séries pour graphes
-    correlations.ts   # détection heuristique aliment → symptôme
     biogenicAmines.ts # amines biogènes (histamine…) : classifyAmines + charge journalière dayAmineLoad + détection de combinaison
     amineCorrelation.ts # corrélation jours à charge amines élevée ↔ symptômes histaminiques (garde-fou conservateur)
     nutrition.ts      # détection de carence (pure) : apports CIQUAL vs ANR, bandes, garde-fou de couverture + rankSourcesFor
@@ -122,8 +121,9 @@ src/
   Pour TOUTE lecture agrégée (badge, stats, graphes, corrélations) passer par
   `effectiveDaySymptoms(day)` (max jour + repas) — ne pas lire `day.symptoms` directement.
   Badge auto : `suggestDayQuality(day)` (vert/orange/rouge selon le cumul).
-- **Honnêteté des corrélations** : `correlations.ts` ne conclut que si l'échantillon ≥ seuil ;
-  sinon liste vide → l'UI affiche « pas encore assez de données ». Ne pas inventer de motif.
+- **Honnêteté des corrélations** : `personalCorrelations.ts` (et `contextCorrelations`, `amineCorrelation`)
+  ne concluent que si l'échantillon ≥ seuil ; sinon liste vide → l'UI affiche « pas encore assez de
+  données ». Ne pas inventer de motif. (Les heuristiques codées en dur ont été retirées.)
 - **Heures de repas** : stockées `"HH:MM"`, affichées « 7 h 30 ».
 
 ## IA (OpenRouter) — règles

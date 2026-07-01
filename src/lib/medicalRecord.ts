@@ -13,7 +13,6 @@ import type {
 } from '../types';
 import { INTENSITY_WEIGHT, STOOL_OPTIONS, SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
 import { dayHasContent, effectiveDaySymptoms } from './aggregates';
-import { detectCorrelations, type Correlation } from './correlations';
 import { personalCorrelations, type PersonalCorrelations } from './personalCorrelations';
 import { contextCorrelations, type ContextCorrelations } from './contextCorrelations';
 import { amineBreakdown } from './biogenicAmines';
@@ -101,7 +100,6 @@ export interface MedicalRecord {
   bristol: BristolStat[]; // répartition des selles (échelle de Bristol)
   avgHydrationL: number | null;
   stoolDays: number; // jours avec une selle renseignée
-  correlations: Correlation[]; // heuristiques (motifs connus)
   personal: PersonalCorrelations; // corrélations calculées sur les données réelles
   context: ContextCorrelations; // facteurs contextuels (stress / sommeil / règles)
   amine: AmineCorrelation; // corrélation charge amines ↔ symptômes histaminiques
@@ -254,7 +252,6 @@ export function buildMedicalRecord(
     bristol,
     avgHydrationL: hydrationN > 0 ? hydrationSum / hydrationN : null,
     stoolDays,
-    correlations: detectCorrelations(recorded),
     personal: personalCorrelations(recorded),
     context: contextCorrelations(recorded),
     amine: amineSymptomCorrelation(recorded),
