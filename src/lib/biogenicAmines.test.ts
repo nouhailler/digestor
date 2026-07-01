@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { amineBreakdown, classifyAmines, dayAmineLoad } from './biogenicAmines';
+import type { FoodInsight } from '../types';
+import { amineBreakdown, amineTolerance, classifyAmines, dayAmineLoad, withDictionaryAmines } from './biogenicAmines';
 
 describe('classifyAmines', () => {
   it('classe les aliments fermentés/affinés en élevé', () => {
@@ -71,6 +72,56 @@ describe('dayAmineLoad', () => {
   it('charge modérée entre les seuils', () => {
     const r = dayAmineLoad(['tomate', 'epinard']); // 1 + 1(liberator tomate) + 1 = 3 → modéré
     expect(r.band).toBe('modere');
+  });
+});
+
+describe('amineTolerance', () => {
+  it('dérive la portion tolérée du niveau', () => {
+    expect(amineTolerance({ level: 'high' })?.level).toBe('avoid');
+    expect(amineTolerance({ level: 'moderate' })?.level).toBe('moderate');
+    expect(amineTolerance({ level: 'low' })?.level).toBe('free');
+    expect(amineTolerance({ level: 'unknown' })).toBeUndefined();
+  });
+
+  it('rétrograde un « faible » libérateur/DAO en portion modérée (prudence)', () => {
+    expect(amineTolerance({ level: 'low', liberator: true })?.level).toBe('moderate');
+    expect(amineTolerance({ level: 'low', daoBlocker: true })?.level).toBe('moderate');
+  });
+
+  it('respecte une tolérance explicite et sa note', () => {
+    const t = amineTolerance({ level: 'high', tolerance: 'moderate', toleranceNote: '1 tranche fine' });
+    expect(t).toEqual({ level: 'moderate', note: '1 tranche fine' });
+  });
+});
+
+describe('withDictionaryAmines', () => {
+  const base: FoodInsight = {
+    key: 'x',
+    name: 'x',
+    category: 'neutral',
+    fodmapLevel: 'low',
+    fodmaps: { fructose: 'low', lactose: 'low', fructans: 'low', gos: 'low', polyols: 'low' },
+    sibo: { verdict: 'inconnu', note: '' },
+    candida: { verdict: 'inconnu', note: '' },
+    summary: '',
+    tips: [],
+    model: 'test',
+    updatedAt: '',
+  };
+
+  it('complète depuis le dictionnaire une fiche sans amines', () => {
+    const out = withDictionaryAmines({ ...base, name: 'Roquefort' });
+    expect(out.amines?.level).toBe('high');
+  });
+
+  it('ne touche pas une fiche déjà pourvue (même référence)', () => {
+    const ins = { ...base, name: 'Roquefort', amines: { level: 'moderate' as const } };
+    expect(withDictionaryAmines(ins)).toBe(ins);
+  });
+
+  it('laisse inchangée une fiche dont l’aliment est inconnu du dictionnaire', () => {
+    const ins = { ...base, name: 'aliment martien' };
+    expect(withDictionaryAmines(ins)).toBe(ins);
   });
 });
 

@@ -45,7 +45,8 @@ const LEGEND: Record<string, string> = {
   fodmapLevel: 'low | moderate | high | unknown (niveau global)',
   fodmaps: 'niveau par groupe : fructose, lactose, fructans, gos, polyols',
   verdict: 'favorable | attention | eviter | inconnu (selon SIBO / candidose)',
-  amines: 'amines biogènes (histamine…) : level low|moderate|high, liberator, daoBlocker, group, note',
+  amines:
+    'amines biogènes (histamine…) : level low|moderate|high, liberator (libère l’histamine), daoBlocker (freine la DAO), tolerance free|moderate|avoid (portion tolérable sans effet notable), toleranceNote (précision de portion), group, note',
 };
 
 /** Aliment du catalogue : nom affiché + éventuelle fiche analysée en cache. */

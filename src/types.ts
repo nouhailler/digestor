@@ -177,12 +177,20 @@ export type AmineLevel = 'low' | 'moderate' | 'high' | 'unknown';
 /** Famille déclencheuse, pour repérer les combinaisons à risque. */
 export type AmineGroup = 'alcool' | 'fromage' | 'charcuterie' | 'fermente' | 'poisson' | 'autre';
 
+/**
+ * Portion tolérable « sans effet notable » (chez une personne sensible). Dérivée
+ * du niveau par défaut, mais précisable par le dictionnaire ou l'IA.
+ */
+export type AmineTolerance = 'free' | 'moderate' | 'avoid';
+
 /** Profil amines biogènes d'un aliment. */
 export interface AmineInfo {
   level: AmineLevel;
   liberator?: boolean; // libère l'histamine endogène
   daoBlocker?: boolean; // freine la DAO / compétition (alcool, putrescine…)
   group?: AmineGroup;
+  tolerance?: AmineTolerance; // combien on peut en consommer sans effet notable
+  toleranceNote?: string; // précision de portion (ex. « 1 tranche fine », « ½ tomate mûre »)
   note?: string;
 }
 

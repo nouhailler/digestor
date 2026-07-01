@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import {
+  Activity,
   ChefHat,
   Copy,
   Download,
@@ -18,6 +19,7 @@ import {
 import type { FoodInsight } from '../types';
 import {
   addFavorite,
+  backfillFoodAmines,
   db,
   deleteFoodEverywhere,
   deleteFoodInsight,
@@ -82,6 +84,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [bulkError, setBulkError] = useState<string | null>(null);
+  const [amineMsg, setAmineMsg] = useState<string | null>(null);
   const stopRef = useRef(false);
 
   // Aliments des repas + fiches analysées.
@@ -201,6 +204,41 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   function openInsight(name: string, details?: string) {
     setSelectedDetails(details);
     setSelected(name);
+  }
+
+  // Enrichit les fiches en amines biogènes : d'abord hors-ligne depuis le
+  // dictionnaire (instantané), puis — si l'IA est configurée — analyse celles
+  // qui restent sans profil (aliments hors dictionnaire).
+  async function completeAmines() {
+    setBulkError(null);
+    setAmineMsg(null);
+    const filled = await backfillFoodAmines();
+    if (!config) {
+      setAmineMsg(`${filled} aliment(s) complété(s) depuis le dictionnaire (hors-ligne).`);
+      return;
+    }
+    const targets = (await getAllFoodInsights()).filter((i) => !i.amines);
+    if (targets.length === 0) {
+      setAmineMsg(`${filled} complété(s) hors-ligne. Aucun autre à enrichir.`);
+      return;
+    }
+    stopRef.current = false;
+    setBulk({ done: 0, total: targets.length });
+    const ctx = buildProfileContext(profile);
+    for (let i = 0; i < targets.length; i++) {
+      if (stopRef.current) break;
+      try {
+        await runAiTask(`Aliment · ${targets[i].name}`, (signal) =>
+          analyzeFood(targets[i].name, config, { profileContext: ctx, signal }).then(putFoodInsight),
+        );
+      } catch (e) {
+        setBulkError(`« ${targets[i].name} » : ${e instanceof Error ? e.message : 'échec'}`);
+        break;
+      }
+      setBulk({ done: i + 1, total: targets.length });
+    }
+    setBulk(null);
+    setAmineMsg(`${filled} complété(s) hors-ligne, ${targets.length} enrichi(s) via l'IA.`);
   }
 
   async function runBulk() {
@@ -412,6 +450,15 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
         </button>
         <button
           type="button"
+          onClick={completeAmines}
+          disabled={!!bulk}
+          title="Complète le profil amines biogènes (histamine) des aliments : d'abord hors-ligne depuis le dictionnaire, puis via l'IA pour les aliments hors dictionnaire (si configurée)."
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-4 py-2 text-sm font-medium text-ink disabled:opacity-50"
+        >
+          <Activity size={15} /> Compléter les amines
+        </button>
+        <button
+          type="button"
           onClick={() => downloadFoodReference(catalogueRows)}
           title="Télécharge tout le catalogue (dictionnaire + vos repas + analyses) au format de référence, à déposer dans la zone Fichiers d'un Projet Claude Web pour fiabiliser la saisie vocale."
           className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-4 py-2 text-sm font-medium text-ink"
@@ -469,6 +516,12 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       {bulkError && (
         <p className="mb-3 rounded-lg px-3 py-2 text-sm" style={{ color: 'var(--color-severe)', background: 'rgba(240,96,106,0.08)' }}>
           {bulkError}
+        </p>
+      )}
+
+      {amineMsg && (
+        <p className="mb-3 rounded-lg px-3 py-2 text-sm" style={{ color: 'var(--color-leger)', background: 'rgba(95,191,111,0.08)' }}>
+          {amineMsg}
         </p>
       )}
 

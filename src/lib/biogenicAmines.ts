@@ -21,7 +21,8 @@ import { normalize } from './foodClassifier';
  * (alcool + charcuterie + fromage affiné + fermenté).
  */
 
-export type { AmineGroup, AmineInfo, AmineLevel } from '../types';
+export type { AmineGroup, AmineInfo, AmineLevel, AmineTolerance } from '../types';
+import type { AmineTolerance, FoodInsight } from '../types';
 
 export const AMINE_LEVEL_LABEL: Record<AmineLevel, string> = {
   low: 'Faible',
@@ -36,6 +37,39 @@ export const AMINE_LEVEL_COLOR: Record<AmineLevel, string> = {
   high: 'var(--color-severe)',
   unknown: 'var(--color-absent)',
 };
+
+export const AMINE_TOLERANCE_LABEL: Record<AmineTolerance, string> = {
+  free: 'Consommable normalement',
+  moderate: 'Portion modérée',
+  avoid: 'À éviter si sensible',
+};
+
+export const AMINE_TOLERANCE_COLOR: Record<AmineTolerance, string> = {
+  free: 'var(--color-leger)',
+  moderate: 'var(--color-modere)',
+  avoid: 'var(--color-severe)',
+};
+
+/** Portion tolérée par défaut selon le niveau (dérivation quand non précisée). */
+const LEVEL_TO_TOLERANCE: Record<AmineLevel, AmineTolerance | undefined> = {
+  low: 'free',
+  moderate: 'moderate',
+  high: 'avoid',
+  unknown: undefined,
+};
+
+/**
+ * Portion « sans effet notable » d'un aliment : la valeur explicite (dictionnaire
+ * ou IA) sinon dérivée du niveau. Un libérateur d'histamine ou un freineur de DAO
+ * de niveau seulement « faible » est rétrogradé en « portion modérée » (prudence).
+ * Renvoie `undefined` si le niveau est inconnu et aucune tolérance n'est fournie.
+ */
+export function amineTolerance(info: AmineInfo): { level: AmineTolerance; note?: string } | undefined {
+  if (info.tolerance) return { level: info.tolerance, note: info.toleranceNote };
+  let level = LEVEL_TO_TOLERANCE[info.level];
+  if (level === 'free' && (info.liberator || info.daoBlocker)) level = 'moderate';
+  return level ? { level, note: info.toleranceNote } : undefined;
+}
 
 const H = (level: AmineLevel, extra: Omit<AmineInfo, 'level'> = {}): AmineInfo => ({ level, ...extra });
 
@@ -95,16 +129,21 @@ const DICTIONARY: Record<string, AmineInfo> = {
   // ---- MODÉRÉ (ambre) ----
   'pain au levain': H('moderate', { group: 'fermente', note: 'Variable selon la fermentation.' }),
   'pain industriel': H('moderate'),
-  chocolat: H('moderate', { liberator: true, daoBlocker: true, note: 'Cacao : libérateur + freine la DAO.' }),
+  chocolat: H('moderate', {
+    liberator: true,
+    daoBlocker: true,
+    note: 'Cacao : libérateur + freine la DAO.',
+    toleranceNote: '1 à 2 carrés de chocolat noir',
+  }),
   cacao: H('moderate', { liberator: true, daoBlocker: true }),
   cafe: H('moderate', { daoBlocker: true }),
   'the noir': H('moderate', { daoBlocker: true }),
   the: H('moderate', { daoBlocker: true }),
-  epinard: H('moderate', { note: 'Riche en histamine/putrescine.' }),
-  tomate: H('moderate', { liberator: true, note: 'Surtout très mûre ; aussi libératrice.' }),
+  epinard: H('moderate', { note: 'Riche en histamine/putrescine.', toleranceNote: 'une petite portion, plutôt cuite' }),
+  tomate: H('moderate', { liberator: true, note: 'Surtout très mûre ; aussi libératrice.', toleranceNote: '½ tomate bien mûre' }),
   aubergine: H('moderate'),
-  avocat: H('moderate', { note: 'Très mûr = élevé.' }),
-  banane: H('moderate', { liberator: true, note: 'Très mûre = élevé ; libératrice.' }),
+  avocat: H('moderate', { note: 'Très mûr = élevé.', toleranceNote: '¼ à ½ avocat pas trop mûr' }),
+  banane: H('moderate', { liberator: true, note: 'Très mûre = élevé ; libératrice.', toleranceNote: '½ banane pas trop mûre' }),
   'jus de fruits': H('moderate', { note: 'Industriels / stockés longtemps.' }),
   'conserve de poisson': H('moderate', { group: 'poisson' }),
   'poisson en boite': H('moderate', { group: 'poisson' }),
@@ -147,6 +186,18 @@ const DICTIONARY: Record<string, AmineInfo> = {
 
 export function dictionaryAmineSize(): number {
   return Object.keys(DICTIONARY).length;
+}
+
+/**
+ * Complète le profil amines d'une fiche depuis le dictionnaire (hors-ligne) si
+ * elle n'en a pas encore. Ne touche pas une fiche déjà pourvue, et n'ajoute rien
+ * si le dictionnaire ne connaît pas l'aliment (reste `unknown`). Fonction pure.
+ */
+export function withDictionaryAmines(insight: FoodInsight): FoodInsight {
+  if (insight.amines) return insight;
+  const guess = classifyAmines(insight.name);
+  if (guess.level === 'unknown' && !guess.liberator && !guess.daoBlocker) return insight;
+  return { ...insight, amines: guess };
 }
 
 /**

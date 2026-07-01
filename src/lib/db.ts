@@ -18,6 +18,7 @@ import type {
 import { dayHasContent } from './aggregates';
 import { withCompleteSymptoms } from './factory';
 import { normalize } from './foodClassifier';
+import { withDictionaryAmines } from './biogenicAmines';
 
 const PROFILE_KEY = 'profile';
 const AI_CONFIG_KEY = 'aiConfig';
@@ -203,6 +204,18 @@ export async function getAllFoodInsights(): Promise<FoodInsight[]> {
 
 export async function deleteFoodInsight(key: string): Promise<void> {
   await db.foodInsights.delete(key);
+}
+
+/**
+ * Complète hors-ligne le profil amines des fiches en cache qui n'en ont pas
+ * encore, depuis le dictionnaire embarqué. Renvoie le nombre de fiches enrichies.
+ * Sans réseau ni clé IA.
+ */
+export async function backfillFoodAmines(): Promise<number> {
+  const insights = await db.foodInsights.toArray();
+  const updated = insights.map(withDictionaryAmines).filter((next, i) => next !== insights[i]);
+  if (updated.length) await db.foodInsights.bulkPut(updated);
+  return updated.length;
 }
 
 /**
