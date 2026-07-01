@@ -6,7 +6,6 @@ import type { DayEntry } from '../types';
 import { useDays } from '../hooks/useDays';
 import { getAllDays } from '../lib/db';
 import { computeWeekStats, dayHasContent, effectiveDaySymptoms } from '../lib/aggregates';
-import { detectCorrelations, type CorrelationLevel } from '../lib/correlations';
 import { personalCorrelations } from '../lib/personalCorrelations';
 import { contextCorrelations } from '../lib/contextCorrelations';
 import { amineSymptomCorrelation } from '../lib/amineCorrelation';
@@ -29,13 +28,6 @@ interface WeekViewProps {
   onDateChange: (iso: string) => void;
   onOpenDay: (iso: string) => void;
 }
-
-const LEVEL_COLOR: Record<CorrelationLevel, string> = {
-  defavorable: 'var(--color-severe)',
-  surveiller: 'var(--color-modere)',
-  favorable: 'var(--color-leger)',
-  neutre: 'var(--color-absent)',
-};
 
 const QUALITY_COLOR = {
   difficile: 'var(--color-severe)',
@@ -78,7 +70,6 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
   if (!days) return <Loading />;
 
   const stats = computeWeekStats(days);
-  const correlations = detectCorrelations(days);
   const personal = personalCorrelations(allDays ?? []);
   const context = contextCorrelations(allDays ?? []);
   const amine = amineSymptomCorrelation(allDays ?? []);
@@ -187,25 +178,6 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
           description="Estimation d'énergie sur 10, à l'inverse de la fatigue après repas et du brouillard mental relevés. 10 = aucune fatigue ni brouillard signalé."
           onInfo={setInfo}
         />
-      </div>
-
-      <div className="mt-6 rounded-2xl border border-border bg-surface p-5">
-        <h3 className="mb-3 text-base font-semibold text-ink">Corrélations identifiées cette semaine</h3>
-        {correlations.length === 0 ? (
-          <p className="text-sm text-muted">Pas encore assez de données pour dégager des corrélations fiables.</p>
-        ) : (
-          <ul className="space-y-2.5">
-            {correlations.map((c, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm text-ink">
-                <span
-                  className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                  style={{ backgroundColor: LEVEL_COLOR[c.level] }}
-                />
-                {c.text}
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
 
       {/* Corrélations personnalisées : sur tout l'historique, à partir des données réelles */}
