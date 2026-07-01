@@ -11,6 +11,7 @@ import { INTENSITY_LABEL, SYMPTOM_LABELS, SYMPTOM_ORDER } from '../constants';
 import { effectiveDaySymptoms } from '../aggregates';
 import { normalize } from '../foodClassifier';
 import { formatQuantity } from '../quantity';
+import { AMINE_LEVEL_LABEL, AMINE_LOAD_LABEL, amineBreakdown, classifyAmines } from '../biogenicAmines';
 import { FODMAP_LEVEL_LABEL, VERDICT_LABEL } from './insightFormat';
 import { chatJSON } from './openrouter';
 
@@ -21,6 +22,10 @@ On te fournit le journal d'une journée (repas et symptômes). Tu repères, avec
 plausibles entre aliments et symptômes et tu proposes des améliorations concrètes.
 Quand une quantité est indiquée devant un aliment (ex. « 1 càc confiture »), tiens-en compte :
 une petite portion a un impact moindre qu'une grande.
+On te signale aussi la charge en amines biogènes (histamine) : si elle est élevée ET que des symptômes
+histaminiques sont présents (urticaire, rougeurs/bouffées, démangeaisons, maux de tête, nausées, fatigue
+après repas), envisage ce lien parmi les causes plausibles et propose une piste adaptée (réduire les
+aliments riches en amines, éviter les combinaisons, privilégier le frais).
 Tu réponds UNIQUEMENT avec un objet JSON valide, sans texte ni Markdown autour.
 Tu ne poses pas de diagnostic ; tes remarques sont des repères généraux.`;
 
@@ -32,10 +37,17 @@ Tu ne poses pas de diagnostic ; tes remarques sont des repères généraux.`;
 function foodTag(f: FoodItem, insight?: FoodInsight): string {
   // La quantité (« 1 càc », « 150 g ») précède le nom : la portion change l'impact.
   const label = f.quantity ? `${formatQuantity(f.quantity)} ${f.name}` : f.name;
-  if (!insight) return `${label} (${f.category})`;
+  // Amines biogènes : depuis l'analyse si dispo, sinon le dictionnaire ; signalé si notable.
+  const amine = insight?.amines ?? classifyAmines(f.name);
+  const amineTag =
+    amine.level === 'high' || amine.level === 'moderate'
+      ? `amines ${AMINE_LEVEL_LABEL[amine.level].toLowerCase()}`
+      : null;
+  if (!insight) return `${label} (${[f.category, amineTag].filter(Boolean).join(', ')})`;
   const parts = [`FODMAP ${FODMAP_LEVEL_LABEL[insight.fodmapLevel].toLowerCase()}`];
   if (insight.sibo.verdict !== 'inconnu') parts.push(`SIBO ${VERDICT_LABEL[insight.sibo.verdict].toLowerCase()}`);
   if (insight.candida.verdict !== 'inconnu') parts.push(`candida ${VERDICT_LABEL[insight.candida.verdict].toLowerCase()}`);
+  if (amineTag) parts.push(amineTag);
   return `${label} (${parts.join(', ')})`;
 }
 
@@ -56,6 +68,16 @@ export function describeDay(day: DayEntry, insights?: Map<string, FoodInsight>):
 
   const lines = [`Date : ${day.date}`, `Repas :\n${meals || '  (aucun)'}`];
   lines.push(`Symptômes : ${symptoms || 'aucun'}`);
+  // Charge en amines biogènes du jour (signalée seulement si non négligeable).
+  const amine = amineBreakdown(day.meals.flatMap((m) => m.foods.map((f) => f.name)));
+  if (amine.load.band !== 'faible') {
+    const triggers = amine.contributors.slice(0, 6).map((c) => c.name).join(', ');
+    lines.push(
+      `Charge en amines biogènes (histamine) : ${AMINE_LOAD_LABEL[amine.load.band].replace('Charge ', '')}` +
+        (triggers ? ` (${triggers})` : '') +
+        (amine.load.combo ? ' · combinaison à risque (alcool + fromage/charcuterie/fermenté)' : ''),
+    );
+  }
   if (day.symptomTiming) lines.push(`Moment des symptômes : ${day.symptomTiming}`);
   if (typeof day.hydrationL === 'number') lines.push(`Hydratation : ${day.hydrationL} L`);
   if (day.stool?.label) lines.push(`Transit : ${day.stool.label}${day.stool.bristol ? ` (Bristol ${day.stool.bristol})` : ''}`);

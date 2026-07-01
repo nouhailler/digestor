@@ -16,6 +16,8 @@ import { dayHasContent, effectiveDaySymptoms } from './aggregates';
 import { detectCorrelations, type Correlation } from './correlations';
 import { personalCorrelations, type PersonalCorrelations } from './personalCorrelations';
 import { contextCorrelations, type ContextCorrelations } from './contextCorrelations';
+import { amineBreakdown } from './biogenicAmines';
+import { amineSymptomCorrelation, type AmineCorrelation } from './amineCorrelation';
 import { sortTreatments } from './treatments';
 import { sortReintro } from './reintro';
 import { normalize } from './foodClassifier';
@@ -61,6 +63,13 @@ export interface RecordMeal {
   symptoms: RecordSymptom[]; // symptômes ressentis après ce repas
 }
 
+/** Un jour dont la charge en amines biogènes est élevée (aliments concernés). */
+export interface AmineHighDay {
+  date: string;
+  triggers: string[]; // aliments modérés/élevés en amines ce jour-là
+  combo: boolean; // combinaison à risque (alcool + fromage/charcuterie/fermenté)
+}
+
 export interface RecordDay {
   date: string;
   quality: DayQuality;
@@ -95,6 +104,8 @@ export interface MedicalRecord {
   correlations: Correlation[]; // heuristiques (motifs connus)
   personal: PersonalCorrelations; // corrélations calculées sur les données réelles
   context: ContextCorrelations; // facteurs contextuels (stress / sommeil / règles)
+  amine: AmineCorrelation; // corrélation charge amines ↔ symptômes histaminiques
+  amineHighDays: AmineHighDay[]; // jours à charge élevée en amines (aliments concernés)
   treatments: Treatment[]; // traitements & compléments (en cours d'abord)
   reintro: ReintroChallenge[]; // tests de réintroduction FODMAP
   days: RecordDay[]; // détail chronologique des jours renseignés
@@ -143,9 +154,16 @@ export function buildMedicalRecord(
   let hydrationN = 0;
   let stoolDays = 0;
   let daysWithMeals = 0;
+  // --- Amines biogènes : jours à charge élevée (aliments concernés) ---
+  const amineHighDays: AmineHighDay[] = [];
 
   for (const day of recorded) {
     const sym = effectiveDaySymptoms(day);
+
+    const bd = amineBreakdown(day.meals.flatMap((m) => m.foods.map((f) => f.name)));
+    if (bd.load.band === 'eleve') {
+      amineHighDays.push({ date: day.date, triggers: bd.contributors.map((c) => c.name), combo: bd.load.combo });
+    }
     for (const k of SYMPTOM_ORDER) {
       const v = sym[k];
       const s = stats.get(k)!;
@@ -239,6 +257,8 @@ export function buildMedicalRecord(
     correlations: detectCorrelations(recorded),
     personal: personalCorrelations(recorded),
     context: contextCorrelations(recorded),
+    amine: amineSymptomCorrelation(recorded),
+    amineHighDays,
     treatments: sortTreatments(treatments, todayISO()),
     reintro: sortReintro(reintro),
     days,

@@ -369,6 +369,59 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
               )}
             </Section>
 
+            {/* 5c. Amines biogènes (histamine) */}
+            <Section title="Amines biogènes (histamine)">
+              <div className="space-y-3">
+                {!record.amine.enoughData ? (
+                  <p className="text-muted">
+                    Pas encore assez de jours renseignés ({record.amine.analyzedDays}) pour évaluer le lien
+                    entre charge en amines et symptômes histaminiques.
+                  </p>
+                ) : record.amine.suspected ? (
+                  <p className="flex items-start gap-2">
+                    <Dot color="var(--color-severe)" />
+                    <span>
+                      <strong className="text-ink">Charge élevée en amines</strong> →{' '}
+                      <span className="text-ink">{Math.round(record.amine.rateWithHigh * 100)} %</span> de jours à
+                      symptômes histaminiques (urticaire, rougeurs, maux de tête…){' '}
+                      <span className="text-muted">
+                        vs {Math.round(record.amine.rateWithoutHigh * 100)} % sinon · sur{' '}
+                        {record.amine.daysHighLoad} jour(s) chargés
+                      </span>
+                    </span>
+                  </p>
+                ) : (
+                  <p className="text-muted">
+                    Pas de lien net détecté entre charge en amines et symptômes histaminiques sur{' '}
+                    {record.amine.analyzedDays} jours.
+                  </p>
+                )}
+
+                {record.amineHighDays.length > 0 && (
+                  <div>
+                    <p className="font-medium text-ink">Jours à charge élevée en amines</p>
+                    <ul className="mt-1 space-y-1">
+                      {record.amineHighDays.map((d) => (
+                        <li key={d.date} className="flex items-start gap-2">
+                          <Dot color="var(--color-modere)" />
+                          <span>
+                            <strong className="text-ink">{dayLongLabel(d.date)}</strong>
+                            {d.triggers.length > 0 && <span className="text-muted"> — {d.triggers.join(', ')}</span>}
+                            {d.combo && <span className="text-severe"> · combinaison à risque</span>}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <p className="text-xs text-muted">
+                  La teneur en amines varie selon fraîcheur et affinage : c'est un repère de risque, pas une
+                  mesure. Détection conservatrice (association le même jour), à confirmer médicalement.
+                </p>
+              </div>
+            </Section>
+
             {/* 6. Journal détaillé */}
             <Section title="Journal détaillé">
               <div className="space-y-4">
