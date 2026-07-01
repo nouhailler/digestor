@@ -83,6 +83,8 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   const [scope, setScope] = useState<'repas' | 'catalogue' | 'favoris'>('catalogue');
   const [showDuplicates, setShowDuplicates] = useState(false);
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
+  // Quelle opération de lot est en cours (pour la progression / le bouton Stop dédiés).
+  const [bulkKind, setBulkKind] = useState<'analyze' | 'amines' | null>(null);
   const [bulkError, setBulkError] = useState<string | null>(null);
   const [amineMsg, setAmineMsg] = useState<string | null>(null);
   const stopRef = useRef(false);
@@ -237,6 +239,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       return;
     }
     stopRef.current = false;
+    setBulkKind('amines');
     setBulk({ done: 0, total: targets.length });
     const ctx = buildProfileContext(profile);
     let done = 0;
@@ -254,7 +257,12 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       setBulk({ done: i + 1, total: targets.length });
     }
     setBulk(null);
-    setAmineMsg(`${done} aliment(s) enrichi(s) en amines via l'IA.`);
+    setBulkKind(null);
+    setAmineMsg(
+      stopRef.current
+        ? `Interrompu — ${done} aliment(s) enrichi(s) ; les autres restent à faire (reprise possible).`
+        : `${done} aliment(s) enrichi(s) en amines via l'IA.`,
+    );
   }
 
   async function runBulk() {
@@ -270,6 +278,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       return;
     stopRef.current = false;
     setBulkError(null);
+    setBulkKind('analyze');
     setBulk({ done: 0, total: targets.length });
     const ctx = buildProfileContext(profile);
     for (let i = 0; i < targets.length; i++) {
@@ -285,6 +294,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       setBulk({ done: i + 1, total: targets.length });
     }
     setBulk(null);
+    setBulkKind(null);
   }
 
   return (
@@ -432,15 +442,16 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
         >
           <ChefHat size={15} /> Idées de repas adaptées
         </button>
-        {unanalyzed.length > 0 &&
-          (bulk ? (
-            <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm text-ink">
-              <Loader2 size={15} className="animate-spin" /> Analyse {bulk.done}/{bulk.total}…
-              <button type="button" onClick={() => (stopRef.current = true)} className="text-muted hover:text-severe" title="Arrêter">
-                <StopCircle size={16} />
-              </button>
-            </span>
-          ) : (
+        {bulk ? (
+          <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm text-ink">
+            <Loader2 size={15} className="animate-spin" />
+            {bulkKind === 'amines' ? 'Enrichissement amines' : 'Analyse'} {bulk.done}/{bulk.total}…
+            <button type="button" onClick={() => (stopRef.current = true)} className="text-muted hover:text-severe" title="Arrêter">
+              <StopCircle size={16} />
+            </button>
+          </span>
+        ) : (
+          unanalyzed.length > 0 && (
             <button
               type="button"
               onClick={ready ? runBulk : onOpenAiSettings}
@@ -450,7 +461,8 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
             >
               <Wand2 size={15} /> Analyser les {unanalyzed.length} aliments non analysés
             </button>
-          ))}
+          )
+        )}
         <button
           type="button"
           onClick={() => setShowDuplicates((v) => !v)}
