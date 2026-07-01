@@ -462,3 +462,157 @@ export const AMINE_RISK_REFERENCE: AmineRiskRef[] = [
     effects: "Généralement considérée comme bénéfique : protège l'ADN et possède des propriétés antioxydantes.",
   },
 ];
+
+// ---- Fiches détaillées des amines à surveiller en priorité ----
+
+/**
+ * Fiche approfondie d'une amine biogène « à surveiller ». Contenu informatif
+ * (effets, aliments, prévention, diagnostic) — non médical.
+ */
+export interface AmineDetail {
+  name: string;
+  intro: string;
+  effects: string[]; // effets d'un excès
+  foods: string[]; // où on la trouve
+  avoid: string[]; // comment éviter les effets
+  diagnosis: string[]; // comment repérer un excès dans le corps
+}
+
+/**
+ * Les quatre amines le plus souvent impliquées dans les réactions alimentaires.
+ * Clés = nom normalisé (cf. `normalize`), pour un accès direct depuis l'UI.
+ */
+export const AMINE_DETAILS: Record<string, AmineDetail> = {
+  histamine: {
+    name: 'Histamine',
+    intro:
+      "C'est l'amine biogène la plus impliquée dans les réactions alimentaires. Le corps la dégrade via l'enzyme DAO (diamine oxydase) ; en cas d'apport trop élevé ou de DAO insuffisante, elle s'accumule.",
+    effects: [
+      'Maux de tête, migraines',
+      'Urticaire, démangeaisons cutanées',
+      'Rougeurs du visage, bouffées de chaleur (flush)',
+      'Congestion / écoulement nasal',
+      'Troubles digestifs : diarrhée, douleurs abdominales',
+      'Hypotension, vertiges',
+      'Tachycardie, palpitations',
+    ],
+    foods: [
+      'Fromages affinés (parmesan, comté, roquefort, vieux fromages)',
+      'Charcuteries sèches (saucisson, jambon cru, salami)',
+      'Poissons semi-conservés ou mal conservés (thon, maquereau, sardine, anchois)',
+      'Aliments fermentés (choucroute, kimchi, miso, sauce soja, kombucha, vinaigres)',
+      'Alcools fermentés : vin (surtout rouge), bière, cidre, champagne',
+      'Tomate et épinard bien mûrs',
+      "Histamino-libérateurs (peu histaminés mais déclencheurs) : fraise, agrumes, ananas, chocolat, tomate",
+    ],
+    avoid: [
+      'Privilégier les aliments très frais ou congelés dès l’achat',
+      'Éviter les restes réchauffés ou conservés plusieurs jours (l’histamine monte avec le temps)',
+      'Respecter la chaîne du froid, surtout pour les poissons',
+      'Limiter fromages affinés, charcuteries, fermentés et alcool',
+      'Éviter les combinaisons à risque (alcool + fromage + charcuterie + fermenté)',
+      'Répartir les aliments à risque sur la journée plutôt que de les cumuler',
+      'Sur avis médical : enzyme DAO en complément avant le repas, ou antihistaminique',
+    ],
+    diagnosis: [
+      'Aucun test parfaitement fiable : le diagnostic reste surtout clinique',
+      'Dosage de l’activité de la DAO sanguine (une DAO basse oriente vers une dégradation réduite)',
+      'Dosage de l’histamine sanguine ou urinaire (peu spécifique, à interpréter avec prudence)',
+      'Test d’éviction (2 à 4 semaines) puis réintroduction encadrée, en tenant un journal',
+      'Dosage de la tryptase pour écarter une mastocytose ; bilan allergologique pour écarter une allergie IgE',
+      'À faire avec un médecin ou un allergologue',
+    ],
+  },
+  tyramine: {
+    name: 'Tyramine',
+    intro:
+      "Issue de la tyrosine, elle augmente avec l'affinage et la fermentation. Son enjeu majeur est l'interaction avec certains médicaments (IMAO).",
+    effects: [
+      'Poussées d’hypertension (effet « fromage »)',
+      'Migraines, céphalées',
+      'Palpitations',
+      'Interaction potentiellement grave avec les antidépresseurs IMAO (crise hypertensive)',
+    ],
+    foods: [
+      'Fromages affinés et vieux fromages',
+      'Charcuteries et viandes séchées / fermentées',
+      'Extraits de levure, bouillons concentrés',
+      'Sauce soja et aliments fermentés',
+      'Fèves, bananes très mûres',
+      'Tout aliment vieilli, avarié ou mal conservé',
+    ],
+    avoid: [
+      'Consommer les protéines fraîches, éviter le vieilli / avarié',
+      'Limiter fromages affinés et aliments fermentés',
+      'En cas de traitement par IMAO : régime pauvre en tyramine strict (consigne médicale impérative)',
+      'Respecter la chaîne du froid et les dates de conservation',
+    ],
+    diagnosis: [
+      'Pas de dosage sanguin en routine',
+      'Repérage surtout clinique : lien entre un repas riche en tyramine et une poussée de tension ou une migraine',
+      'Surveillance de la tension artérielle, surtout sous IMAO ou en cas de migraines',
+      'À évaluer avec un médecin (interactions médicamenteuses)',
+    ],
+  },
+  putrescine: {
+    name: 'Putrescine',
+    intro:
+      "Peu toxique en elle-même, mais elle aggrave les effets de l'histamine : elle sature la DAO et facilite l'absorption intestinale de l'histamine. C'est aussi un marqueur de fraîcheur.",
+    effects: [
+      'Favorise l’absorption intestinale de l’histamine',
+      'Sature la DAO → amplifie les réactions histaminiques',
+      'Troubles digestifs possibles',
+      'Sa présence signale une dégradation de l’aliment',
+    ],
+    foods: [
+      'Aliments peu frais ou en début de décomposition',
+      'Poissons et viandes mal conservés',
+      'Fromages affinés et aliments fermentés',
+      'Agrumes',
+    ],
+    avoid: [
+      'Privilégier la fraîcheur : c’est le principal levier',
+      'Respecter strictement la chaîne du froid',
+      'Éviter les restes et les aliments proches de la péremption',
+      'Limiter les fermentés en même temps que d’autres amines',
+    ],
+    diagnosis: [
+      'Pas de test clinique dédié en pratique courante',
+      'Surtout mesurée dans le contrôle qualité alimentaire (indice d’amines biogènes)',
+      'Approche clinique : éviction puis réintroduction, avec journal alimentaire',
+      'À évaluer avec un professionnel de santé',
+    ],
+  },
+  cadaverine: {
+    name: 'Cadavérine',
+    intro:
+      "Issue de la lysine, elle apparaît quand un aliment se dégrade (odeur de putréfaction). Comme la putrescine, elle renforce la toxicité de l'histamine en gênant sa dégradation.",
+    effects: [
+      'Renforce les effets toxiques de l’histamine (inhibe sa dégradation par la DAO)',
+      'Troubles digestifs',
+      'Marqueur de putréfaction : signe d’un aliment avarié',
+    ],
+    foods: [
+      'Poissons et viandes en décomposition ou mal conservés',
+      'Fromages très affinés',
+      'Aliments fermentés longtemps',
+    ],
+    avoid: [
+      'Consommer des produits très frais',
+      'Jeter tout aliment à l’odeur suspecte',
+      'Respecter la chaîne du froid',
+      'Éviter poissons et viandes non frais',
+    ],
+    diagnosis: [
+      'Pas de test clinique en routine',
+      'Dosée dans le contrôle qualité alimentaire (avec putrescine et histamine)',
+      'Repérage clinique par éviction / réintroduction',
+      'À évaluer avec un professionnel de santé',
+    ],
+  },
+};
+
+/** Fiche détaillée d'une amine « à surveiller », si elle existe (par nom). */
+export function amineDetail(name: string): AmineDetail | undefined {
+  return AMINE_DETAILS[normalize(name)];
+}

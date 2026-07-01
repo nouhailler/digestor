@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { AlertTriangle, BookOpen, ChevronDown, HeartPulse, Info, Table2 } from 'lucide-react';
 import { TipBanner } from '../components/TipBanner';
 import { SymptomDetailSheet } from '../components/SymptomDetailSheet';
+import { AmineDetailSheet } from '../components/AmineDetailSheet';
 import { EncyclopediaList } from '../components/EncyclopediaList';
 import { DigestiveGuide } from '../components/DigestiveGuide';
 import { findManifestation } from '../lib/encyclopedia';
-import { AMINE_RISK_REFERENCE, BIOGENIC_AMINES_REFERENCE } from '../lib/biogenicAmines';
+import { AMINE_RISK_REFERENCE, BIOGENIC_AMINES_REFERENCE, amineDetail } from '../lib/biogenicAmines';
 
 interface Cell {
   label: string;
@@ -75,6 +76,8 @@ type SubTab = 'reperes' | 'encyclopedie' | 'systeme';
 export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
   const [tab, setTab] = useState<SubTab>('reperes');
   const [selected, setSelected] = useState<Cell | null>(null);
+  // Amine « à surveiller » dont la fiche détaillée est ouverte (histamine, tyramine…).
+  const [amineName, setAmineName] = useState<string | null>(null);
 
   return (
     <div className="mx-auto max-w-3xl px-4 pt-4 pb-28">
@@ -148,8 +151,8 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
           </div>
 
           <AmineExplainer />
-          <AmineRiskSection />
-          <AmineReferenceSection />
+          <AmineRiskSection onOpenAmine={setAmineName} />
+          <AmineReferenceSection onOpenAmine={setAmineName} />
         </>
       ) : tab === 'encyclopedie' ? (
         <EncyclopediaList
@@ -171,7 +174,24 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
         }}
         onSelectRelated={(name) => setSelected({ label: name, hint: findManifestation(name) ?? '' })}
       />
+
+      <AmineDetailSheet open={amineName !== null} name={amineName ?? ''} onClose={() => setAmineName(null)} />
     </div>
+  );
+}
+
+/** Nom d'amine cliquable si une fiche détaillée existe, sinon texte simple. */
+function AmineName({ name, onOpenAmine }: { name: string; onOpenAmine: (name: string) => void }) {
+  if (!amineDetail(name)) return <>{name}</>;
+  return (
+    <button
+      type="button"
+      onClick={() => onOpenAmine(name)}
+      title={`En savoir plus sur ${name} (effets, aliments, prévention, diagnostic)`}
+      className="text-left text-ink underline decoration-dotted decoration-muted underline-offset-4 hover:decoration-ink"
+    >
+      {name}
+    </button>
   );
 }
 
@@ -223,7 +243,7 @@ function amineRiskColor(stars: number): string {
 }
 
 /** Tableau dépliable des amines les plus problématiques (niveau de risque + effets). */
-function AmineRiskSection() {
+function AmineRiskSection({ onOpenAmine }: { onOpenAmine: (name: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-4 rounded-2xl border border-border bg-surface p-5 text-sm">
@@ -256,7 +276,9 @@ function AmineRiskSection() {
                   const color = amineRiskColor(a.stars);
                   return (
                     <tr key={a.name} className="align-top">
-                      <td className="border-b border-border bg-surface px-3 py-2 font-medium text-ink">{a.name}</td>
+                      <td className="border-b border-border bg-surface px-3 py-2 font-medium text-ink">
+                        <AmineName name={a.name} onOpenAmine={onOpenAmine} />
+                      </td>
                       <td className="whitespace-nowrap border-b border-l border-border bg-surface px-3 py-2">
                         <span aria-label={`${a.stars} sur 5`} title={a.riskLabel}>
                           <span style={{ color }}>{'★'.repeat(a.stars)}</span>
@@ -284,7 +306,7 @@ function AmineRiskSection() {
 }
 
 /** Référence dépliable de toutes les amines biogènes (origine, rôle, excès). */
-function AmineReferenceSection() {
+function AmineReferenceSection({ onOpenAmine }: { onOpenAmine: (name: string) => void }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="mt-4 rounded-2xl border border-border bg-surface p-5 text-sm">
@@ -311,7 +333,8 @@ function AmineReferenceSection() {
             {BIOGENIC_AMINES_REFERENCE.map((a) => (
               <li key={a.name} className="rounded-xl border border-border bg-surface-2 px-3 py-2">
                 <p className="font-medium text-ink">
-                  {a.name} <span className="font-normal text-muted">· issue de {a.precursor}</span>
+                  <AmineName name={a.name} onOpenAmine={onOpenAmine} />{' '}
+                  <span className="font-normal text-muted">· issue de {a.precursor}</span>
                 </p>
                 <p className="mt-0.5 text-ink">
                   <span className="text-muted">Rôle : </span>
