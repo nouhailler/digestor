@@ -1,7 +1,12 @@
 import type { DayEntry, PeriodTrend, SymptomKey } from '../types';
 import { INTENSITY_WEIGHT, SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
 import { dayHasContent, effectiveDaySymptoms, topSymptoms } from './aggregates';
+import { dayAmineLoad } from './biogenicAmines';
+import { amineSymptomCorrelation } from './amineCorrelation';
 import { normalize } from './foodClassifier';
+
+/** Aliments d'un jour (noms), pour la charge en amines. */
+const dayFoodNames = (day: DayEntry): string[] => day.meals.flatMap((m) => m.foods.map((f) => f.name));
 
 const isMarked = (k: SymptomKey, s: Record<SymptomKey, import('../types').Intensity>) =>
   s[k] === 'severe' || s[k] === 'modere';
@@ -12,6 +17,7 @@ interface HalfStats {
   avgSeverity: number; // somme pondérée des symptômes / jour
   avgHydration: number | null;
   proPerDay: number; // aliments « pro » par jour
+  amineHighRate: number; // part de jours à charge amines élevée
 }
 
 function halfStats(days: DayEntry[]): HalfStats {
@@ -20,6 +26,7 @@ function halfStats(days: DayEntry[]): HalfStats {
   let hydrationSum = 0;
   let hydrationN = 0;
   let proCount = 0;
+  let amineHighDays = 0;
   for (const day of days) {
     const sym = effectiveDaySymptoms(day);
     let w = 0;
@@ -35,6 +42,7 @@ function halfStats(days: DayEntry[]): HalfStats {
       hydrationN++;
     }
     for (const m of day.meals) for (const f of m.foods) if (f.category === 'pro') proCount++;
+    if (dayAmineLoad(dayFoodNames(day)).band === 'eleve') amineHighDays++;
   }
   const n = days.length || 1;
   return {
@@ -43,6 +51,7 @@ function halfStats(days: DayEntry[]): HalfStats {
     avgSeverity: severitySum / n,
     avgHydration: hydrationN > 0 ? hydrationSum / hydrationN : null,
     proPerDay: proCount / n,
+    amineHighRate: amineHighDays / n,
   };
 }
 
@@ -79,6 +88,10 @@ export function computeTrends(allDays: DayEntry[]): PeriodTrend[] {
   add('Jours à symptômes', a.symptomDayRate, b.symptomDayRate, 0.1, true, pct);
   add('Sévérité moyenne / jour', a.avgSeverity, b.avgSeverity, 0.5, true, (x) => x.toFixed(1));
   add('Aliments défavorables / jour', a.proPerDay, b.proPerDay, 0.5, true, (x) => x.toFixed(1));
+  // Charge en amines : n'ajoute la tendance que si la période en comporte (évite le bruit « 0 % → 0 % »).
+  if (a.amineHighRate > 0 || b.amineHighRate > 0) {
+    add('Jours à charge amines élevée', a.amineHighRate, b.amineHighRate, 0.1, true, pct);
+  }
   if (a.avgHydration != null && b.avgHydration != null) {
     add('Hydratation moyenne', a.avgHydration, b.avgHydration, 0.2, false, (x) => `${x.toFixed(1)} L`);
   }
@@ -126,12 +139,23 @@ export function describePeriod(allDays: DayEntry[], label: string): string {
 
   const pro = topProFoods(recorded);
 
+  // Charge en amines biogènes (histamine) : jours à charge élevée + lien avec les symptômes histaminiques.
+  const amineHighDays = recorded.filter((d) => dayAmineLoad(dayFoodNames(d)).band === 'eleve').length;
+  const amineCorr = amineSymptomCorrelation(recorded);
+
   const lines = [
     `Période : ${label} (${recorded.length} jours renseignés, du ${from} au ${to})`,
     `Jours à symptômes : ${symptomDays}/${recorded.length}`,
     `Top symptômes (intensité cumulée) : ${tops || 'aucun'}`,
   ];
   if (pro.length) lines.push(`Aliments défavorables fréquents : ${pro.join(', ')}`);
+  if (amineHighDays > 0) {
+    let amineLine = `Charge en amines biogènes (histamine) : ${amineHighDays}/${recorded.length} jours à charge élevée`;
+    if (amineCorr.suspected) {
+      amineLine += ` — lien probable avec les symptômes histaminiques (${pct(amineCorr.rateWithHigh)} de ces jours vs ${pct(amineCorr.rateWithoutHigh)} sinon)`;
+    }
+    lines.push(amineLine);
+  }
   if (trends) lines.push(`Évolution (1re vs 2de moitié) : ${trends}`);
   return lines.join('\n');
 }

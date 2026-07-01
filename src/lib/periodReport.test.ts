@@ -32,6 +32,23 @@ describe('computeTrends', () => {
     expect(sym.detail).toBe('100 % → 0 %');
   });
 
+  it('ajoute la tendance charge amines seulement si la période en comporte', () => {
+    const withAmine = computeTrends([
+      mkDay(['Roquefort', 'Saucisson']),
+      mkDay(['Roquefort', 'Saucisson']),
+      mkDay(['Riz']),
+      mkDay(['Riz']),
+    ]);
+    const t = withAmine.find((x) => x.metric === 'Jours à charge amines élevée')!;
+    expect(t).toBeTruthy();
+    expect(t.detail).toBe('100 % → 0 %');
+    expect(t.direction).toBe('down');
+    expect(t.good).toBe(true);
+
+    const noAmine = computeTrends([mkDay(['Riz']), mkDay(['Riz']), mkDay(['Riz']), mkDay(['Riz'])]);
+    expect(noAmine.some((x) => x.metric === 'Jours à charge amines élevée')).toBe(false);
+  });
+
   it('inclut l’hydratation seulement si renseignée des deux côtés', () => {
     const withH = computeTrends([
       mkDay(['Riz'], {}, 1.0),
@@ -54,6 +71,17 @@ describe('describePeriod', () => {
     expect(text).toContain('Période : 4 semaines');
     expect(text).toContain('Jours à symptômes : 1/2');
     expect(text).toContain('Ballonnements');
+  });
+
+  it('signale les jours à charge en amines élevée', () => {
+    const text = describePeriod([mkDay(['Roquefort', 'Saucisson']), mkDay(['Riz'])], 'Tout');
+    expect(text).toContain('Charge en amines biogènes (histamine)');
+    expect(text).toContain('1/2 jours à charge élevée');
+  });
+
+  it('omet la ligne amines si aucun jour à charge élevée', () => {
+    const text = describePeriod([mkDay(['Riz']), mkDay(['Pomme'])], 'Tout');
+    expect(text).not.toContain('Charge en amines');
   });
 
   it('gère l’absence de données', () => {
