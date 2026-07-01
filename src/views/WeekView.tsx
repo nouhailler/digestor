@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { addWeeks } from 'date-fns';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -21,6 +22,7 @@ import {
   weekdayShort,
 } from '../lib/dates';
 import { TipBanner } from '../components/TipBanner';
+import { Sheet } from '../components/Sheet';
 
 interface WeekViewProps {
   date: string;
@@ -53,11 +55,25 @@ function countActiveSymptoms(day: DayEntry): number {
   return SYMPTOM_ORDER.filter((k) => sym[k] !== 'absent').length;
 }
 
+const C = {
+  severe: 'var(--color-severe)',
+  modere: 'var(--color-modere)',
+  leger: 'var(--color-leger)',
+  absent: 'var(--color-absent)',
+};
+
+/** Couleur d'un « compteur d'événements » (moins = mieux) : 0 vert, ≤ seuil ambre, sinon rouge. */
+const countColor = (n: number, amberMax = 2) => (n === 0 ? C.leger : n <= amberMax ? C.modere : C.severe);
+/** Couleur d'une note /10 (plus = mieux) : ≥ 7 vert, ≥ 4 ambre, sinon rouge. */
+const scoreColor = (s: number | null) => (s == null ? C.absent : s >= 7 ? C.leger : s >= 4 ? C.modere : C.severe);
+
 export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
   const dates = weekDays(fromISODate(date));
   const days = useDays(dates);
   const allDays = useLiveQuery(() => getAllDays(), []);
   const goWeek = (d: number) => onDateChange(toISODate(addWeeks(fromISODate(date), d)));
+  // Carte du récapitulatif dont l'explication est ouverte.
+  const [info, setInfo] = useState<{ label: string; text: string } | null>(null);
 
   if (!days) return <Loading />;
 
@@ -121,23 +137,55 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
       <h3 className="mb-3 text-xl font-semibold text-ink">Récapitulatif de la semaine</h3>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <StatCard label="Jours difficiles" value={`${stats.hardDays} / ${stats.totalDays}`} color="severe" />
-        <StatCard label="Épisodes de ballonnements sévères" value={`${stats.severeBloating}`} color="severe" />
-        <StatCard label="Épisodes de diarrhée" value={`${stats.diarrheaEpisodes}`} color="modere" />
         <StatCard
-          label="Jours sans sucre ajouté"
-          value={`${stats.noAddedSugarDays} / ${stats.totalDays}`}
-          color="leger"
+          label="Jours difficiles"
+          value={`${stats.hardDays} / ${stats.totalDays}`}
+          color={countColor(stats.hardDays)}
+          description="Nombre de jours de la semaine dont la qualité globale est « difficile » (badge rouge) — que vous l'ayez choisie vous-même ou qu'elle soit suggérée d'après vos symptômes. 0 jour difficile = vert ; 1 à 2 = ambre ; 3 et plus = rouge."
+          onInfo={setInfo}
         />
         <StatCard
-          label="Hydratation moy. / jour"
-          value={stats.avgHydration != null ? `${stats.avgHydration.toFixed(1).replace('.', ',')} L` : '—'}
-          color="leger"
+          label="Épisodes de ballonnements sévères"
+          value={`${stats.severeBloating}`}
+          color={countColor(stats.severeBloating)}
+          description="Nombre de jours de la semaine où des ballonnements de niveau sévère ont été enregistrés (au niveau d'un repas ou de la journée). 0 = vert."
+          onInfo={setInfo}
+        />
+        <StatCard
+          label="Épisodes de diarrhée"
+          value={`${stats.diarrheaEpisodes}`}
+          color={countColor(stats.diarrheaEpisodes)}
+          description="Nombre de jours avec une diarrhée modérée ou sévère. 0 = vert."
+          onInfo={setInfo}
+        />
+        <StatCard
+          label="Jours sans sucre ajouté"
+          value={`${stats.noAddedSugarDays} / ${stats.daysWithMeals}`}
+          color={
+            stats.daysWithMeals === 0
+              ? C.absent
+              : stats.noAddedSugarDays === stats.daysWithMeals
+                ? C.leger
+                : stats.noAddedSugarDays === 0
+                  ? C.severe
+                  : C.modere
+          }
+          description="Parmi les jours où vous avez enregistré des repas, ceux sans sucre ajouté ni alcool. Affiché X / Y, où Y = jours avec repas (les jours non renseignés ne comptent pas). Tous les jours sans sucre = vert ; aucun = rouge."
+          onInfo={setInfo}
+        />
+        <StatCard
+          label="Amines (note /10)"
+          value={stats.amineScore != null ? `${stats.amineScore} / 10` : '—'}
+          color={scoreColor(stats.amineScore)}
+          description="Note de la semaine sur 10 pour la charge en amines biogènes (histamine), calculée sur les jours avec repas. 10 = journées peu chargées ; note basse = plusieurs jours à forte charge (fromages affinés, charcuterie, aliments fermentés, alcool…)."
+          onInfo={setInfo}
         />
         <StatCard
           label="Score énergie moy."
           value={stats.energyScore != null ? `${stats.energyScore} / 10` : '—'}
-          color="modere"
+          color={scoreColor(stats.energyScore)}
+          description="Estimation d'énergie sur 10, à l'inverse de la fatigue après repas et du brouillard mental relevés. 10 = aucune fatigue ni brouillard signalé."
+          onInfo={setInfo}
         />
       </div>
 
@@ -261,24 +309,39 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
           </p>
         )}
       </div>
+
+      <Sheet open={info !== null} title={info?.label ?? ''} onClose={() => setInfo(null)}>
+        <p className="text-sm leading-relaxed text-ink">{info?.text}</p>
+      </Sheet>
     </div>
   );
 }
 
-const COLOR_VAR: Record<'severe' | 'modere' | 'leger', string> = {
-  severe: 'var(--color-severe)',
-  modere: 'var(--color-modere)',
-  leger: 'var(--color-leger)',
-};
-
-function StatCard({ label, value, color }: { label: string; value: string; color: keyof typeof COLOR_VAR }) {
+function StatCard({
+  label,
+  value,
+  color,
+  description,
+  onInfo,
+}: {
+  label: string;
+  value: string;
+  color: string;
+  description: string;
+  onInfo: (i: { label: string; text: string }) => void;
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
+    <button
+      type="button"
+      onClick={() => onInfo({ label, text: description })}
+      title="Toucher pour savoir ce que mesure cette carte"
+      className="rounded-2xl border border-border bg-surface p-4 text-left transition hover:border-muted active:scale-[0.98]"
+    >
       <div className="min-h-[2.5rem] text-sm leading-tight text-muted">{label}</div>
-      <div className="mt-1 text-2xl font-semibold" style={{ color: COLOR_VAR[color] }}>
+      <div className="mt-1 text-2xl font-semibold" style={{ color }}>
         {value}
       </div>
-    </div>
+    </button>
   );
 }
 

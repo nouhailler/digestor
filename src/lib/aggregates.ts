@@ -1,6 +1,7 @@
 import type { DayEntry, Intensity, FoodCategory, SymptomKey } from '../types';
 import { INTENSITY_WEIGHT, SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
 import { isAddedSugarOrAlcohol } from './foodClassifier';
+import { dayAmineLoad, type AmineLoadBand } from './biogenicAmines';
 
 /** Itère tous les aliments d'un jour. */
 function* foodsOf(day: DayEntry) {
@@ -50,6 +51,7 @@ export interface WeekStats {
   daysWithMeals: number;
   avgHydration: number | null;
   energyScore: number | null; // /10
+  amineScore: number | null; // /10 (10 = journées peu chargées en amines)
 }
 
 /** Statistiques de la maquette « Récapitulatif de la semaine » sur 7 jours. */
@@ -64,6 +66,8 @@ export function computeWeekStats(days: DayEntry[]): WeekStats {
   let hydrationN = 0;
   let energyPenaltySum = 0;
   let energyN = 0;
+  let amineBandSum = 0;
+  let amineN = 0;
 
   for (const day of days) {
     const sym = effectiveDaySymptoms(day);
@@ -77,6 +81,9 @@ export function computeWeekStats(days: DayEntry[]): WeekStats {
       let added = false;
       for (const f of foodsOf(day)) if (isAddedSugarOrAlcohol(f.name)) added = true;
       if (!added) noAddedSugarDays++;
+      // Charge en amines du jour (repère par bande : faible 0, modéré 1, élevé 2).
+      amineBandSum += AMINE_BAND_WEIGHT[dayAmineLoad([...foodsOf(day)].map((f) => f.name)).band];
+      amineN++;
     }
 
     if (typeof day.hydrationL === 'number') {
@@ -99,6 +106,8 @@ export function computeWeekStats(days: DayEntry[]): WeekStats {
     energyN > 0
       ? Math.round(10 - (energyPenaltySum / energyN / 6) * 10)
       : null;
+  // Note amines /10 : bande max = 2 (élevé). 10 = journées peu chargées.
+  const amineScore = amineN > 0 ? Math.round(10 - (amineBandSum / amineN / 2) * 10) : null;
 
   return {
     hardDays,
@@ -109,8 +118,12 @@ export function computeWeekStats(days: DayEntry[]): WeekStats {
     daysWithMeals,
     avgHydration,
     energyScore,
+    amineScore,
   };
 }
+
+/** Poids par bande de charge amines pour la note hebdo. */
+const AMINE_BAND_WEIGHT: Record<AmineLoadBand, number> = { faible: 0, modere: 1, eleve: 2 };
 
 export interface DaySeverityPoint {
   date: string;
