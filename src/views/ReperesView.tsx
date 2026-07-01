@@ -84,7 +84,7 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
       <h2 className="mb-3 text-xl font-semibold text-ink">Repères</h2>
 
       {/* Sous-onglets */}
-      <div className="mb-4 inline-flex rounded-full border border-border p-1 text-sm">
+      <div className="mb-4 inline-flex max-w-full rounded-full border border-border p-1 text-xs sm:text-sm">
         <SubTabButton active={tab === 'reperes'} onClick={() => setTab('reperes')} icon={<Table2 size={15} />}>
           Repères
         </SubTabButton>
@@ -380,7 +380,7 @@ function SubTabButton({
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5"
+      className="inline-flex shrink items-center justify-center gap-1 rounded-full px-2.5 py-1.5 sm:gap-1.5 sm:px-3"
       style={{
         backgroundColor: active ? 'var(--color-surface-2)' : 'transparent',
         color: active ? 'var(--color-ink)' : 'var(--color-muted)',

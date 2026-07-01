@@ -55,24 +55,26 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
         <button
           type="button"
           onClick={() => go(-1)}
-          className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:text-ink"
+          aria-label="Jour précédent"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:text-ink"
         >
-          <ChevronLeft size={16} /> Jour précédent
+          <ChevronLeft size={16} /> <span className="hidden sm:inline">Jour précédent</span>
         </button>
 
         <input
           type="date"
           value={date}
           onChange={(e) => e.target.value && onDateChange(e.target.value)}
-          className="rounded-md border border-border bg-surface-2 px-2 py-1 text-sm text-ink [color-scheme:dark]"
+          className="min-w-0 flex-1 rounded-md border border-border bg-surface-2 px-2 py-1 text-center text-sm text-ink [color-scheme:dark] sm:flex-none sm:text-left"
         />
 
         <button
           type="button"
           onClick={() => go(1)}
-          className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:text-ink"
+          aria-label="Jour suivant"
+          className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-3 py-1.5 text-sm text-muted hover:text-ink"
         >
-          Jour suivant <ChevronRight size={16} />
+          <span className="hidden sm:inline">Jour suivant</span> <ChevronRight size={16} />
         </button>
       </div>
 
