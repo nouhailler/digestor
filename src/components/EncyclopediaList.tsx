@@ -10,6 +10,8 @@ import { explainSymptom } from '../lib/ai/symptomInfo';
 import { runAiTask } from '../lib/ai/aiActivity';
 import { buildProfileContext } from '../lib/profile';
 import { normalize } from '../lib/foodClassifier';
+import { AMINE_ARTICLES, AMINE_CATEGORY, amineArticle } from '../lib/amineArticles';
+import { AmineArticleSheet } from './AmineArticleSheet';
 
 interface EncyclopediaListProps {
   onSelectSymptom: (name: string, hint: string) => void;
@@ -25,6 +27,7 @@ export function EncyclopediaList({ onSelectSymptom, onOpenAiSettings }: Encyclop
   const [cat, setCat] = useState('all');
   const [bulk, setBulk] = useState<{ done: number; total: number } | null>(null);
   const [bulkError, setBulkError] = useState<string | null>(null);
+  const [amineName, setAmineName] = useState<string | null>(null);
   const stopRef = useRef(false);
 
   const detailedKeys = useMemo(
@@ -32,9 +35,18 @@ export function EncyclopediaList({ onSelectSymptom, onOpenAiSettings }: Encyclop
     [detailed],
   );
 
+  // Catégorie « Amines biogènes » (fiches détaillées statiques), ajoutée au socle.
+  const allCategories = useMemo(
+    () => [
+      ...categories,
+      { category: AMINE_CATEGORY, items: AMINE_ARTICLES.map((a) => ({ name: a.name, manifestation: a.summary })) },
+    ],
+    [categories],
+  );
+
   const q = normalize(query);
   const filtered = useMemo(() => {
-    return categories
+    return allCategories
       .filter((c) => cat === 'all' || c.category === cat)
       .map((c) => ({
         category: c.category,
@@ -43,13 +55,17 @@ export function EncyclopediaList({ onSelectSymptom, onOpenAiSettings }: Encyclop
         ),
       }))
       .filter((c) => c.items.length > 0);
-  }, [categories, cat, q]);
+  }, [allCategories, cat, q]);
 
   const totalMatches = filtered.reduce((n, c) => n + c.items.length, 0);
 
-  // Pré-génération en masse des fiches manquantes (sur le périmètre affiché).
+  // Pré-génération en masse des fiches manquantes (les amines ont leur propre
+  // fiche statique : on ne les envoie pas à la génération IA de symptômes).
   const missing = useMemo(
-    () => filtered.flatMap((c) => c.items).filter((it) => !detailedKeys.has(normalize(it.name))),
+    () =>
+      filtered
+        .flatMap((c) => c.items)
+        .filter((it) => !detailedKeys.has(normalize(it.name)) && !amineArticle(it.name)),
     [filtered, detailedKeys],
   );
 
@@ -102,7 +118,7 @@ export function EncyclopediaList({ onSelectSymptom, onOpenAiSettings }: Encyclop
           className="rounded-lg border border-border bg-surface-2 px-2 py-2 text-sm text-ink [color-scheme:dark]"
         >
           <option value="all">Toutes les catégories</option>
-          {categories.map((c) => (
+          {allCategories.map((c) => (
             <option key={c.category} value={c.category}>
               {c.category}
             </option>
@@ -155,12 +171,13 @@ export function EncyclopediaList({ onSelectSymptom, onOpenAiSettings }: Encyclop
             <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">{category.category}</h4>
             <ul className="space-y-1.5">
               {category.items.map((it) => {
-                const done = detailedKeys.has(normalize(it.name));
+                const isAmine = !!amineArticle(it.name);
+                const done = !isAmine && detailedKeys.has(normalize(it.name));
                 return (
                   <li key={it.name}>
                     <button
                       type="button"
-                      onClick={() => onSelectSymptom(it.name, it.manifestation)}
+                      onClick={() => (isAmine ? setAmineName(it.name) : onSelectSymptom(it.name, it.manifestation))}
                       className="flex w-full items-start gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-left hover:border-leger"
                     >
                       <span className="min-w-0 flex-1">
@@ -211,6 +228,8 @@ export function EncyclopediaList({ onSelectSymptom, onOpenAiSettings }: Encyclop
         {extraCount > 0 && <p className="mt-2 text-xs text-muted">{extraCount} symptôme(s) ajouté(s) par l'IA.</p>}
         {error && <p className="mt-2" style={{ color: 'var(--color-severe)' }}>{error}</p>}
       </div>
+
+      <AmineArticleSheet open={amineName !== null} name={amineName ?? ''} onClose={() => setAmineName(null)} />
     </div>
   );
 }
