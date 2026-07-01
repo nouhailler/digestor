@@ -169,7 +169,7 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
         </p>
         {!personal.enoughData ? (
           <p className="text-sm text-muted">
-            Pas encore assez de données pour une analyse fiable — continuez à remplir le journal.
+            Pas encore assez de données pour les corrélations alimentaires — continuez à remplir le journal.
           </p>
         ) : (
           <div className="space-y-4 text-sm">
@@ -234,28 +234,31 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
                 </ul>
               </div>
             )}
-            {amine.suspected && (
-              <div>
-                <p className="mb-1.5 font-medium text-ink">Amines biogènes (histamine)</p>
-                <div className="flex items-start gap-2.5 text-ink">
-                  <span
-                    className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: 'var(--color-severe)' }}
-                  />
-                  <span>
-                    <strong>Charge élevée en amines</strong> → {Math.round(amine.rateWithHigh * 100)} % de jours à
-                    symptômes histaminiques (urticaire, rougeurs, maux de tête…){' '}
-                    <span className="text-muted">
-                      vs {Math.round(amine.rateWithoutHigh * 100)} % sinon · sur {amine.daysHighLoad} jour(s) chargés
-                    </span>
-                  </span>
-                </div>
-              </div>
-            )}
-            <p className="text-xs text-muted">
-              Détection conservatrice (association le même jour). Indications à confirmer, pas un diagnostic.
-            </p>
           </div>
+        )}
+        {/* Amines : indépendant du seuil des corrélations alimentaires (propre significativité). */}
+        {amine.suspected && (
+          <div className="mt-4 text-sm">
+            <p className="mb-1.5 font-medium text-ink">Amines biogènes (histamine)</p>
+            <div className="flex items-start gap-2.5 text-ink">
+              <span
+                className="mt-1.5 inline-block h-2.5 w-2.5 shrink-0 rounded-full"
+                style={{ backgroundColor: 'var(--color-severe)' }}
+              />
+              <span>
+                <strong>Charge élevée en amines</strong> → {Math.round(amine.rateWithHigh * 100)} % de jours à
+                symptômes histaminiques (urticaire, rougeurs, maux de tête…){' '}
+                <span className="text-muted">
+                  vs {Math.round(amine.rateWithoutHigh * 100)} % sinon · sur {amine.daysHighLoad} jour(s) chargés
+                </span>
+              </span>
+            </div>
+          </div>
+        )}
+        {(personal.enoughData || amine.suspected) && (
+          <p className="mt-4 text-xs text-muted">
+            Détection conservatrice (association le même jour). Indications à confirmer, pas un diagnostic.
+          </p>
         )}
       </div>
     </div>
