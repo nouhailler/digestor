@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { BookOpen, HeartPulse, Info, Table2 } from 'lucide-react';
+import { BookOpen, ChevronDown, HeartPulse, Info, Table2 } from 'lucide-react';
 import { TipBanner } from '../components/TipBanner';
 import { SymptomDetailSheet } from '../components/SymptomDetailSheet';
 import { EncyclopediaList } from '../components/EncyclopediaList';
 import { DigestiveGuide } from '../components/DigestiveGuide';
 import { findManifestation } from '../lib/encyclopedia';
+import { BIOGENIC_AMINES_REFERENCE } from '../lib/biogenicAmines';
 
 interface Cell {
   label: string;
@@ -147,6 +148,7 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
           </div>
 
           <AmineExplainer />
+          <AmineReferenceSection />
         </>
       ) : tab === 'encyclopedie' ? (
         <EncyclopediaList
@@ -208,6 +210,53 @@ function AmineExplainer() {
       <p className="mt-2 text-xs text-muted">
         La teneur en histamine varie beaucoup (fraîcheur, affinage). Repère indicatif, non médical.
       </p>
+    </div>
+  );
+}
+
+/** Référence dépliable de toutes les amines biogènes (origine, rôle, excès). */
+function AmineReferenceSection() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="mt-4 rounded-2xl border border-border bg-surface p-5 text-sm">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className="flex w-full items-center gap-2 text-left text-base font-semibold text-ink"
+      >
+        <BookOpen size={16} className="text-muted" />
+        Toutes les amines biogènes
+        <ChevronDown
+          size={16}
+          className={`ml-auto shrink-0 text-muted transition-transform ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && (
+        <>
+          <p className="mt-2 mb-3 leading-relaxed text-muted">
+            Au-delà de l'histamine, plusieurs amines biogènes se forment par décarboxylation d'un acide aminé.
+            Origine, rôle physiologique et effets d'un excès alimentaire. Repère informatif, non médical.
+          </p>
+          <ul className="space-y-2">
+            {BIOGENIC_AMINES_REFERENCE.map((a) => (
+              <li key={a.name} className="rounded-xl border border-border bg-surface-2 px-3 py-2">
+                <p className="font-medium text-ink">
+                  {a.name} <span className="font-normal text-muted">· issue de {a.precursor}</span>
+                </p>
+                <p className="mt-0.5 text-ink">
+                  <span className="text-muted">Rôle : </span>
+                  {a.role}
+                </p>
+                <p className="mt-0.5 text-ink">
+                  <span className="text-muted">Excès alimentaire : </span>
+                  {a.excess}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 }

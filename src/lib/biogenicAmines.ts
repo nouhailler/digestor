@@ -286,3 +286,112 @@ export const AMINE_LOAD_COLOR: Record<AmineLoadBand, string> = {
   modere: 'var(--color-modere)',
   eleve: 'var(--color-severe)',
 };
+
+// ---- Référence informative : les principales amines biogènes ----
+
+/** Fiche de référence d'une amine biogène (écran Repères). */
+export interface BiogenicAmineRef {
+  name: string;
+  precursor: string; // acide aminé (ou molécule) d'origine
+  role: string; // rôle physiologique
+  excess: string; // effet d'un excès alimentaire
+}
+
+/**
+ * Les principales amines biogènes, au-delà de l'histamine. Chacune se forme par
+ * décarboxylation d'un acide aminé (ou d'une amine précédente). Référence
+ * informative — origine, rôle physiologique et effets d'un excès alimentaire.
+ * Non médical.
+ */
+export const BIOGENIC_AMINES_REFERENCE: BiogenicAmineRef[] = [
+  {
+    name: 'Histamine',
+    precursor: 'Histidine',
+    role: 'Réactions immunitaires, sécrétion gastrique, neurotransmetteur.',
+    excess: 'Maux de tête, migraines, rougeurs, démangeaisons, diarrhée, hypotension, tachycardie.',
+  },
+  {
+    name: 'Tyramine',
+    precursor: 'Tyrosine',
+    role: 'Modulation du système nerveux, régulation de la pression artérielle.',
+    excess: 'Hypertension, migraines, interaction avec les antidépresseurs IMAO.',
+  },
+  {
+    name: 'Phényléthylamine',
+    precursor: 'Phénylalanine',
+    role: "Neuromodulateur, influence sur l'humeur et la vigilance.",
+    excess: 'Migraines chez les personnes sensibles, stimulation nerveuse.',
+  },
+  {
+    name: 'Tryptamine',
+    precursor: 'Tryptophane',
+    role: 'Précurseur de neurotransmetteurs, neuromodulateur.',
+    excess: 'Céphalées, vasoconstriction chez les personnes sensibles.',
+  },
+  {
+    name: 'Putrescine',
+    precursor: 'Ornithine',
+    role: 'Croissance cellulaire, réparation des tissus, synthèse des polyamines.',
+    excess: "Favorise l'absorption de l'histamine, peut provoquer des troubles digestifs.",
+  },
+  {
+    name: 'Cadavérine',
+    precursor: 'Lysine',
+    role: 'Croissance cellulaire, métabolisme des polyamines.',
+    excess: "Accentue la toxicité de l'histamine, odeur de putréfaction, troubles digestifs.",
+  },
+  {
+    name: 'Spermidine',
+    precursor: 'Putrescine',
+    role: "Renouvellement cellulaire, autophagie, protection de l'ADN.",
+    excess: 'Généralement bénéfique aux doses alimentaires, peu d’effets indésirables connus.',
+  },
+  {
+    name: 'Spermine',
+    precursor: 'Spermidine',
+    role: "Protection de l'ADN, croissance cellulaire, activité antioxydante.",
+    excess: 'Peu toxique aux doses normales.',
+  },
+  {
+    name: 'Agmatine',
+    precursor: 'Arginine',
+    role: "Neuromodulateur, régulation de l'oxyde nitrique, fonction cardiovasculaire.",
+    excess: 'Effets encore peu connus chez l’humain.',
+  },
+  {
+    name: 'Octopamine',
+    precursor: 'Tyrosine',
+    role: "Neurotransmetteur principalement chez les invertébrés, très faible rôle chez l'humain.",
+    excess: 'Peut augmenter la pression artérielle chez les personnes sensibles.',
+  },
+  {
+    name: 'Dopamine',
+    precursor: 'Tyrosine',
+    role: 'Neurotransmetteur impliqué dans le mouvement, la motivation et le plaisir.',
+    excess: 'Peu absorbée par voie digestive, impact alimentaire négligeable.',
+  },
+  {
+    name: 'Noradrénaline',
+    precursor: 'Tyrosine',
+    role: 'Hormone et neurotransmetteur du stress, régulation de la pression artérielle.',
+    excess: 'Impact alimentaire négligeable.',
+  },
+  {
+    name: 'Adrénaline',
+    precursor: 'Tyrosine',
+    role: "Hormone du stress, préparation à l'effort, augmentation du rythme cardiaque.",
+    excess: 'Présence alimentaire négligeable.',
+  },
+  {
+    name: 'Sérotonine',
+    precursor: 'Tryptophane',
+    role: "Régulation de l'humeur, du sommeil, de l'appétit et du transit intestinal.",
+    excess: 'Généralement sans effet car très peu absorbée par voie digestive.',
+  },
+  {
+    name: 'Mélatonine',
+    precursor: 'Tryptophane (via la sérotonine)',
+    role: 'Régulation du rythme veille-sommeil, antioxydant.',
+    excess: 'Généralement bénéfique, peu d’effets indésirables aux doses alimentaires.',
+  },
+];
