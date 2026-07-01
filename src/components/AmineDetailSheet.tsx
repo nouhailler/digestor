@@ -1,4 +1,4 @@
-import { Activity, Leaf, Stethoscope, UtensilsCrossed } from 'lucide-react';
+import { Activity, Leaf, Scale, Stethoscope, UtensilsCrossed } from 'lucide-react';
 import { Sheet } from './Sheet';
 import { amineDetail } from '../lib/biogenicAmines';
 
@@ -27,6 +27,10 @@ export function AmineDetailSheet({ open, name, onClose }: AmineDetailSheetProps)
             title="Où on la trouve"
           >
             <List items={detail.foods} color="var(--color-modere)" />
+          </Block>
+
+          <Block icon={<Scale size={15} style={{ color: 'var(--color-modere)' }} />} title="Quelle quantité tolérer">
+            <List items={detail.tolerance} color="var(--color-modere)" />
           </Block>
 
           <Block icon={<Leaf size={15} style={{ color: 'var(--color-leger)' }} />} title="Comment éviter les effets">

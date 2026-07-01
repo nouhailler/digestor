@@ -549,6 +549,7 @@ export interface AmineDetail {
   intro: string;
   effects: string[]; // effets d'un excès
   foods: string[]; // où on la trouve
+  tolerance: string[]; // quelle proportion tolérer sans effet notable
   avoid: string[]; // comment éviter les effets
   diagnosis: string[]; // comment repérer un excès dans le corps
 }
@@ -579,6 +580,12 @@ export const AMINE_DETAILS: Record<string, AmineDetail> = {
       'Alcools fermentés : vin (surtout rouge), bière, cidre, champagne',
       'Tomate et épinard bien mûrs',
       "Histamino-libérateurs (peu histaminés mais déclencheurs) : fraise, agrumes, ananas, chocolat, tomate",
+    ],
+    tolerance: [
+      'Le seuil varie beaucoup selon les personnes : il n’existe pas de dose « sûre » universelle',
+      'De petites portions d’aliments modérés sont souvent tolérées ; les aliments très riches (fromage très affiné, poisson mal conservé) déclenchent même en petite quantité',
+      'Ce qui compte le plus : la charge cumulée sur la journée et les combinaisons, plus que chaque aliment isolé',
+      'Tester par petites portions espacées, en tenant un journal pour trouver son propre seuil',
     ],
     avoid: [
       'Privilégier les aliments très frais ou congelés dès l’achat',
@@ -616,6 +623,11 @@ export const AMINE_DETAILS: Record<string, AmineDetail> = {
       'Fèves, bananes très mûres',
       'Tout aliment vieilli, avarié ou mal conservé',
     ],
+    tolerance: [
+      'Sans traitement particulier, de petites portions occasionnelles passent souvent',
+      'Sous IMAO : seuil très bas (quelques dizaines de mg suffisent) → pas de « petite quantité » tolérée sur les aliments riches, régime strict',
+      'Éviter de cumuler plusieurs sources (fromage + charcuterie + fermenté) au même repas',
+    ],
     avoid: [
       'Consommer les protéines fraîches, éviter le vieilli / avarié',
       'Limiter fromages affinés et aliments fermentés',
@@ -645,6 +657,11 @@ export const AMINE_DETAILS: Record<string, AmineDetail> = {
       'Fromages affinés et aliments fermentés',
       'Agrumes',
     ],
+    tolerance: [
+      'Pas de seuil précis : le risque vient surtout de son rôle d’amplificateur (elle aide l’histamine à passer)',
+      'La fraîcheur prime : un aliment frais en contient peu, un aliment vieilli beaucoup',
+      'Limiter ses sources en même temps que des aliments histaminés',
+    ],
     avoid: [
       'Privilégier la fraîcheur : c’est le principal levier',
       'Respecter strictement la chaîne du froid',
@@ -671,6 +688,11 @@ export const AMINE_DETAILS: Record<string, AmineDetail> = {
       'Poissons et viandes en décomposition ou mal conservés',
       'Fromages très affinés',
       'Aliments fermentés longtemps',
+    ],
+    tolerance: [
+      'Pas de seuil défini : sa présence signale surtout un aliment dégradé',
+      'Un aliment vraiment frais en contient très peu → la quantité tolérée dépend d’abord de la fraîcheur',
+      'À éviter dès qu’il y a un doute sur la conservation',
     ],
     avoid: [
       'Consommer des produits très frais',
