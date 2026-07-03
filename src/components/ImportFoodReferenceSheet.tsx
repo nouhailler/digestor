@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Check, ChevronDown, ClipboardCopy, Sparkles } from 'lucide-react';
 import { Sheet } from './Sheet';
 import { getAllFoodInsights, putFoodInsight } from '../lib/db';
+import { CLAUDE_WEB_AMINES_PROMPT } from '../lib/foodReferenceImportPrompt';
 import {
   mergeFoodReference,
   parseFoodReference,
@@ -27,6 +28,8 @@ export function ImportFoodReferenceSheet({ open, onClose, onImported }: ImportFo
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<ReferenceMergeResult | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   function reset() {
     setText('');
@@ -34,6 +37,16 @@ export function ImportFoodReferenceSheet({ open, onClose, onImported }: ImportFo
     setPreview(null);
     setError(null);
     setDone(null);
+  }
+
+  async function copyPrompt() {
+    try {
+      await navigator.clipboard.writeText(CLAUDE_WEB_AMINES_PROMPT);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* presse-papiers indisponible */
+    }
   }
 
   async function doPreview() {
@@ -94,6 +107,40 @@ export function ImportFoodReferenceSheet({ open, onClose, onImported }: ImportFo
           </div>
         ) : (
           <>
+            {/* Aide : prompt Claude Web à copier */}
+            <div className="rounded-lg border border-border">
+              <button
+                type="button"
+                onClick={() => setShowPrompt((v) => !v)}
+                className="flex w-full items-center justify-between px-3 py-2 text-muted hover:text-ink"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Sparkles size={15} /> Comment compléter les amines en masse ?
+                </span>
+                <ChevronDown size={16} className={showPrompt ? 'rotate-180 transition' : 'transition'} />
+              </button>
+              {showPrompt && (
+                <div className="space-y-2 border-t border-border px-3 py-3">
+                  <p className="text-muted">
+                    1. Exportez le référentiel (bouton « Exporter »). 2. Créez un Projet sur claude.ai, joignez-y
+                    ce fichier et collez le prompt ci-dessous comme instructions. 3. Collez la réponse JSON de
+                    Claude ici. Astuce : lancez d'abord « Compléter les amines (hors-ligne) » pour le gratuit.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={copyPrompt}
+                    className="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-ink"
+                  >
+                    {copied ? <Check size={15} style={{ color: 'var(--color-leger)' }} /> : <ClipboardCopy size={15} />}
+                    {copied ? 'Copié !' : 'Copier le prompt'}
+                  </button>
+                  <pre className="max-h-40 overflow-auto whitespace-pre-wrap rounded-lg bg-surface-2 p-3 text-xs text-muted">
+                    {CLAUDE_WEB_AMINES_PROMPT}
+                  </pre>
+                </div>
+              )}
+            </div>
+
             <textarea
               value={text}
               onChange={(e) => {

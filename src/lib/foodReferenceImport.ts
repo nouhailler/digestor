@@ -1,6 +1,6 @@
 import type { FodmapGroups, FodmapLevel, FoodCategory, FoodInsight, Verdict } from '../types';
 import { parseJsonLoose } from './json';
-import { buildFoodInsight } from './ai/foodInsight';
+import { buildFoodInsight, deriveCategory } from './ai/foodInsight';
 
 /**
  * Import d'un « référentiel d'aliments » (le pendant de `foodReference.ts` /
@@ -93,21 +93,25 @@ function mergeGroups(existing: FodmapGroups, incoming: FodmapGroups): FodmapGrou
  * place avec des « inconnus ».
  */
 export function mergeFoodInsight(existing: FoodInsight, incoming: FoodInsight): FoodInsight {
+  const fodmapLevel = meaningfulLevel(incoming.fodmapLevel) ? incoming.fodmapLevel : existing.fodmapLevel;
+  const sibo = {
+    verdict: meaningfulVerdict(incoming.sibo.verdict) ? incoming.sibo.verdict : existing.sibo.verdict,
+    note: incoming.sibo.note || existing.sibo.note,
+  };
+  const candida = {
+    verdict: meaningfulVerdict(incoming.candida.verdict) ? incoming.candida.verdict : existing.candida.verdict,
+    note: incoming.candida.note || existing.candida.note,
+  };
   return {
     key: existing.key,
     name: incoming.name || existing.name,
-    // La catégorie de l'import (portée par le référentiel) est prioritaire.
-    category: incoming.category,
-    fodmapLevel: meaningfulLevel(incoming.fodmapLevel) ? incoming.fodmapLevel : existing.fodmapLevel,
+    // Recalculée depuis l'analyse FUSIONNÉE : un patch « amines seul » (sans
+    // FODMAP/verdicts signifiants) conserve donc la catégorie existante.
+    category: deriveCategory(fodmapLevel, sibo.verdict, candida.verdict),
+    fodmapLevel,
     fodmaps: mergeGroups(existing.fodmaps, incoming.fodmaps),
-    sibo: {
-      verdict: meaningfulVerdict(incoming.sibo.verdict) ? incoming.sibo.verdict : existing.sibo.verdict,
-      note: incoming.sibo.note || existing.sibo.note,
-    },
-    candida: {
-      verdict: meaningfulVerdict(incoming.candida.verdict) ? incoming.candida.verdict : existing.candida.verdict,
-      note: incoming.candida.note || existing.candida.note,
-    },
+    sibo,
+    candida,
     amines: incoming.amines ?? existing.amines,
     safePortion: incoming.safePortion || existing.safePortion,
     summary: incoming.summary || existing.summary,

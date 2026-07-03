@@ -87,7 +87,19 @@ describe('mergeFoodInsight', () => {
     expect(m.candida.verdict).toBe('eviter');
     expect(m.summary).toBe('Résumé existant.');
     expect(m.tips).toEqual(['Conseil existant.']);
+    expect(m.category).toBe('pro'); // recalculée depuis l'analyse conservée (candida eviter)
     expect(m.key).toBe('roquefort');
+  });
+
+  it('un patch amines seul (via parse) ne perturbe pas la catégorie existante', () => {
+    // Patch minimal : uniquement name + amines, comme le renvoie Claude Web.
+    const { insights } = parseFoodReference(
+      JSON.stringify({ type: 'food-reference', foods: [{ name: 'Roquefort', amines: { level: 'high', histamine: 'high' } }] }),
+    );
+    const m = mergeFoodInsight(base, insights[0]);
+    expect(m.category).toBe('pro'); // inchangée malgré l'absence de catégorie dans le patch
+    expect(m.fodmapLevel).toBe('moderate'); // analyse existante préservée
+    expect(m.amines?.histamine).toBe('high'); // amines posées
   });
 
   it('les valeurs signifiantes de l’import gagnent', () => {
