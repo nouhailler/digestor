@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DayEntry, Intensity, SymptomKey } from '../types';
 import { emptyDay } from './factory';
-import { amineSymptomCorrelation } from './amineCorrelation';
+import { amineSymptomCorrelation, amineTypeCorrelation } from './amineCorrelation';
 
 let n = 0;
 function mkDay(foods: string[], symptoms: Partial<Record<SymptomKey, Intensity>> = {}): DayEntry {
@@ -65,5 +65,54 @@ describe('amineSymptomCorrelation', () => {
     const r = amineSymptomCorrelation(days);
     expect(r.suspected).toBe(false);
     expect(r.rateWithHigh).toBe(0);
+  });
+});
+
+// Aliments riches par amine (détail du dictionnaire)
+const HIST = ['Roquefort', 'Choucroute']; // histamine 3+3 → axe histamine élevé
+const TYR = ['Gruyère', 'Cheddar']; // tyramine 3+3 → axe tyramine élevé
+
+describe('amineTypeCorrelation', () => {
+  it('détecte un pattern histaminique (charge histamine ↔ symptômes histaminiques)', () => {
+    const days: DayEntry[] = [
+      mkDay(HIST, { urticaire: 'severe' }),
+      mkDay(HIST, { rougeurs: 'modere' }),
+      mkDay(HIST, { demangeaisons: 'severe' }),
+      mkDay(LOW),
+      mkDay(LOW),
+      mkDay(LOW),
+    ];
+    const r = amineTypeCorrelation(days, 'histamine');
+    expect(r.suspected).toBe(true);
+    expect(r.rateWithHigh).toBe(1);
+    expect(r.rateWithoutHigh).toBe(0);
+  });
+
+  it('détecte un pattern tyraminique (migraine / hypertension)', () => {
+    const days: DayEntry[] = [
+      mkDay(TYR, { migraine: 'severe' }),
+      mkDay(TYR, { hypertension_soudaine: 'modere' }),
+      mkDay(TYR, { migraine: 'modere' }),
+      mkDay(LOW),
+      mkDay(LOW),
+      mkDay(LOW),
+    ];
+    const r = amineTypeCorrelation(days, 'tyramine');
+    expect(r.daysHighLoad).toBe(3);
+    expect(r.suspected).toBe(true);
+  });
+
+  it('ne conclut pas un pattern tyraminique quand seuls des symptômes histaminiques suivent', () => {
+    const days: DayEntry[] = [
+      mkDay(TYR, { urticaire: 'severe' }), // urticaire = histaminique, pas tyraminique
+      mkDay(TYR, { rougeurs: 'severe' }),
+      mkDay(TYR, { demangeaisons: 'severe' }),
+      mkDay(LOW),
+      mkDay(LOW),
+      mkDay(LOW),
+    ];
+    const r = amineTypeCorrelation(days, 'tyramine');
+    expect(r.rateWithHigh).toBe(0);
+    expect(r.suspected).toBe(false);
   });
 });

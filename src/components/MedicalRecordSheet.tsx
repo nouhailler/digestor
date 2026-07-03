@@ -371,6 +371,34 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
                   </p>
                 )}
 
+                {(record.amineTypes.histamine.suspected || record.amineTypes.tyramine.suspected) && (
+                  <div>
+                    <p className="font-medium text-ink">Patterns par amine</p>
+                    <ul className="mt-1 space-y-1">
+                      {record.amineTypes.histamine.suspected && (
+                        <li className="flex items-start gap-2">
+                          <Dot color="var(--color-severe)" />
+                          <span>
+                            <strong className="text-ink">Pattern histaminique</strong> — charge élevée en histamine →{' '}
+                            {Math.round(record.amineTypes.histamine.rateWithHigh * 100)} % de jours à symptômes histaminiques
+                            <span className="text-muted"> (vs {Math.round(record.amineTypes.histamine.rateWithoutHigh * 100)} % sinon)</span>
+                          </span>
+                        </li>
+                      )}
+                      {record.amineTypes.tyramine.suspected && (
+                        <li className="flex items-start gap-2">
+                          <Dot color="var(--color-severe)" />
+                          <span>
+                            <strong className="text-ink">Pattern tyraminique</strong> — charge élevée en tyramine →{' '}
+                            {Math.round(record.amineTypes.tyramine.rateWithHigh * 100)} % de jours à symptômes tyraminiques (migraine, hypertension…)
+                            <span className="text-muted"> (vs {Math.round(record.amineTypes.tyramine.rateWithoutHigh * 100)} % sinon)</span>
+                          </span>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
+
                 {record.amineHighDays.length > 0 && (
                   <div>
                     <p className="font-medium text-ink">Jours à charge élevée en amines</p>

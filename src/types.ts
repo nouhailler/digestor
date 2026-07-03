@@ -71,6 +71,7 @@ export interface SatietyCheck {
 }
 
 export type SymptomKey =
+  // ---- Historiques (conservés tels quels : aucune donnée perdue) ----
   | 'ballonnements'
   | 'gaz'
   | 'douleurs_abdo'
@@ -85,7 +86,55 @@ export type SymptomKey =
   | 'urticaire'
   | 'rougeurs'
   | 'maux_de_tete'
-  | 'nausees';
+  | 'nausees'
+  // ---- Amines biogènes : cutané ----
+  | 'demangeaisons_visage_cou'
+  | 'demangeaisons_paumes_plantes'
+  | 'chaleur_cutanee'
+  | 'oedeme_leger'
+  // ---- Amines biogènes : digestif ----
+  | 'trop_plein'
+  // ---- Amines biogènes : neuro ----
+  | 'migraine'
+  | 'vertiges'
+  // ---- Amines biogènes : cardiovasculaire ----
+  | 'palpitations'
+  | 'hypotension'
+  | 'hypertension_soudaine'
+  | 'bouffee_chaleur_pouls'
+  // ---- Amines biogènes : ORL / respiratoire ----
+  | 'nez_qui_coule'
+  | 'eternuements'
+  | 'toux'
+  | 'gorge_qui_gratte'
+  | 'difficulte_respiratoire'
+  // ---- Amines biogènes : général ----
+  | 'malaise_general'
+  | 'anxiete_soudaine'
+  | 'picotement_bouche_levres'
+  | 'salivation_anormale'
+  | 'troubles_sommeil'
+  // ---- Amines biogènes : signes d'alerte (urgents) ----
+  | 'gonflement_gorge_langue'
+  | 'difficulte_avaler'
+  | 'chute_tension_malaise'
+  | 'urticaire_generalisee_aggravation';
+
+/** Système corporel d'un symptôme (regroupement de la grille + croisement amines). */
+export type SymptomCategory =
+  | 'digestif'
+  | 'cutane'
+  | 'neuro'
+  | 'cardiovasculaire'
+  | 'orl_respiratoire'
+  | 'general'
+  | 'alerte';
+
+/**
+ * Amine biogène la plus souvent associée à un symptôme, à titre indicatif seulement.
+ * Ne remplace pas le suivi réel — sert de socle au croisement amine↔symptôme.
+ */
+export type TypicalAmine = 'histamine' | 'tyramine' | 'both' | 'unknown';
 
 export type Intensity = 'absent' | 'leger' | 'modere' | 'severe';
 // gris        | vert    | ambre   | rouge
@@ -185,9 +234,18 @@ export type AmineTolerance = 'free' | 'moderate' | 'avoid';
 
 /** Profil amines biogènes d'un aliment. */
 export interface AmineInfo {
-  level: AmineLevel;
-  liberator?: boolean; // libère l'histamine endogène
-  daoBlocker?: boolean; // freine la DAO / compétition (alcool, putrescine…)
+  level: AmineLevel; // niveau GLOBAL (pilote badge + charge journalière)
+  // ---- Détail par amine (optionnel) : quelle amine est en cause ----
+  histamine?: AmineLevel;
+  tyramine?: AmineLevel;
+  putrescineCadaverine?: AmineLevel; // putrescine/cadavérine : potentialisent la DAO
+  // ---- Mécanismes ----
+  liberator?: boolean; // libère l'histamine endogène (schéma public : histamineLiberator)
+  daoBlocker?: boolean; // freine la DAO / compétition (schéma public : daoInhibitor)
+  maoInhibitor?: boolean; // inhibe la MAO → accumulation de tyramine (effet faible hors IMAO)
+  fermented?: boolean; // aliment fermenté / affiné
+  freshnessDependent?: boolean; // teneur dépendante de la fraîcheur (valeurs = produit frais)
+  // ---- Existants ----
   group?: AmineGroup;
   tolerance?: AmineTolerance; // combien on peut en consommer sans effet notable
   toleranceNote?: string; // précision de portion (ex. « 1 tranche fine », « ½ tomate mûre »)

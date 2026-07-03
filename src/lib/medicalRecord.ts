@@ -16,7 +16,12 @@ import { dayHasContent, effectiveDaySymptoms } from './aggregates';
 import { personalCorrelations, type PersonalCorrelations } from './personalCorrelations';
 import { contextCorrelations, type ContextCorrelations } from './contextCorrelations';
 import { amineBreakdown } from './biogenicAmines';
-import { amineSymptomCorrelation, type AmineCorrelation } from './amineCorrelation';
+import {
+  amineSymptomCorrelation,
+  amineTypeCorrelations,
+  type AmineCorrelation,
+  type AmineTypeCorrelations,
+} from './amineCorrelation';
 import { sortTreatments } from './treatments';
 import { sortReintro } from './reintro';
 import { normalize } from './foodClassifier';
@@ -103,6 +108,7 @@ export interface MedicalRecord {
   personal: PersonalCorrelations; // corrélations calculées sur les données réelles
   context: ContextCorrelations; // facteurs contextuels (stress / sommeil / règles)
   amine: AmineCorrelation; // corrélation charge amines ↔ symptômes histaminiques
+  amineTypes: AmineTypeCorrelations; // patterns par amine (histaminique / tyraminique)
   amineHighDays: AmineHighDay[]; // jours à charge élevée en amines (aliments concernés)
   treatments: Treatment[]; // traitements & compléments (en cours d'abord)
   reintro: ReintroChallenge[]; // tests de réintroduction FODMAP
@@ -255,6 +261,7 @@ export function buildMedicalRecord(
     personal: personalCorrelations(recorded),
     context: contextCorrelations(recorded),
     amine: amineSymptomCorrelation(recorded),
+    amineTypes: amineTypeCorrelations(recorded),
     amineHighDays,
     treatments: sortTreatments(treatments, todayISO()),
     reintro: sortReintro(reintro),

@@ -8,7 +8,14 @@ import {
   VERDICT_COLOR,
   VERDICT_LABEL,
 } from '../../lib/ai/insightFormat';
-import { AMINE_LEVEL_COLOR, AMINE_LEVEL_LABEL, AMINE_TOLERANCE_LABEL, amineTolerance } from '../../lib/biogenicAmines';
+import {
+  AMINE_LEVEL_COLOR,
+  AMINE_LEVEL_LABEL,
+  AMINE_TOLERANCE_LABEL,
+  AMINE_TYPE_LABEL,
+  AMINE_TYPES,
+  amineTolerance,
+} from '../../lib/biogenicAmines';
 
 const GROUP_KEYS = Object.keys(FODMAP_GROUP_LABEL) as (keyof FodmapGroups)[];
 
@@ -72,20 +79,44 @@ export function FoodInsightCard({ insight }: { insight: FoodInsight }) {
 
       {insight.amines &&
         (() => {
-          const tol = amineTolerance(insight.amines);
+          const a = insight.amines;
+          const tol = amineTolerance(a);
+          // Détail par amine renseigné (histamine / tyramine / putrescine-cadavérine).
+          const details = AMINE_TYPES.filter((t) => a[t] && a[t] !== 'unknown');
+          // Mécanismes en toutes lettres.
+          const mechanisms = [
+            a.liberator ? 'histamino-libérateur' : '',
+            a.daoBlocker ? 'freine la DAO' : '',
+            a.maoInhibitor ? 'inhibe la MAO (tyramine)' : '',
+            a.fermented ? 'fermenté / affiné' : '',
+            a.freshnessDependent ? 'dépend de la fraîcheur' : '',
+          ].filter(Boolean);
           const text = [
-            insight.amines.note,
-            insight.amines.liberator ? 'Histamino-libérateur chez les personnes sensibles.' : '',
-            insight.amines.daoBlocker ? 'Freine la DAO (dégradation de l’histamine).' : '',
-            tol
-              ? `Consommation : ${AMINE_TOLERANCE_LABEL[tol.level].toLowerCase()}${tol.note ? ` (${tol.note})` : ''}.`
-              : '',
+            a.note,
+            tol ? `Consommation : ${AMINE_TOLERANCE_LABEL[tol.level].toLowerCase()}${tol.note ? ` (${tol.note})` : ''}.` : '',
           ]
             .filter(Boolean)
             .join(' ');
-          return text ? (
-            <Note title="Amines biogènes" text={text} color={AMINE_LEVEL_COLOR[insight.amines.level]} />
-          ) : null;
+          if (!text && !details.length && !mechanisms.length) return null;
+          return (
+            <div className="rounded-lg border border-border bg-surface-2 px-3 py-2">
+              <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: AMINE_LEVEL_COLOR[a.level] }}>
+                Amines biogènes
+              </span>
+              {details.length > 0 && (
+                <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1">
+                  {details.map((t) => (
+                    <span key={t} className="inline-flex items-center gap-1.5 text-xs text-muted">
+                      <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: AMINE_LEVEL_COLOR[a[t]!] }} />
+                      {AMINE_TYPE_LABEL[t]} : {AMINE_LEVEL_LABEL[a[t]!].toLowerCase()}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {mechanisms.length > 0 && <p className="mt-1.5 text-xs text-muted">{capitalize(mechanisms.join(' · '))}.</p>}
+              {text && <p className="mt-1 text-ink">{text}</p>}
+            </div>
+          );
         })()}
 
       {insight.safePortion && (
@@ -117,6 +148,10 @@ export function FoodInsightCard({ insight }: { insight: FoodInsight }) {
       </p>
     </div>
   );
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
 function Badge({ label, color }: { label: string; color: string }) {

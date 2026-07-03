@@ -1,22 +1,59 @@
-import type { FoodCategory, Intensity, SymptomKey } from '../types';
+import type { FoodCategory, Intensity, SymptomCategory, SymptomKey } from '../types';
 
-/** Ordre exact d'affichage des symptômes (grille 4×3). */
+/**
+ * Ordre d'affichage des symptômes, regroupé par catégorie (digestif → alerte).
+ * L'itération étant contiguë par catégorie, `symptomsByCategory` (symptomCatalog)
+ * peut grouper sans retrier. Les consommateurs agrégés (quality, aggregates,
+ * medicalRecord…) restent agnostiques à l'ordre.
+ */
 export const SYMPTOM_ORDER: SymptomKey[] = [
+  // Digestif
   'ballonnements',
   'gaz',
   'douleurs_abdo',
   'reflux',
-  'fatigue_apres_repas',
-  'envie_sucre',
   'diarrhee',
   'constipation',
-  'brouillard_mental',
-  'mycose_buccale',
+  'nausees',
+  'trop_plein',
+  // Cutané
   'demangeaisons',
+  'demangeaisons_visage_cou',
+  'demangeaisons_paumes_plantes',
   'urticaire',
   'rougeurs',
+  'chaleur_cutanee',
+  'oedeme_leger',
+  // Neuro
   'maux_de_tete',
-  'nausees',
+  'migraine',
+  'vertiges',
+  'fatigue_apres_repas',
+  'brouillard_mental',
+  // Cardiovasculaire
+  'palpitations',
+  'hypotension',
+  'hypertension_soudaine',
+  'bouffee_chaleur_pouls',
+  // ORL / respiratoire
+  'nez_qui_coule',
+  'eternuements',
+  'toux',
+  'gorge_qui_gratte',
+  'difficulte_respiratoire',
+  // Général
+  'envie_sucre',
+  'mycose_buccale',
+  'malaise_general',
+  'anxiete_soudaine',
+  'picotement_bouche_levres',
+  'salivation_anormale',
+  'troubles_sommeil',
+  // Signes d'alerte
+  'gonflement_gorge_langue',
+  'difficulte_avaler',
+  'chute_tension_malaise',
+  'urticaire_generalisee_aggravation',
 ];
 
 /** Explications courtes par symptôme, affichées en infobulle au survol. */
@@ -36,6 +73,38 @@ export const SYMPTOM_HINTS: Record<SymptomKey, string> = {
   rougeurs: 'Rougeurs du visage / bouffées de chaleur (flush).',
   maux_de_tete: 'Céphalées / migraines, parfois après certains aliments.',
   nausees: 'Sensation de mal de cœur, envie de vomir.',
+  // ---- Cutané (amines) ----
+  demangeaisons_visage_cou: 'Démangeaisons localisées au visage, au cou ou au cuir chevelu.',
+  demangeaisons_paumes_plantes: 'Démangeaisons des paumes des mains / plantes des pieds.',
+  chaleur_cutanee: 'Sensation de chaleur sur la peau, sans forcément de rougeur visible.',
+  oedeme_leger: 'Léger gonflement des paupières ou des lèvres — à surveiller.',
+  // ---- Digestif (amines) ----
+  trop_plein: 'Sensation de « trop-plein » inhabituelle, disproportionnée au repas.',
+  // ---- Neuro (amines) ----
+  migraine: 'Céphalée pulsatile, souvent unilatérale (plutôt liée à la tyramine).',
+  vertiges: 'Vertiges ou étourdissements, parfois avec baisse de tension.',
+  // ---- Cardiovasculaire (amines) ----
+  palpitations: 'Cœur qui bat vite ou fort (tachycardie), sensation de palpitations.',
+  hypotension: 'Baisse de tension, souvent avec vertiges ou malaise léger.',
+  hypertension_soudaine: 'Poussée de tension soudaine (classique tyramine + IMAO) — à surveiller.',
+  bouffee_chaleur_pouls: 'Bouffée de chaleur accompagnée d’un pouls accéléré.',
+  // ---- ORL / respiratoire (amines) ----
+  nez_qui_coule: 'Nez qui coule ou congestion nasale, hors rhume.',
+  eternuements: 'Salves d’éternuements après le repas.',
+  toux: 'Toux irritative sans cause infectieuse évidente.',
+  gorge_qui_gratte: 'Gorge qui gratte, picote ou se serre.',
+  difficulte_respiratoire: 'Gêne respiratoire, sifflements → urgence si marqué.',
+  // ---- Général (amines) ----
+  malaise_general: 'Sensation de malaise général, « pas bien » diffus.',
+  anxiete_soudaine: 'Anxiété soudaine sans cause apparente (effet nerveux de l’histamine).',
+  picotement_bouche_levres: 'Picotements ou fourmillements de la bouche / des lèvres.',
+  salivation_anormale: 'Salivation excessive ou, au contraire, bouche sèche.',
+  troubles_sommeil: 'Endormissement perturbé, surtout après un repas du soir.',
+  // ---- Signes d'alerte (urgents) ----
+  gonflement_gorge_langue: 'Gonflement de la gorge ou de la langue → urgence médicale.',
+  difficulte_avaler: 'Difficulté à respirer ou à avaler → urgence médicale.',
+  chute_tension_malaise: 'Chute de tension importante avec malaise → urgence médicale.',
+  urticaire_generalisee_aggravation: 'Urticaire généralisée qui s’aggrave vite → urgence médicale.',
 };
 
 export const SYMPTOM_LABELS: Record<SymptomKey, string> = {
@@ -54,6 +123,122 @@ export const SYMPTOM_LABELS: Record<SymptomKey, string> = {
   rougeurs: 'Rougeurs / bouffées',
   maux_de_tete: 'Maux de tête',
   nausees: 'Nausées',
+  // ---- Cutané (amines) ----
+  demangeaisons_visage_cou: 'Démangeaisons visage / cou',
+  demangeaisons_paumes_plantes: 'Démangeaisons paumes / plantes',
+  chaleur_cutanee: 'Chaleur cutanée',
+  oedeme_leger: 'Œdème léger (paupières, lèvres)',
+  // ---- Digestif (amines) ----
+  trop_plein: 'Sensation de trop-plein',
+  // ---- Neuro (amines) ----
+  migraine: 'Migraine',
+  vertiges: 'Vertiges / étourdissements',
+  // ---- Cardiovasculaire (amines) ----
+  palpitations: 'Palpitations / tachycardie',
+  hypotension: 'Hypotension',
+  hypertension_soudaine: 'Hypertension soudaine',
+  bouffee_chaleur_pouls: 'Bouffée de chaleur + pouls',
+  // ---- ORL / respiratoire (amines) ----
+  nez_qui_coule: 'Nez qui coule / congestion',
+  eternuements: 'Éternuements',
+  toux: 'Toux',
+  gorge_qui_gratte: 'Gorge qui gratte',
+  difficulte_respiratoire: 'Difficulté respiratoire',
+  // ---- Général (amines) ----
+  malaise_general: 'Malaise général',
+  anxiete_soudaine: 'Anxiété soudaine',
+  picotement_bouche_levres: 'Picotement bouche / lèvres',
+  salivation_anormale: 'Salivation anormale',
+  troubles_sommeil: 'Troubles du sommeil',
+  // ---- Signes d'alerte (urgents) ----
+  gonflement_gorge_langue: 'Gonflement gorge / langue',
+  difficulte_avaler: 'Difficulté à avaler',
+  chute_tension_malaise: 'Chute de tension / malaise',
+  urticaire_generalisee_aggravation: 'Urticaire généralisée qui s’aggrave',
+};
+
+/** Libellés des catégories de symptômes (regroupement de la grille). */
+export const SYMPTOM_CATEGORY_LABEL: Record<SymptomCategory, string> = {
+  digestif: 'Digestif',
+  cutane: 'Cutané',
+  neuro: 'Neurologique',
+  cardiovasculaire: 'Cardiovasculaire',
+  orl_respiratoire: 'ORL / respiratoire',
+  general: 'Général',
+  alerte: "Signes d'alerte",
+};
+
+/** Ordre d'affichage des catégories (digestif d'abord, alerte en dernier). */
+export const SYMPTOM_CATEGORY_ORDER: SymptomCategory[] = [
+  'digestif',
+  'cutane',
+  'neuro',
+  'cardiovasculaire',
+  'orl_respiratoire',
+  'general',
+  'alerte',
+];
+
+/** Couleur d'accent par catégorie (variables `--color-*` de @theme). */
+export const SYMPTOM_CATEGORY_COLOR: Record<SymptomCategory, string> = {
+  digestif: 'var(--color-modere)',
+  cutane: 'var(--color-leger)',
+  neuro: 'var(--color-modere)',
+  cardiovasculaire: 'var(--color-severe)',
+  orl_respiratoire: 'var(--color-leger)',
+  general: 'var(--color-absent)',
+  alerte: 'var(--color-severe)',
+};
+
+/** Système corporel de chaque symptôme (regroupement + croisement amines). */
+export const SYMPTOM_CATEGORY: Record<SymptomKey, SymptomCategory> = {
+  // Digestif
+  ballonnements: 'digestif',
+  gaz: 'digestif',
+  douleurs_abdo: 'digestif',
+  reflux: 'digestif',
+  diarrhee: 'digestif',
+  constipation: 'digestif',
+  nausees: 'digestif',
+  trop_plein: 'digestif',
+  // Cutané
+  demangeaisons: 'cutane',
+  demangeaisons_visage_cou: 'cutane',
+  demangeaisons_paumes_plantes: 'cutane',
+  urticaire: 'cutane',
+  rougeurs: 'cutane',
+  chaleur_cutanee: 'cutane',
+  oedeme_leger: 'cutane',
+  // Neuro
+  maux_de_tete: 'neuro',
+  migraine: 'neuro',
+  vertiges: 'neuro',
+  fatigue_apres_repas: 'neuro',
+  brouillard_mental: 'neuro',
+  // Cardiovasculaire
+  palpitations: 'cardiovasculaire',
+  hypotension: 'cardiovasculaire',
+  hypertension_soudaine: 'cardiovasculaire',
+  bouffee_chaleur_pouls: 'cardiovasculaire',
+  // ORL / respiratoire
+  nez_qui_coule: 'orl_respiratoire',
+  eternuements: 'orl_respiratoire',
+  toux: 'orl_respiratoire',
+  gorge_qui_gratte: 'orl_respiratoire',
+  difficulte_respiratoire: 'orl_respiratoire',
+  // Général
+  envie_sucre: 'general',
+  mycose_buccale: 'general',
+  malaise_general: 'general',
+  anxiete_soudaine: 'general',
+  picotement_bouche_levres: 'general',
+  salivation_anormale: 'general',
+  troubles_sommeil: 'general',
+  // Signes d'alerte
+  gonflement_gorge_langue: 'alerte',
+  difficulte_avaler: 'alerte',
+  chute_tension_malaise: 'alerte',
+  urticaire_generalisee_aggravation: 'alerte',
 };
 
 /** Couleurs (variables CSS de @theme) par intensité. */

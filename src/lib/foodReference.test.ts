@@ -73,6 +73,27 @@ describe('buildFoodReference', () => {
     expect(entry.amines?.group).toBe('fromage');
   });
 
+  it('exporte les amines au schéma public (détail par amine + noms explicites)', () => {
+    const [entry] = buildFoodReference([{ name: 'Roquefort' }], now).foods;
+    // Détail par amine présent
+    expect(entry.amines?.histamine).toBe('high');
+    expect(entry.amines?.tyramine).toBe('high');
+    expect(entry.amines?.fermented).toBe(true);
+  });
+
+  it('traduit liberator/daoBlocker vers histamineLiberator/daoInhibitor', () => {
+    // "vin rouge" : daoBlocker interne → daoInhibitor à l'export ; pas de flag interne resté brut
+    const [entry] = buildFoodReference([{ name: 'Vin rouge' }], now).foods;
+    const a = entry.amines as unknown as Record<string, unknown>;
+    expect(a.daoInhibitor).toBe(true);
+    expect(a.daoBlocker).toBeUndefined(); // le nom interne ne fuit pas
+    // Chocolat = histamino-libérateur
+    const [choc] = buildFoodReference([{ name: 'Chocolat' }], now).foods;
+    const ca = choc.amines as unknown as Record<string, unknown>;
+    expect(ca.histamineLiberator).toBe(true);
+    expect(ca.liberator).toBeUndefined();
+  });
+
   it('n’ajoute pas d’amines pour un aliment inconnu du dictionnaire', () => {
     const [entry] = buildFoodReference([{ name: 'Aliment martien' }], now).foods;
     expect(entry.amines).toBeUndefined();

@@ -26,7 +26,7 @@ Tu ne donnes pas de diagnostic médical ; tes notes restent des repères génér
 
 function userPrompt(name: string, profileContext?: string, details?: string): string {
   return `Analyse l'aliment suivant : « ${name} ».
-${details ? `\nInformations produit (issues de l'emballage, à prendre en compte pour juger les FODMAP/sucres/additifs) : ${details}\n` : ''}
+${details ? `\nInformations produit (issues de l'emballage : ingrédients, marque). À exploiter pour juger les FODMAP/sucres/additifs ET les amines biogènes — repère dans les ingrédients tout ce qui est fermenté/affiné (fromage affiné, charcuterie, sauce soja, miso, choucroute, vinaigre, levure ou extrait de levure), le poisson (surtout semi-conserve/conserve), l'alcool, le cacao, et les additifs/arômes histamino-libérateurs, pour renseigner le bloc "amines" : ${details}\n` : ''}
 Renvoie STRICTEMENT cet objet JSON (mêmes clés, mêmes valeurs autorisées) :
 {
   "name": "nom court et normalisé de l'aliment, en français",
@@ -40,12 +40,12 @@ Renvoie STRICTEMENT cet objet JSON (mêmes clés, mêmes valeurs autorisées) :
   },
   "sibo": { "verdict": "favorable | attention | eviter", "note": "1 phrase max, en français" },
   "candida": { "verdict": "favorable | attention | eviter", "note": "1 phrase max, en français" },
-  "amines": { "level": "low | moderate | high", "liberator": true/false (l'aliment libère l'histamine endogène chez les personnes sensibles), "daoBlocker": true/false (freine la DAO, l'enzyme qui dégrade l'histamine), "tolerance": "free | moderate | avoid (quelle proportion une personne sensible peut consommer sans effet notable)", "toleranceNote": "précision de portion tolérée, ex. « 1 tranche fine », « ½ tomate mûre », ou \\"\\" si non pertinent", "note": "amines biogènes/histamine, 1 phrase ; tiens compte de la fermentation/affinage et de la fraîcheur" },
-  "safePortion": "portion habituellement tolérée en phase pauvre en FODMAP (ex. « 1/2 tasse, 75 g »), ou \\"\\" si non pertinent",
+  "amines": { "level": "low | moderate | high (niveau global d'amines biogènes)", "histamine": "low | moderate | high (teneur en histamine)", "tyramine": "low | moderate | high (teneur en tyramine)", "putrescineCadaverine": "low | moderate | high (putrescine/cadavérine, potentialisent la DAO)", "histamineLiberator": true/false (déclenche la libération d'histamine endogène, même sans en contenir), "daoInhibitor": true/false (freine la DAO, l'enzyme qui dégrade l'histamine), "maoInhibitor": true/false (freine la MAO, favorise l'accumulation de tyramine), "fermented": true/false (fermenté ou affiné), "freshnessDependent": true/false (teneur dépendante de la fraîcheur/conservation), "tolerance": "free | moderate | avoid (quelle proportion une personne sensible peut consommer sans effet notable)", "toleranceNote": "précision de portion tolérée, ex. « 1 tranche fine », « ½ tomate mûre », ou \\"\\" si non pertinent", "note": "amines biogènes, 1 phrase ; précise quelle amine est en cause et tiens compte de la fermentation/affinage et de la fraîcheur" },
+  "safePortion": "portion habituellement tolérée (ex. « 1/2 tasse, 75 g »), ou \\"\\" si non pertinent",
   "summary": "synthèse en 1 à 2 phrases, en français",
   "tips": ["1 à 3 conseils courts en français"]
 }
-${profileContext ? `\nContexte du profil de la personne (à prendre en compte dans les notes et conseils) : ${profileContext}` : ''}`;
+IMPORTANT : si l'aliment est riche en amines biogènes, histamino-libérateur, ou inhibiteur de la DAO ou de la MAO, alors "safePortion", "summary" et "tips" DOIVENT en tenir compte (mentionner l'amine concernée, la portion prudente, la fraîcheur).${profileContext ? `\nContexte du profil de la personne (à prendre en compte dans les notes et conseils) : ${profileContext}` : ''}`;
 }
 
 // ---- Validation / coercition ----
@@ -62,24 +62,52 @@ function coerceAmineLevel(v: unknown): AmineLevel {
   return AMINE_LEVELS.includes(v as AmineLevel) ? (v as AmineLevel) : 'unknown';
 }
 
-/** Coerce un bloc amines biogènes ; renvoie undefined si rien d'exploitable. */
+/** Niveau par amine : ajouté seulement s'il parse en low/moderate/high (jamais 'unknown'). */
+function coerceAmineDetail(v: unknown): AmineLevel | undefined {
+  const lvl = coerceAmineLevel(v);
+  return lvl === 'unknown' ? undefined : lvl;
+}
+
+/**
+ * Coerce un bloc amines biogènes ; renvoie undefined si rien d'exploitable.
+ * Le schéma « public » (prompts / import / export) nomme les flags
+ * `histamineLiberator` / `daoInhibitor` ; le stockage interne garde
+ * `liberator` / `daoBlocker`. On accepte donc les deux (alias).
+ */
 function coerceAmines(v: unknown): AmineInfo | undefined {
   if (!v || typeof v !== 'object') return undefined;
   const o = v as Record<string, unknown>;
   const info: AmineInfo = { level: coerceAmineLevel(o.level) };
-  if (o.liberator === true) info.liberator = true;
-  if (o.daoBlocker === true) info.daoBlocker = true;
+  // Détail par amine
+  const histamine = coerceAmineDetail(o.histamine);
+  if (histamine) info.histamine = histamine;
+  const tyramine = coerceAmineDetail(o.tyramine);
+  if (tyramine) info.tyramine = tyramine;
+  const putrescineCadaverine = coerceAmineDetail(o.putrescineCadaverine);
+  if (putrescineCadaverine) info.putrescineCadaverine = putrescineCadaverine;
+  // Mécanismes (alias publics acceptés)
+  if (o.liberator === true || o.histamineLiberator === true) info.liberator = true;
+  if (o.daoBlocker === true || o.daoInhibitor === true) info.daoBlocker = true;
+  if (o.maoInhibitor === true) info.maoInhibitor = true;
+  if (o.fermented === true) info.fermented = true;
+  if (o.freshnessDependent === true) info.freshnessDependent = true;
   if (AMINE_GROUPS.includes(o.group as AmineGroup)) info.group = o.group as AmineGroup;
   if (AMINE_TOLERANCES.includes(o.tolerance as AmineTolerance)) info.tolerance = o.tolerance as AmineTolerance;
   const toleranceNote = coerceString(o.toleranceNote);
   if (toleranceNote) info.toleranceNote = toleranceNote;
   const note = coerceString(o.note);
   if (note) info.note = note;
-  // Rien d'utile (niveau inconnu et aucun flag/note) → on n'ajoute pas le bloc.
+  // Rien d'utile (niveau inconnu et aucun détail/flag/note) → on n'ajoute pas le bloc.
   if (
     info.level === 'unknown' &&
+    !info.histamine &&
+    !info.tyramine &&
+    !info.putrescineCadaverine &&
     !info.liberator &&
     !info.daoBlocker &&
+    !info.maoInhibitor &&
+    !info.fermented &&
+    !info.freshnessDependent &&
     !info.group &&
     !info.tolerance &&
     !info.toleranceNote &&

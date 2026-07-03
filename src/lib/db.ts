@@ -195,7 +195,10 @@ export async function getFoodInsight(key: string): Promise<FoodInsight | undefin
 }
 
 export async function putFoodInsight(insight: FoodInsight): Promise<void> {
-  await db.foodInsights.put(insight);
+  // Complète le profil amines depuis le dictionnaire embarqué quand l'analyse
+  // (IA / import / scan) ne l'a pas renseigné et que l'aliment est connu — ainsi
+  // les amines sont toujours prises en compte, même sans le backfill manuel.
+  await db.foodInsights.put(withDictionaryAmines(insight));
 }
 
 export async function getAllFoodInsights(): Promise<FoodInsight[]> {

@@ -68,8 +68,8 @@ src/
     dayAnalysisExport.ts # formatDayAnalysis (texte) + partage natif (repli presse-papiers) + téléchargement
     journalSearch.ts  # recherche dans le journal (aliments / symptômes / notes)
     aggregates.ts     # stats hebdo + séries pour graphes
-    biogenicAmines.ts # amines biogènes (histamine…) : classifyAmines + charge journalière dayAmineLoad + détection de combinaison
-    amineCorrelation.ts # corrélation jours à charge amines élevée ↔ symptômes histaminiques (garde-fou conservateur)
+    biogenicAmines.ts # amines biogènes : classifyAmines (profil détaillé par amine histamine/tyramine/putrescine + daoBlocker/maoInhibitor/liberator/fermented/freshnessDependent), charge globale dayAmineLoad + par amine dayAmineByType + combinaison
+    amineCorrelation.ts # corrélations charge amines ↔ symptômes : globale (amineSymptomCorrelation) + fine par type (amineTypeCorrelation, patterns histaminique/tyraminique via typicalAmine) — garde-fous conservateurs
     nutrition.ts      # détection de carence (pure) : apports CIQUAL vs ANR, bandes, garde-fou de couverture + rankSourcesFor
     foodReference.ts  # buildFoodReference + downloadFoodReference (export du catalogue au format Claude Web, avec amines)
     db.ts             # Dexie v8 : days/meta/foodInsights/dayAnalyses/symptomNotes/organNotes/favorites/treatments/reintroChallenges/mealTemplates/periodAnalyses, export/import, config IA
@@ -90,6 +90,7 @@ src/
     satietyCorrelation.ts # courbe moyenne + regroupement par catégorie / niveau FODMAP (corrélation locale)
     satietyDuration.ts # durée de satiété mesurée (retour de la faim) + attendue (composition) + sync Notes du jour
     mealTags.ts       # tags de composition d'un repas (protéiné/fibres/sucré) : libellés, couleurs, parsing
+    symptomCatalog.ts # catalogue symptômes : catégorie par système (constants) + méta amine (typicalAmine/urgent/onset) + groupement (symptomsByCategory) — socle du croisement amine↔symptôme
     ai/               # couche IA (OpenRouter), optionnelle
       openrouter.ts   # client : fetchFreeModels, chatJSON (parse JSON robuste)
       foodInsight.ts  # prompt + analyzeFood + buildFoodInsight (réutilisé par l'import) + deriveCategory

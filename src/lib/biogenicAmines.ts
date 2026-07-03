@@ -50,6 +50,10 @@ export const AMINE_TOLERANCE_COLOR: Record<AmineTolerance, string> = {
   avoid: 'var(--color-severe)',
 };
 
+/** Les amines détaillées suivies par aliment (clés de `AmineInfo`). */
+export type AmineType = 'histamine' | 'tyramine' | 'putrescineCadaverine';
+export const AMINE_TYPES: AmineType[] = ['histamine', 'tyramine', 'putrescineCadaverine'];
+
 /** Portion tolérée par défaut selon le niveau (dérivation quand non précisée). */
 const LEVEL_TO_TOLERANCE: Record<AmineLevel, AmineTolerance | undefined> = {
   low: 'free',
@@ -89,10 +93,37 @@ export function amineBadge(info: AmineInfo): {
   }
   const tol = amineTolerance(info);
   const parts = [`Amines biogènes (histamine…) : ${AMINE_LEVEL_LABEL[info.level].toLowerCase()}`];
+  const dominant = dominantAmine(info);
+  if (dominant) parts.push(`surtout ${dominant}`);
   if (info.daoBlocker) parts.push('freine la DAO');
+  if (info.maoInhibitor) parts.push('inhibe la MAO');
   if (info.liberator) parts.push('histamino-libérateur');
+  if (info.fermented) parts.push('fermenté/affiné');
+  if (info.freshnessDependent) parts.push('dépend de la fraîcheur');
   if (tol) parts.push(`consommation : ${AMINE_TOLERANCE_LABEL[tol.level].toLowerCase()}${tol.note ? ` (${tol.note})` : ''}`);
   return { color, label, title: parts.join(' · '), portion: tol?.note };
+}
+
+/** Libellés des amines détaillées (pour l'affichage). */
+export const AMINE_TYPE_LABEL: Record<AmineType, string> = {
+  histamine: 'Histamine',
+  tyramine: 'Tyramine',
+  putrescineCadaverine: 'Putrescine / cadavérine',
+};
+
+/**
+ * Amine détaillée dominante d'un profil (le plus haut niveau parmi
+ * histamine/tyramine/putrescine), ou `undefined` si aucun détail n'est fourni.
+ */
+export function dominantAmine(info: AmineInfo): string | undefined {
+  let best: { type: AmineType; rank: number } | undefined;
+  for (const type of AMINE_TYPES) {
+    const lvl = info[type];
+    if (!lvl || lvl === 'unknown') continue;
+    const rank = LEVEL_RANK[lvl];
+    if (!best || rank > best.rank) best = { type, rank };
+  }
+  return best ? AMINE_TYPE_LABEL[best.type].toLowerCase() : undefined;
 }
 
 const H = (level: AmineLevel, extra: Omit<AmineInfo, 'level'> = {}): AmineInfo => ({ level, ...extra });
@@ -103,94 +134,108 @@ const H = (level: AmineLevel, extra: Omit<AmineInfo, 'level'> = {}): AmineInfo =
  */
 const DICTIONARY: Record<string, AmineInfo> = {
   // ---- ÉLEVÉ (rouge) ----
-  // Fromages affinés / fermentés
-  'fromage affine': H('high', { group: 'fromage' }),
-  parmesan: H('high', { group: 'fromage' }),
-  comte: H('high', { group: 'fromage' }),
-  roquefort: H('high', { group: 'fromage' }),
-  'fromage bleu': H('high', { group: 'fromage' }),
-  bleu: H('high', { group: 'fromage' }),
-  cheddar: H('high', { group: 'fromage' }),
-  gruyere: H('high', { group: 'fromage' }),
-  emmental: H('high', { group: 'fromage' }),
-  gouda: H('high', { group: 'fromage' }),
-  'vieux fromage': H('high', { group: 'fromage' }),
-  // Charcuteries
-  charcuterie: H('high', { group: 'charcuterie' }),
-  saucisson: H('high', { group: 'charcuterie' }),
-  'jambon sec': H('high', { group: 'charcuterie' }),
-  'jambon cru': H('high', { group: 'charcuterie' }),
-  salami: H('high', { group: 'charcuterie' }),
-  chorizo: H('high', { group: 'charcuterie' }),
-  pate: H('high', { group: 'charcuterie', note: 'Pâté/terrine industriels.' }),
-  // Boissons fermentées
-  vin: H('high', { group: 'alcool', daoBlocker: true }),
-  'vin rouge': H('high', { group: 'alcool', daoBlocker: true, note: 'Le plus riche.' }),
-  'vin blanc': H('high', { group: 'alcool', daoBlocker: true }),
-  champagne: H('high', { group: 'alcool', daoBlocker: true }),
-  biere: H('high', { group: 'alcool', daoBlocker: true }),
-  cidre: H('high', { group: 'alcool', daoBlocker: true }),
-  kombucha: H('high', { group: 'fermente' }),
+  // Fromages affinés / fermentés (histamine + tyramine ↑ avec l'affinage)
+  'fromage affine': H('high', { group: 'fromage', fermented: true, histamine: 'high', tyramine: 'high' }),
+  parmesan: H('high', { group: 'fromage', fermented: true, histamine: 'high', tyramine: 'high', putrescineCadaverine: 'low' }),
+  comte: H('high', { group: 'fromage', fermented: true, histamine: 'moderate', tyramine: 'moderate', putrescineCadaverine: 'low' }),
+  roquefort: H('high', { group: 'fromage', fermented: true, histamine: 'high', tyramine: 'high', putrescineCadaverine: 'moderate' }),
+  'fromage bleu': H('high', { group: 'fromage', fermented: true, histamine: 'high', tyramine: 'high', putrescineCadaverine: 'moderate' }),
+  bleu: H('high', { group: 'fromage', fermented: true, histamine: 'high', tyramine: 'high', putrescineCadaverine: 'moderate' }),
+  cheddar: H('high', { group: 'fromage', fermented: true, histamine: 'high', tyramine: 'high' }),
+  gruyere: H('high', { group: 'fromage', fermented: true, histamine: 'moderate', tyramine: 'high' }),
+  emmental: H('high', { group: 'fromage', fermented: true, histamine: 'moderate', tyramine: 'moderate' }),
+  gouda: H('high', { group: 'fromage', fermented: true, histamine: 'moderate', tyramine: 'high' }),
+  'vieux fromage': H('high', { group: 'fromage', fermented: true, histamine: 'high', tyramine: 'high' }),
+  // Mozzarella fraîche : jeune, non affinée → bien tolérée
+  'mozzarella fraiche': H('low', { group: 'fromage', histamine: 'low', tyramine: 'low' }),
+  mozzarella: H('low', { group: 'fromage', histamine: 'low', tyramine: 'low' }),
+  // Charcuteries (fermentées / séchées)
+  charcuterie: H('high', { group: 'charcuterie', fermented: true, histamine: 'moderate', tyramine: 'moderate', putrescineCadaverine: 'moderate' }),
+  saucisson: H('high', { group: 'charcuterie', fermented: true, histamine: 'moderate', tyramine: 'moderate', putrescineCadaverine: 'moderate' }),
+  'jambon sec': H('high', { group: 'charcuterie', fermented: true, histamine: 'moderate', tyramine: 'moderate', putrescineCadaverine: 'low' }),
+  'jambon cru': H('high', { group: 'charcuterie', fermented: true, histamine: 'moderate', tyramine: 'moderate', putrescineCadaverine: 'low' }),
+  salami: H('high', { group: 'charcuterie', fermented: true, histamine: 'moderate', tyramine: 'moderate', putrescineCadaverine: 'moderate' }),
+  chorizo: H('high', { group: 'charcuterie', fermented: true, histamine: 'moderate', tyramine: 'moderate', putrescineCadaverine: 'moderate' }),
+  pate: H('high', { group: 'charcuterie', note: 'Pâté/terrine industriels.', histamine: 'moderate', tyramine: 'low' }),
+  // Jambon cuit frais : bien toléré s'il est frais
+  'jambon cuit': H('low', { group: 'charcuterie', freshnessDependent: true, histamine: 'low' }),
+  // Boissons fermentées (alcool = freine la DAO)
+  vin: H('high', { group: 'alcool', daoBlocker: true, fermented: true, histamine: 'moderate', tyramine: 'moderate' }),
+  'vin rouge': H('high', { group: 'alcool', daoBlocker: true, fermented: true, histamine: 'moderate', tyramine: 'moderate', note: 'Le plus riche.' }),
+  'vin blanc': H('high', { group: 'alcool', daoBlocker: true, fermented: true, histamine: 'low', tyramine: 'low' }),
+  champagne: H('high', { group: 'alcool', daoBlocker: true, fermented: true, histamine: 'moderate', tyramine: 'low' }),
+  biere: H('high', { group: 'alcool', daoBlocker: true, fermented: true, histamine: 'moderate', tyramine: 'low' }),
+  cidre: H('high', { group: 'alcool', daoBlocker: true, fermented: true, histamine: 'moderate', tyramine: 'low' }),
+  kombucha: H('high', { group: 'fermente', fermented: true, histamine: 'moderate' }),
   alcool: H('high', { group: 'alcool', daoBlocker: true }),
-  // Poissons à risque (surtout mal conservés / en boîte)
-  thon: H('high', { group: 'poisson', note: 'Risque ↑ si chaîne du froid rompue / en boîte.' }),
-  maquereau: H('high', { group: 'poisson', note: 'Histamine monte vite hors froid.' }),
-  sardine: H('high', { group: 'poisson' }),
-  anchois: H('high', { group: 'poisson' }),
+  // Poissons à risque (surtout mal conservés / en boîte) — dépend fortement de la fraîcheur
+  thon: H('high', { group: 'poisson', freshnessDependent: true, histamine: 'moderate', putrescineCadaverine: 'low', note: 'Risque ↑ si chaîne du froid rompue / en boîte.' }),
+  maquereau: H('high', { group: 'poisson', freshnessDependent: true, histamine: 'moderate', putrescineCadaverine: 'low', note: 'Histamine monte vite hors froid.' }),
+  sardine: H('high', { group: 'poisson', freshnessDependent: true, histamine: 'moderate' }),
+  anchois: H('high', { group: 'poisson', fermented: true, histamine: 'high', tyramine: 'low', putrescineCadaverine: 'moderate' }),
   // Aliments fermentés
-  choucroute: H('high', { group: 'fermente' }),
-  kimchi: H('high', { group: 'fermente' }),
-  miso: H('high', { group: 'fermente' }),
-  'sauce soja': H('high', { group: 'fermente' }),
+  choucroute: H('high', { group: 'fermente', fermented: true, histamine: 'high', tyramine: 'low', putrescineCadaverine: 'low' }),
+  kimchi: H('high', { group: 'fermente', fermented: true, histamine: 'moderate', tyramine: 'low', putrescineCadaverine: 'low' }),
+  miso: H('high', { group: 'fermente', fermented: true, histamine: 'moderate', tyramine: 'moderate' }),
+  'sauce soja': H('high', { group: 'fermente', fermented: true, histamine: 'moderate', tyramine: 'moderate' }),
   // Levures
-  'levure alimentaire': H('high', { group: 'fermente' }),
-  'levure de biere': H('high', { group: 'fermente' }),
+  'levure alimentaire': H('high', { group: 'fermente', fermented: true, histamine: 'low', tyramine: 'low' }),
+  'levure de biere': H('high', { group: 'fermente', fermented: true, histamine: 'low', tyramine: 'low' }),
+  levure: H('moderate', { group: 'fermente', fermented: true, histamine: 'low', tyramine: 'low', note: 'Pain / produits levés.' }),
   // Vinaigres (fermentés) — explicites pour primer sur « cidre »/« vin »
-  vinaigre: H('high', { group: 'fermente', note: 'Fermenté : riche en amines.' }),
-  'vinaigre de cidre': H('high', { group: 'fermente', note: 'Fermenté : riche en amines.' }),
-  'vinaigre balsamique': H('high', { group: 'fermente' }),
+  vinaigre: H('high', { group: 'fermente', fermented: true, histamine: 'moderate', note: 'Fermenté : riche en amines.' }),
+  'vinaigre de cidre': H('high', { group: 'fermente', fermented: true, histamine: 'moderate', note: 'Fermenté : riche en amines.' }),
+  'vinaigre balsamique': H('high', { group: 'fermente', fermented: true, histamine: 'moderate' }),
 
   // ---- MODÉRÉ (ambre) ----
-  'pain au levain': H('moderate', { group: 'fermente', note: 'Variable selon la fermentation.' }),
-  'pain industriel': H('moderate'),
+  'pain au levain': H('moderate', { group: 'fermente', fermented: true, histamine: 'low', tyramine: 'low', note: 'Variable selon la fermentation.' }),
+  'pain industriel': H('moderate', { fermented: true }),
   chocolat: H('moderate', {
     liberator: true,
     daoBlocker: true,
+    fermented: true,
+    histamine: 'low',
+    tyramine: 'low',
     note: 'Cacao : libérateur + freine la DAO.',
     toleranceNote: '1 à 2 carrés de chocolat noir',
   }),
-  cacao: H('moderate', { liberator: true, daoBlocker: true }),
+  cacao: H('moderate', { liberator: true, daoBlocker: true, fermented: true, histamine: 'low', tyramine: 'low' }),
   cafe: H('moderate', { daoBlocker: true }),
-  'the noir': H('moderate', { daoBlocker: true }),
+  'the noir': H('moderate', { daoBlocker: true, fermented: true }),
   the: H('moderate', { daoBlocker: true }),
-  epinard: H('moderate', { note: 'Riche en histamine/putrescine.', toleranceNote: 'une petite portion, plutôt cuite' }),
-  tomate: H('moderate', { liberator: true, note: 'Surtout très mûre ; aussi libératrice.', toleranceNote: '½ tomate bien mûre' }),
-  aubergine: H('moderate'),
-  avocat: H('moderate', { note: 'Très mûr = élevé.', toleranceNote: '¼ à ½ avocat pas trop mûr' }),
-  banane: H('moderate', { liberator: true, note: 'Très mûre = élevé ; libératrice.', toleranceNote: '½ banane pas trop mûre' }),
+  epinard: H('moderate', { histamine: 'moderate', note: 'Riche en histamine/putrescine.', toleranceNote: 'une petite portion, plutôt cuite' }),
+  tomate: H('moderate', { liberator: true, histamine: 'low', putrescineCadaverine: 'low', note: 'Surtout très mûre ; aussi libératrice.', toleranceNote: '½ tomate bien mûre' }),
+  aubergine: H('moderate', { histamine: 'moderate' }),
+  avocat: H('moderate', { freshnessDependent: true, tyramine: 'low', putrescineCadaverine: 'moderate', note: 'Très mûr = élevé.', toleranceNote: '¼ à ½ avocat pas trop mûr' }),
+  banane: H('moderate', { liberator: true, freshnessDependent: true, tyramine: 'low', putrescineCadaverine: 'low', note: 'Très mûre = élevé ; libératrice.', toleranceNote: '½ banane pas trop mûre' }),
   'jus de fruits': H('moderate', { note: 'Industriels / stockés longtemps.' }),
-  'conserve de poisson': H('moderate', { group: 'poisson' }),
-  'poisson en boite': H('moderate', { group: 'poisson' }),
+  'conserve de poisson': H('moderate', { group: 'poisson', freshnessDependent: true, histamine: 'moderate' }),
+  'poisson en boite': H('moderate', { group: 'poisson', freshnessDependent: true, histamine: 'moderate' }),
   // Histamino-libérateurs notoires (teneur faible mais déclenchent)
   fraise: H('moderate', { liberator: true, note: 'Histamino-libératrice.' }),
-  agrumes: H('moderate', { liberator: true }),
-  citron: H('moderate', { liberator: true }),
-  orange: H('moderate', { liberator: true }),
+  agrumes: H('moderate', { liberator: true, putrescineCadaverine: 'low' }),
+  citron: H('moderate', { liberator: true, putrescineCadaverine: 'low' }),
+  orange: H('moderate', { liberator: true, putrescineCadaverine: 'low' }),
   ananas: H('moderate', { liberator: true }),
-  'fruits de mer': H('moderate', { group: 'poisson', liberator: true }),
-  crustaces: H('moderate', { group: 'poisson', liberator: true }),
-  crevette: H('moderate', { group: 'poisson', liberator: true }),
+  'fruit de la passion': H('moderate', { liberator: true, maoInhibitor: true, note: 'Libérateur + inhibiteur de la MAO.' }),
+  'fruits de mer': H('moderate', { group: 'poisson', liberator: true, freshnessDependent: true }),
+  crustaces: H('moderate', { group: 'poisson', liberator: true, freshnessDependent: true }),
+  crevette: H('moderate', { group: 'poisson', liberator: true, freshnessDependent: true }),
   noix: H('moderate', { liberator: true }),
   cacahuete: H('moderate', { liberator: true }),
   additifs: H('moderate', { liberator: true }),
+  // Inhibiteurs de la MAO (freinent la dégradation de la tyramine)
+  reglisse: H('moderate', { maoInhibitor: true, note: 'Inhibiteur de la MAO.' }),
+  curcuma: H('low', { maoInhibitor: true, note: 'Inhibiteur de la MAO (effet modéré).' }),
 
   // ---- FAIBLE (vert) — bien tolérés s'ils sont frais ----
-  'viande fraiche': H('low', { note: 'Très récemment cuite.' }),
-  boeuf: H('low', { note: 'Frais ; éviter mijoté/réchauffé longuement.' }),
-  poulet: H('low', { note: 'Frais.' }),
-  dinde: H('low'),
-  'poisson frais': H('low', { group: 'poisson', note: 'Très frais ou congelé dès la pêche.' }),
-  oeuf: H('low', { note: 'Le blanc cru peut être libérateur.' }),
+  'viande fraiche': H('low', { freshnessDependent: true, note: 'Très récemment cuite.' }),
+  boeuf: H('low', { freshnessDependent: true, note: 'Frais ; éviter mijoté/réchauffé longuement.' }),
+  poulet: H('low', { freshnessDependent: true, note: 'Frais.' }),
+  dinde: H('low', { freshnessDependent: true }),
+  'poisson frais': H('low', { group: 'poisson', freshnessDependent: true, histamine: 'low', note: 'Très frais ou congelé dès la pêche.' }),
+  oeuf: H('low', { liberator: true, note: 'Le blanc cru peut être libérateur.' }),
+  'blanc oeuf': H('low', { liberator: true, note: 'Histamino-libérateur (cru).' }),
   courgette: H('low'),
   carotte: H('low'),
   brocoli: H('low'),
@@ -204,8 +249,8 @@ const DICTIONARY: Record<string, AmineInfo> = {
   pasteque: H('low'),
   riz: H('low'),
   quinoa: H('low'),
-  'pomme de terre': H('low'),
-  'lait frais': H('low', { note: 'Si toléré par ailleurs.' }),
+  'pomme de terre': H('low', { putrescineCadaverine: 'low' }),
+  'lait frais': H('low', { freshnessDependent: true, note: 'Si toléré par ailleurs.' }),
 };
 
 export function dictionaryAmineSize(): number {
@@ -259,6 +304,7 @@ export interface AmineLoad {
   highCount: number;
   liberators: number;
   daoBlockers: number;
+  maoInhibitors: number; // inhibiteurs de la MAO (accumulation de tyramine)
   /** Familles déclencheuses présentes parmi les aliments « élevés ». */
   groups: AmineGroup[];
   /** Combinaison à risque détectée (alcool + fromage/charcuterie/fermenté). */
@@ -270,15 +316,16 @@ const COMBO_PARTNERS: AmineGroup[] = ['fromage', 'charcuterie', 'fermente'];
 /**
  * Évalue la charge en amines biogènes d'un ensemble d'aliments (un repas, ou
  * toute une journée). Le score cumule les niveaux (modéré +1, élevé +3) plus un
- * bonus pour les libérateurs et les bloqueurs de DAO. La présence d'alcool AVEC
- * un fromage affiné / une charcuterie / un fermenté escalade en « élevé », même
- * si chaque aliment passe « à peu près » seul.
+ * bonus pour les libérateurs, les bloqueurs de DAO et les inhibiteurs de MAO.
+ * La présence d'alcool AVEC un fromage affiné / une charcuterie / un fermenté
+ * escalade en « élevé », même si chaque aliment passe « à peu près » seul.
  */
 export function dayAmineLoad(names: string[]): AmineLoad {
   let score = 0;
   let highCount = 0;
   let liberators = 0;
   let daoBlockers = 0;
+  let maoInhibitors = 0;
   const groups = new Set<AmineGroup>();
 
   for (const n of names) {
@@ -296,6 +343,11 @@ export function dayAmineLoad(names: string[]): AmineLoad {
       daoBlockers++;
       score += 1;
     }
+    if (info.maoInhibitor) {
+      maoInhibitors++;
+      // Effet modeste hors contexte médicamenteux (IMAO) : contribution minime.
+      score += 1;
+    }
   }
 
   const combo = groups.has('alcool') && COMBO_PARTNERS.some((g) => groups.has(g));
@@ -303,7 +355,43 @@ export function dayAmineLoad(names: string[]): AmineLoad {
   let band: AmineLoadBand = score >= 5 ? 'eleve' : score >= 2 ? 'modere' : 'faible';
   if (combo) band = 'eleve';
 
-  return { score, band, highCount, liberators, daoBlockers, groups: [...groups], combo };
+  return { score, band, highCount, liberators, daoBlockers, maoInhibitors, groups: [...groups], combo };
+}
+
+/** Charge par amine (score + bande) pour un ensemble d'aliments. */
+export interface AmineTypeLoad {
+  score: number;
+  band: AmineLoadBand;
+}
+
+/**
+ * Charge journalière détaillée PAR amine (histamine / tyramine / putrescine-
+ * cadavérine). Repli : l'axe histamine reprend le `level` global quand le détail
+ * `histamine` est absent (fiches n'ayant que le niveau global) ; les autres axes
+ * ne comptent que le détail explicite. Les histamino-libérateurs et les
+ * bloqueurs de DAO alourdissent l'axe histamine ; les inhibiteurs de MAO, l'axe
+ * tyramine. Sert au croisement fin amine↔symptôme (cf. amineCorrelation).
+ */
+export function dayAmineByType(names: string[]): Record<AmineType, AmineTypeLoad> {
+  const score: Record<AmineType, number> = { histamine: 0, tyramine: 0, putrescineCadaverine: 0 };
+
+  for (const n of names) {
+    const info = classifyAmines(n);
+    const histamine = info.histamine ?? info.level; // repli sur le niveau global
+    score.histamine += LEVEL_WEIGHT[histamine];
+    if (info.liberator) score.histamine += 1;
+    if (info.daoBlocker) score.histamine += 1;
+    if (info.tyramine) score.tyramine += LEVEL_WEIGHT[info.tyramine];
+    if (info.maoInhibitor) score.tyramine += 1;
+    if (info.putrescineCadaverine) score.putrescineCadaverine += LEVEL_WEIGHT[info.putrescineCadaverine];
+  }
+
+  const band = (s: number): AmineLoadBand => (s >= 5 ? 'eleve' : s >= 2 ? 'modere' : 'faible');
+  return {
+    histamine: { score: score.histamine, band: band(score.histamine) },
+    tyramine: { score: score.tyramine, band: band(score.tyramine) },
+    putrescineCadaverine: { score: score.putrescineCadaverine, band: band(score.putrescineCadaverine) },
+  };
 }
 
 /** Un aliment du jour qui contribue à la charge (avec son profil amines). */
@@ -320,6 +408,8 @@ export interface AmineBreakdown {
   daoBlockers: AmineContributor[];
   /** Aliments histamino-libérateurs. */
   liberators: AmineContributor[];
+  /** Aliments qui inhibent la MAO. */
+  maoInhibitors: AmineContributor[];
 }
 
 const LEVEL_RANK: Record<AmineLevel, number> = { high: 3, moderate: 2, low: 1, unknown: 0 };
@@ -334,6 +424,7 @@ export function amineBreakdown(names: string[]): AmineBreakdown {
   const contributors: AmineContributor[] = [];
   const daoBlockers: AmineContributor[] = [];
   const liberators: AmineContributor[] = [];
+  const maoInhibitors: AmineContributor[] = [];
 
   for (const name of names) {
     const key = normalize(name);
@@ -344,10 +435,11 @@ export function amineBreakdown(names: string[]): AmineBreakdown {
     if (info.level === 'high' || info.level === 'moderate') contributors.push(entry);
     if (info.daoBlocker) daoBlockers.push(entry);
     if (info.liberator) liberators.push(entry);
+    if (info.maoInhibitor) maoInhibitors.push(entry);
   }
 
   contributors.sort((a, b) => LEVEL_RANK[b.info.level] - LEVEL_RANK[a.info.level]);
-  return { load: dayAmineLoad(names), contributors, daoBlockers, liberators };
+  return { load: dayAmineLoad(names), contributors, daoBlockers, liberators, maoInhibitors };
 }
 
 export const AMINE_LOAD_LABEL: Record<AmineLoadBand, string> = {

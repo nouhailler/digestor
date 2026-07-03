@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import type { FoodInsight } from '../types';
-import { amineBreakdown, amineTolerance, classifyAmines, dayAmineLoad, withDictionaryAmines } from './biogenicAmines';
+import {
+  amineBadge,
+  amineBreakdown,
+  amineTolerance,
+  classifyAmines,
+  dayAmineByType,
+  dayAmineLoad,
+  dominantAmine,
+  withDictionaryAmines,
+} from './biogenicAmines';
 
 describe('classifyAmines', () => {
   it('classe les aliments fermentés/affinés en élevé', () => {
@@ -138,5 +147,57 @@ describe('amineBreakdown', () => {
   it('dédoublonne par nom normalisé', () => {
     const b = amineBreakdown(['Roquefort', 'roquefort', 'ROQUEFORT']);
     expect(b.contributors).toHaveLength(1);
+  });
+
+  it('liste les inhibiteurs de MAO', () => {
+    const b = amineBreakdown(['Curcuma', 'Réglisse', 'Riz']);
+    expect(b.maoInhibitors.map((c) => c.name).sort()).toEqual(['Curcuma', 'Réglisse']);
+    expect(b.load.maoInhibitors).toBe(2);
+  });
+});
+
+describe('détail par amine', () => {
+  it('classifyAmines porte le détail histamine/tyramine des fromages affinés', () => {
+    const roquefort = classifyAmines('roquefort');
+    expect(roquefort.histamine).toBe('high');
+    expect(roquefort.tyramine).toBe('high');
+    expect(roquefort.fermented).toBe(true);
+  });
+
+  it('marque les inhibiteurs de MAO et la dépendance à la fraîcheur', () => {
+    expect(classifyAmines('curcuma').maoInhibitor).toBe(true);
+    expect(classifyAmines('fruit de la passion').maoInhibitor).toBe(true);
+    expect(classifyAmines('thon').freshnessDependent).toBe(true);
+  });
+
+  it('dominantAmine renvoie l’amine la plus chargée', () => {
+    expect(dominantAmine(classifyAmines('roquefort'))).toBe('histamine'); // égalité → 1re rencontrée
+    expect(dominantAmine(classifyAmines('avocat'))).toBe('putrescine / cadavérine');
+    expect(dominantAmine({ level: 'high' })).toBeUndefined(); // aucun détail
+  });
+
+  it('amineBadge mentionne l’inhibition de la MAO', () => {
+    expect(amineBadge(classifyAmines('curcuma')).title).toMatch(/inhibe la MAO/i);
+  });
+});
+
+describe('dayAmineByType', () => {
+  it('sépare les axes histamine et tyramine', () => {
+    // roquefort : histamine high(3) + tyramine high(3) ; jambon sec : histamine mod(1) + tyramine mod(1)
+    const r = dayAmineByType(['roquefort', 'jambon sec']);
+    expect(r.histamine.score).toBe(3 + 1);
+    expect(r.tyramine.score).toBe(3 + 1);
+    expect(r.histamine.band).toBe('modere'); // 4 → modéré (< 5)
+  });
+
+  it('l’axe histamine reprend le niveau global quand le détail est absent', () => {
+    // "thon" : histamine détaillée modérée(1) ; "vin rouge" : histamine mod(1) + daoBlocker(+1)
+    const r = dayAmineByType(['vin rouge']);
+    expect(r.histamine.score).toBe(1 + 1); // moderate + daoBlocker
+  });
+
+  it('l’axe tyramine compte les inhibiteurs de MAO', () => {
+    const r = dayAmineByType(['curcuma']); // pas de tyramine détaillée mais maoInhibitor +1
+    expect(r.tyramine.score).toBe(1);
   });
 });

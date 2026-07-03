@@ -1,3 +1,15 @@
+import { SYMPTOM_LABELS } from './constants';
+import { symptomsByCategory } from './symptomCatalog';
+
+/**
+ * Liste des identifiants de symptômes autorisés, groupés par catégorie et
+ * dérivés du catalogue (SYMPTOM_ORDER + symptomCatalog) : reste automatiquement
+ * en phase quand on ajoute/retire un symptôme. Format : « Catégorie : id (Libellé), … ».
+ */
+const SYMPTOM_IDS_PROMPT = symptomsByCategory()
+  .map((g) => `  · ${g.label} : ${g.keys.map((k) => `${k} (${SYMPTOM_LABELS[k]})`).join(', ')}`)
+  .join('\n');
+
 /**
  * Prompt à coller dans un Projet Claude Web (claude.ai). L'utilisateur décrit
  * ses repas / symptômes à voix haute ; Claude renvoie le JSON à coller dans Digestor.
@@ -36,9 +48,9 @@ sinon de ta connaissance) :
 - "fodmaps" : niveaux par groupe — { "fructose", "lactose", "fructans", "gos", "polyols" } ∈ low|moderate|high.
 - "sibo" : { "verdict": "favorable|attention|eviter", "note": "1 phrase" }.
 - "candida" : { "verdict": "favorable|attention|eviter", "note": "1 phrase" }.
-- "amines" (amines biogènes / histamine) : { "level": "low|moderate|high", "liberator": true/false (libère l'histamine endogène), "daoBlocker": true/false (freine la DAO), "note": "1 phrase" }.
-  Élevé surtout pour les fermentés/affinés (fromages affinés, charcuterie sèche, vin, bière, choucroute, miso, sauce soja, kombucha) et les poissons à risque (thon, maquereau, sardine, anchois — pire si mal conservés / en boîte). Tiens compte de la fraîcheur et de la maturité (banane/avocat très mûrs = plus élevés).
-- "safePortion" : portion tolérée (optionnel), "summary" : 1 phrase (optionnel), "tips" : [conseils] (optionnel).
+- "amines" (amines biogènes) : { "level": "low|moderate|high" (global), "histamine": "low|moderate|high", "tyramine": "low|moderate|high", "putrescineCadaverine": "low|moderate|high", "histamineLiberator": true/false (déclenche la libération d'histamine endogène), "daoInhibitor": true/false (freine la DAO), "maoInhibitor": true/false (freine la MAO → accumulation de tyramine), "fermented": true/false, "freshnessDependent": true/false (teneur ∝ fraîcheur), "note": "1 phrase, précise l'amine en cause" }.
+  Élevé surtout pour les fermentés/affinés (fromages affinés, charcuterie sèche, vin, bière, choucroute, miso, sauce soja, kombucha) et les poissons à risque (thon, maquereau, sardine, anchois — pire si mal conservés / en boîte). La tyramine monte avec l'affinage (fromages, charcuterie). Inhibiteurs de MAO notables : réglisse, curcuma, fruit de la passion. Tiens compte de la fraîcheur et de la maturité (banane/avocat très mûrs = plus élevés).
+- "safePortion" : portion tolérée (optionnel), "summary" : 1 phrase (optionnel), "tips" : [conseils] (optionnel). Si l'aliment est riche en amines / libérateur / inhibiteur DAO ou MAO, ces trois champs DOIVENT en tenir compte.
 Si tu n'es pas sûr d'un champ, mets "unknown" (niveaux) ou "inconnu" (verdicts) plutôt que d'inventer.
 
 TAGS DE COMPOSITION (par repas, optionnel mais recommandé) — "tags" : liste parmi
@@ -47,9 +59,9 @@ satiété (protéiné/fibres → satiété longue ; sucré → courte). Ex. œuf
 viennoiserie + jus de fruit → ["sucre"]. N'ajoute que ce qui est réellement marquant dans le repas.
 
 SYMPTÔMES (optionnels, par jour) — objet "symptoms" : clé = identifiant exact, valeur ∈ absent|leger|modere|severe.
-Identifiants autorisés : ballonnements, gaz, douleurs_abdo, reflux, fatigue_apres_repas, envie_sucre,
-diarrhee, constipation, brouillard_mental, mycose_buccale, demangeaisons, urticaire, rougeurs,
-maux_de_tete, nausees.
+Identifiants autorisés (par système ; n'utilise que ce qui a été réellement évoqué) :
+${SYMPTOM_IDS_PROMPT}
+  Les symptômes « Signes d'alerte » servent au suivi a posteriori ; s'ils sont décrits comme actuels et graves, rappelle en UNE phrase de consulter en urgence.
 - "symptomTiming" : moment des symptômes, ex. "2 h après le dîner" (optionnel).
 
 TRANSIT & DIVERS (optionnels, par jour)
@@ -81,7 +93,7 @@ FORMAT DE SORTIE
               "fodmaps": { "fructose": "low", "lactose": "low", "fructans": "low", "gos": "low", "polyols": "low" },
               "sibo": { "verdict": "favorable|attention|eviter", "note": "" },
               "candida": { "verdict": "favorable|attention|eviter", "note": "" },
-              "amines": { "level": "low|moderate|high", "liberator": false, "daoBlocker": false, "note": "" },
+              "amines": { "level": "low|moderate|high", "histamine": "low|moderate|high", "tyramine": "low|moderate|high", "putrescineCadaverine": "low|moderate|high", "histamineLiberator": false, "daoInhibitor": false, "maoInhibitor": false, "fermented": false, "freshnessDependent": false, "note": "" },
               "safePortion": "",
               "summary": "",
               "tips": []

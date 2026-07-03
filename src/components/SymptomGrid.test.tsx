@@ -17,10 +17,12 @@ describe('cycleIntensity', () => {
 });
 
 describe('<SymptomGrid>', () => {
-  it('affiche les 12 symptômes', () => {
+  it('affiche les symptômes groupés + le bandeau des signes d’alerte', () => {
     render(<SymptomGrid symptoms={emptySymptoms()} editing={false} onCycle={() => {}} />);
     expect(screen.getByText('Ballonnements')).toBeTruthy();
     expect(screen.getByText('Nausées')).toBeTruthy();
+    // Section « Signes d'alerte » avec son bandeau d'avertissement.
+    expect(screen.getByText(/prise en charge médicale immédiate/)).toBeTruthy();
     expect(screen.queryAllByRole('button')).toHaveLength(0); // pas de bouton en lecture
   });
 
@@ -28,7 +30,7 @@ describe('<SymptomGrid>', () => {
     const onCycle = vi.fn();
     render(<SymptomGrid symptoms={emptySymptoms()} editing onCycle={onCycle} />);
     const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(SYMPTOM_ORDER.length);
+    expect(buttons).toHaveLength(SYMPTOM_ORDER.length); // un bouton par symptôme
     fireEvent.click(screen.getByText('Ballonnements'));
     expect(onCycle).toHaveBeenCalledWith('ballonnements');
   });

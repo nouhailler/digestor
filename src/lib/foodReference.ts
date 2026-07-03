@@ -1,6 +1,46 @@
-import type { AmineInfo, FodmapGroups, FodmapLevel, FoodCategory, FoodInsight, Verdict } from '../types';
+import type { AmineGroup, AmineInfo, AmineLevel, AmineTolerance, FodmapGroups, FodmapLevel, FoodCategory, FoodInsight, Verdict } from '../types';
 import { classifyFood } from './foodClassifier';
 import { classifyAmines } from './biogenicAmines';
+
+/**
+ * Profil amines tel qu'exporté (schéma « public » : noms explicites
+ * `daoInhibitor` / `histamineLiberator`). Le stockage interne (`AmineInfo`)
+ * garde `daoBlocker` / `liberator` ; `amineForExport` fait la traduction.
+ */
+export interface AmineExport {
+  level: AmineLevel;
+  histamine?: AmineLevel;
+  tyramine?: AmineLevel;
+  putrescineCadaverine?: AmineLevel;
+  histamineLiberator?: boolean;
+  daoInhibitor?: boolean;
+  maoInhibitor?: boolean;
+  fermented?: boolean;
+  freshnessDependent?: boolean;
+  group?: AmineGroup;
+  tolerance?: AmineTolerance;
+  toleranceNote?: string;
+  note?: string;
+}
+
+/** Traduit un profil amines interne vers le schéma public d'export. */
+function amineForExport(info: AmineInfo): AmineExport {
+  return {
+    level: info.level,
+    ...(info.histamine ? { histamine: info.histamine } : {}),
+    ...(info.tyramine ? { tyramine: info.tyramine } : {}),
+    ...(info.putrescineCadaverine ? { putrescineCadaverine: info.putrescineCadaverine } : {}),
+    ...(info.liberator ? { histamineLiberator: true } : {}),
+    ...(info.daoBlocker ? { daoInhibitor: true } : {}),
+    ...(info.maoInhibitor ? { maoInhibitor: true } : {}),
+    ...(info.fermented ? { fermented: true } : {}),
+    ...(info.freshnessDependent ? { freshnessDependent: true } : {}),
+    ...(info.group ? { group: info.group } : {}),
+    ...(info.tolerance ? { tolerance: info.tolerance } : {}),
+    ...(info.toleranceNote ? { toleranceNote: info.toleranceNote } : {}),
+    ...(info.note ? { note: info.note } : {}),
+  };
+}
 
 /**
  * Référentiel d'aliments exportable, au même format que
@@ -17,7 +57,7 @@ export interface FoodReferenceEntry {
   fodmaps: FodmapGroups;
   sibo: { verdict: Verdict; note: string };
   candida: { verdict: Verdict; note: string };
-  amines?: AmineInfo;
+  amines?: AmineExport;
   safePortion?: string;
   summary?: string;
   tips?: string[];
@@ -46,7 +86,7 @@ const LEGEND: Record<string, string> = {
   fodmaps: 'niveau par groupe : fructose, lactose, fructans, gos, polyols',
   verdict: 'favorable | attention | eviter | inconnu (selon SIBO / candidose)',
   amines:
-    'amines biogènes (histamine…) : level low|moderate|high, liberator (libère l’histamine), daoBlocker (freine la DAO), tolerance free|moderate|avoid (portion tolérable sans effet notable), toleranceNote (précision de portion), group, note',
+    'amines biogènes : level (global) + détail par amine histamine|tyramine|putrescineCadaverine ∈ low|moderate|high · histamineLiberator (déclenche l’histamine endogène) · daoInhibitor (freine la DAO) · maoInhibitor (freine la MAO → tyramine) · fermented · freshnessDependent (teneur ∝ fraîcheur) · tolerance free|moderate|avoid · toleranceNote · group · note',
 };
 
 /** Aliment du catalogue : nom affiché + éventuelle fiche analysée en cache. */
@@ -71,7 +111,7 @@ function entryFromInsight(name: string, ins: FoodInsight): FoodReferenceEntry {
     fodmaps: { ...ins.fodmaps },
     sibo: { verdict: ins.sibo.verdict, note: ins.sibo.note },
     candida: { verdict: ins.candida.verdict, note: ins.candida.note },
-    ...(amines ? { amines } : {}),
+    ...(amines ? { amines: amineForExport(amines) } : {}),
     ...(ins.safePortion ? { safePortion: ins.safePortion } : {}),
     ...(ins.summary ? { summary: ins.summary } : {}),
     ...(ins.tips.length ? { tips: [...ins.tips] } : {}),
@@ -97,7 +137,7 @@ function stubEntry(name: string): FoodReferenceEntry {
     fodmaps: { ...UNKNOWN_GROUPS },
     sibo: { verdict: 'inconnu', note: '' },
     candida: { verdict: 'inconnu', note: '' },
-    ...(amines ? { amines } : {}),
+    ...(amines ? { amines: amineForExport(amines) } : {}),
   };
 }
 
