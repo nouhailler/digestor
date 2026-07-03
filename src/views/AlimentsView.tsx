@@ -14,6 +14,7 @@ import {
   Star,
   StopCircle,
   Trash2,
+  Upload,
   Wand2,
 } from 'lucide-react';
 import type { FoodInsight } from '../types';
@@ -43,6 +44,7 @@ import { useAiActivity } from '../hooks/useAiActivity';
 import { FoodInsightSheet } from '../components/ai/FoodInsightSheet';
 import { MealSuggestionsSheet } from '../components/ai/MealSuggestionsSheet';
 import { ScanProductSheet } from '../components/ScanProductSheet';
+import { ImportFoodReferenceSheet } from '../components/ImportFoodReferenceSheet';
 import { TipBanner } from '../components/TipBanner';
 
 interface AlimentsViewProps {
@@ -79,6 +81,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   // Contexte produit (ingrédients/marque) d'un aliment scanné, injecté à l'analyse IA.
   const [selectedDetails, setSelectedDetails] = useState<string | undefined>(undefined);
   const [scanOpen, setScanOpen] = useState(false);
+  const [importRefOpen, setImportRefOpen] = useState(false);
   const [suggestionsOpen, setSuggestionsOpen] = useState(false);
   const [scope, setScope] = useState<'repas' | 'catalogue' | 'favoris'>('catalogue');
   const [showDuplicates, setShowDuplicates] = useState(false);
@@ -508,6 +511,14 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
         >
           <Download size={15} /> Exporter le référentiel d'aliments ({catalogueRows.length})
         </button>
+        <button
+          type="button"
+          onClick={() => setImportRefOpen(true)}
+          title="Importe un référentiel d'aliments (JSON exporté depuis Digestor puis complété, ex. profils d'amines biogènes). Fusionne sans écraser les analyses en place."
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-4 py-2 text-sm font-medium text-ink"
+        >
+          <Upload size={15} /> Importer un référentiel
+        </button>
       </div>
 
       {/* Panneau des doublons (variantes proches regroupées) */}
@@ -698,6 +709,8 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
           openInsight(name, details);
         }}
       />
+
+      <ImportFoodReferenceSheet open={importRefOpen} onClose={() => setImportRefOpen(false)} />
 
       <MealSuggestionsSheet
         open={suggestionsOpen}
