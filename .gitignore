@@ -10,4 +10,6 @@ dist-ssr
 /ciqual-*.json
 /ciqual-*.csv
 /moleculor-*.json
+# Référentiel d'aliments exporté depuis Digestor (donnée personnelle, non versionnée)
+/digestor-aliments-reference-*.json
 .~lock.*#
