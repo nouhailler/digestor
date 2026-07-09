@@ -94,6 +94,15 @@ describe('buildFoodReference', () => {
     expect(ca.liberator).toBeUndefined();
   });
 
+  it('exporte le profil amines des légumineuses ajoutées au dictionnaire', () => {
+    const [lentilles] = buildFoodReference([{ name: 'Lentilles corail' }], now).foods;
+    expect(lentilles.amines?.level).toBe('low');
+    expect(lentilles.amines?.putrescineCadaverine).toBe('low');
+    const [feves] = buildFoodReference([{ name: 'Fèves' }], now).foods;
+    expect(feves.amines?.level).toBe('moderate');
+    expect(feves.amines?.tyramine).toBe('moderate');
+  });
+
   it('n’ajoute pas d’amines pour un aliment inconnu du dictionnaire', () => {
     const [entry] = buildFoodReference([{ name: 'Aliment martien' }], now).foods;
     expect(entry.amines).toBeUndefined();
