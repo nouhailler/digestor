@@ -3,11 +3,13 @@ import type { FoodInsight } from '../types';
 import {
   amineBadge,
   amineBreakdown,
+  amineNegligible,
   amineTolerance,
   classifyAmines,
   dayAmineByType,
   dayAmineLoad,
   dominantAmine,
+  needsAmineProfile,
   withDictionaryAmines,
 } from './biogenicAmines';
 
@@ -24,6 +26,16 @@ describe('classifyAmines', () => {
     expect(classifyAmines('courgette').level).toBe('low');
     expect(classifyAmines('pomme').level).toBe('low');
     expect(classifyAmines('riz').level).toBe('low');
+  });
+
+  it('classe les légumineuses en faible, les fèves en modéré (tyramine)', () => {
+    expect(classifyAmines('lentilles corail').level).toBe('low');
+    expect(classifyAmines('pois chiches').level).toBe('low');
+    expect(classifyAmines('haricots rouges').level).toBe('low');
+    expect(classifyAmines('feves').level).toBe('moderate');
+    expect(classifyAmines('feves').tyramine).toBe('moderate');
+    // « haricots verts » (plus long) prime toujours sur « haricots »
+    expect(classifyAmines('haricots verts').level).toBe('low');
   });
 
   it('marque les histamino-libérateurs et bloqueurs de DAO', () => {
@@ -131,6 +143,63 @@ describe('withDictionaryAmines', () => {
   it('laisse inchangée une fiche dont l’aliment est inconnu du dictionnaire', () => {
     const ins = { ...base, name: 'aliment martien' };
     expect(withDictionaryAmines(ins)).toBe(ins);
+  });
+});
+
+describe('amineNegligible', () => {
+  it('reconnaît les aliments à amines clairement négligeables', () => {
+    expect(amineNegligible('poivron')).toBe(true);
+    expect(amineNegligible('Chou-fleur')).toBe(true); // match par mot : « chou »
+    expect(amineNegligible('huile d’olive')).toBe(true);
+    expect(amineNegligible('eau plate')).toBe(true);
+    expect(amineNegligible('gousse d’ail')).toBe(true);
+  });
+
+  it('n’attrape pas par frontière de mot les aliments contenant un fragment', () => {
+    // « eau » ⊂ « veau »/« gateau », « ail » ⊂ « aile »/« travail » : boundary protège
+    expect(amineNegligible('veau')).toBe(false);
+    expect(amineNegligible('gateau')).toBe(false);
+    expect(amineNegligible('aile de poulet')).toBe(false);
+    expect(amineNegligible('beaufort')).toBe(false); // fromage affiné : reste à traiter
+  });
+
+  it('exclut les cas ambigus (libérateurs / fermentés / affinés)', () => {
+    expect(amineNegligible('tomate')).toBe(false);
+    expect(amineNegligible('epinard')).toBe(false);
+    expect(amineNegligible('fraise')).toBe(false);
+    expect(amineNegligible('')).toBe(false);
+  });
+});
+
+describe('needsAmineProfile', () => {
+  const base: FoodInsight = {
+    key: 'x',
+    name: 'x',
+    category: 'neutral',
+    fodmapLevel: 'low',
+    fodmaps: { fructose: 'low', lactose: 'low', fructans: 'low', gos: 'low', polyols: 'low' },
+    sibo: { verdict: 'inconnu', note: '' },
+    candida: { verdict: 'inconnu', note: '' },
+    summary: '',
+    tips: [],
+    model: 'test',
+    updatedAt: '',
+  };
+
+  it('à enrichir : inconnu du dictionnaire, sans profil, non négligeable', () => {
+    expect(needsAmineProfile({ ...base, name: 'boudin noir' })).toBe(true);
+  });
+
+  it('pas à enrichir : déjà un profil amines', () => {
+    expect(needsAmineProfile({ ...base, name: 'boudin noir', amines: { level: 'high' } })).toBe(false);
+  });
+
+  it('pas à enrichir : connu du dictionnaire', () => {
+    expect(needsAmineProfile({ ...base, name: 'Roquefort' })).toBe(false);
+  });
+
+  it('pas à enrichir : aliment à amines négligeables', () => {
+    expect(needsAmineProfile({ ...base, name: 'poivron rouge' })).toBe(false);
   });
 });
 

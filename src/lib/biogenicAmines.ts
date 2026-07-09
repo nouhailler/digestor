@@ -224,6 +224,9 @@ const DICTIONARY: Record<string, AmineInfo> = {
   noix: H('moderate', { liberator: true }),
   cacahuete: H('moderate', { liberator: true }),
   additifs: H('moderate', { liberator: true }),
+  // Fèves : source notable de tyramine (interaction IMAO classique)
+  feve: H('moderate', { tyramine: 'moderate', note: 'Fèves : source de tyramine.' }),
+  feves: H('moderate', { tyramine: 'moderate', note: 'Fèves : source de tyramine.' }),
   // Inhibiteurs de la MAO (freinent la dégradation de la tyramine)
   reglisse: H('moderate', { maoInhibitor: true, note: 'Inhibiteur de la MAO.' }),
   curcuma: H('low', { maoInhibitor: true, note: 'Inhibiteur de la MAO (effet modéré).' }),
@@ -250,6 +253,20 @@ const DICTIONARY: Record<string, AmineInfo> = {
   riz: H('low'),
   quinoa: H('low'),
   'pomme de terre': H('low', { putrescineCadaverine: 'low' }),
+  // Légumineuses (cuites / fraîches) : amines faibles, un peu de putrescine.
+  // Les fèves (tyramine) sont plus haut, en « modéré ».
+  legumineuse: H('low', { putrescineCadaverine: 'low', note: 'Amines faibles (un peu de putrescine).' }),
+  legumineuses: H('low', { putrescineCadaverine: 'low', note: 'Amines faibles (un peu de putrescine).' }),
+  lentille: H('low', { putrescineCadaverine: 'low', note: 'Légumineuse : amines faibles.' }),
+  lentilles: H('low', { putrescineCadaverine: 'low', note: 'Légumineuse : amines faibles.' }),
+  'pois chiche': H('low', { putrescineCadaverine: 'low', note: 'Légumineuse : amines faibles.' }),
+  'pois chiches': H('low', { putrescineCadaverine: 'low', note: 'Légumineuse : amines faibles.' }),
+  haricot: H('low', { putrescineCadaverine: 'low', note: 'Légumineuse : amines faibles.' }),
+  haricots: H('low', { putrescineCadaverine: 'low', note: 'Légumineuse : amines faibles.' }),
+  flageolet: H('low', { putrescineCadaverine: 'low' }),
+  flageolets: H('low', { putrescineCadaverine: 'low' }),
+  'petit pois': H('low', { putrescineCadaverine: 'low' }),
+  'petits pois': H('low', { putrescineCadaverine: 'low' }),
   'lait frais': H('low', { freshnessDependent: true, note: 'Si toléré par ailleurs.' }),
 };
 
@@ -289,6 +306,70 @@ export function classifyAmines(rawName: string): AmineInfo {
     }
   }
   return best ? best.info : { level: 'unknown' };
+}
+
+/**
+ * Aliments à teneur en amines biogènes consensuellement NÉGLIGEABLE et sans
+ * mécanisme connu (ni histamino-libérateur, ni freineur DAO/MAO, ni fermenté) :
+ * légumes et fruits frais neutres, féculents/farines nature, huiles, herbes, eau…
+ * Sert à ne PAS les compter parmi les aliments « à enrichir » en amines : un
+ * enrichissement (dico ou IA) les laisserait `unknown` sans que ça manque, et le
+ * prompt d'export les omet volontairement. Clés normalisées ; match par frontière
+ * de mot comme `classifyAmines`.
+ *
+ * Prudence : uniquement des aliments dont la pauvreté est peu discutable. Tout
+ * ambigu (tomate, épinard, aubergine, avocat, banane, fraise, agrumes, ananas,
+ * chocolat, fruits de mer, fromages, œuf, légumineuses, fruits secs…) en est
+ * EXCLU → reste compté (ces cas sont d'ailleurs déjà couverts par `DICTIONARY`).
+ */
+const NEGLIGIBLE_AMINES = new Set<string>([
+  // Légumes frais neutres
+  'courge', 'potiron', 'poivron', 'chou', 'navet', 'radis', 'betterave', 'celeri',
+  'fenouil', 'endive', 'poireau', 'asperge', 'artichaut', 'panais', 'patate',
+  'oignon', 'ail', 'echalote', 'blette', 'roquette', 'mache', 'cresson',
+  // Fruits frais neutres (hors histamino-libérateurs)
+  'abricot', 'peche', 'nectarine', 'cerise', 'myrtille', 'framboise', 'cassis',
+  'groseille', 'coing', 'rhubarbe', 'grenade', 'figue', 'prune', 'mirabelle',
+  'quetsche',
+  // Féculents / céréales / farines nature
+  'ble', 'avoine', 'orge', 'sarrasin', 'millet', 'semoule', 'pates', 'polenta',
+  'tapioca', 'farine', 'boulgour', 'epeautre',
+  // Matières grasses, sucres, condiments simples
+  'huile', 'beurre', 'sel', 'poivre', 'sucre', 'miel', 'sirop',
+  // Herbes aromatiques
+  'persil', 'basilic', 'coriandre', 'thym', 'romarin', 'ciboulette', 'aneth',
+  'estragon', 'laurier', 'origan', 'sauge', 'menthe',
+  // Eau et infusions simples
+  'eau', 'tisane', 'infusion', 'camomille', 'verveine',
+]);
+
+/**
+ * Vrai si l'aliment est un porteur d'amines clairement négligeable
+ * (cf. `NEGLIGIBLE_AMINES`). Match exact puis par frontière de mot.
+ */
+export function amineNegligible(rawName: string): boolean {
+  const name = normalize(rawName);
+  if (!name) return false;
+  if (NEGLIGIBLE_AMINES.has(name)) return true;
+  const padded = ` ${name} `;
+  for (const key of NEGLIGIBLE_AMINES) {
+    if (padded.includes(` ${key} `)) return true;
+  }
+  return false;
+}
+
+/**
+ * Un aliment « à enrichir » en amines : pas encore de profil, inconnu du
+ * dictionnaire embarqué, ET pas clairement négligeable. Base commune du décompte
+ * affiché et des cibles de l'enrichissement IA — on ne dépense pas d'appel pour
+ * un aliment dont la teneur est notoirement négligeable. Fonction pure.
+ */
+export function needsAmineProfile(insight: FoodInsight): boolean {
+  return (
+    !insight.amines &&
+    classifyAmines(insight.name).level === 'unknown' &&
+    !amineNegligible(insight.name)
+  );
 }
 
 // ---- Charge journalière & combinaisons ----

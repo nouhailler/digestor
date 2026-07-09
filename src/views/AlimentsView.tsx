@@ -32,7 +32,7 @@ import { CATEGORY_COLOR } from '../lib/constants';
 import { dateLabel } from '../lib/dates';
 import { FODMAP_LEVEL_COLOR, FODMAP_LEVEL_LABEL } from '../lib/ai/insightFormat';
 import { classifyFood, dictionaryFoods, looseKey, normalize } from '../lib/foodClassifier';
-import { amineBadge, classifyAmines } from '../lib/biogenicAmines';
+import { amineBadge, classifyAmines, needsAmineProfile } from '../lib/biogenicAmines';
 import { downloadFoodReference } from '../lib/foodReference';
 import { analyzeFood } from '../lib/ai/foodInsight';
 import { runAiTask } from '../lib/ai/aiActivity';
@@ -157,7 +157,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
   // Fiches analysées sans profil amines que le dictionnaire ne peut pas combler
   // (aliments hors dictionnaire) → cibles de l'enrichissement IA. Global (toutes portées).
   const amineIaTargets = useMemo(
-    () => (insights ?? []).filter((i) => !i.amines && classifyAmines(i.name).level === 'unknown'),
+    () => (insights ?? []).filter(needsAmineProfile),
     [insights],
   );
 
@@ -236,9 +236,9 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
     setBulkError(null);
     setAmineMsg(null);
     await backfillFoodAmines();
-    const targets = (await getAllFoodInsights()).filter((i) => !i.amines);
+    const targets = (await getAllFoodInsights()).filter(needsAmineProfile);
     if (targets.length === 0) {
-      setAmineMsg('Aucun aliment à enrichir : tous ont un profil amines.');
+      setAmineMsg('Aucun aliment à enrichir : les autres ont déjà un profil ou sont à amines négligeables.');
       return;
     }
     stopRef.current = false;
