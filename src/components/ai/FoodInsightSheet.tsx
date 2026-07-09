@@ -1,4 +1,5 @@
-import { Loader2, RefreshCw, Settings2, Sparkles, Star, UserCheck } from 'lucide-react';
+import { useState } from 'react';
+import { Check, Loader2, RefreshCw, Settings2, Share2, Sparkles, Star, UserCheck } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Sheet } from '../Sheet';
 import { AiBusy } from './AiBusy';
@@ -10,6 +11,8 @@ import { addFavorite, db, removeFavorite } from '../../lib/db';
 import { normalize } from '../../lib/foodClassifier';
 import { dateLabel } from '../../lib/dates';
 import { buildProfileContext, hasHealthInfo } from '../../lib/profile';
+import { shareFoodInsight } from '../../lib/foodInsightExport';
+import type { FoodInsight } from '../../types';
 
 interface FoodInsightSheetProps {
   open: boolean;
@@ -38,25 +41,28 @@ export function FoodInsightSheet({ open, name, onClose, onOpenAiSettings, detail
         <div className="space-y-4">
           <FoodInsightCard insight={insight} />
           {profileAware && <ProfileAwareNote />}
-          {ready ? (
-            <button
-              type="button"
-              onClick={runAnalyze}
-              disabled={loading}
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink disabled:opacity-50"
-            >
-              {loading ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
-              Réanalyser
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onOpenAiSettings}
-              className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink"
-            >
-              <Settings2 size={15} /> Configurer l'IA pour réanalyser
-            </button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {ready ? (
+              <button
+                type="button"
+                onClick={runAnalyze}
+                disabled={loading}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink disabled:opacity-50"
+              >
+                {loading ? <Loader2 size={15} className="animate-spin" /> : <RefreshCw size={15} />}
+                Réanalyser
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenAiSettings}
+                className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink"
+              >
+                <Settings2 size={15} /> Configurer l'IA pour réanalyser
+              </button>
+            )}
+            <ShareInsightButton insight={insight} />
+          </div>
           {error && <p className="text-sm" style={{ color: 'var(--color-severe)' }}>{error}</p>}
         </div>
       ) : !ready ? (
@@ -121,6 +127,31 @@ function FavoriteToggle({ name }: { name: string }) {
         <span className="text-xs text-muted">Scanné le {dateLabel(favorite.scannedAt)}</span>
       )}
     </div>
+  );
+}
+
+/**
+ * Partage la fiche (feuille native de l'OS sur mobile, sinon copie dans le
+ * presse-papiers) pour l'envoyer à un proche : « cet aliment m'est favorable… ».
+ */
+function ShareInsightButton({ insight }: { insight: FoodInsight }) {
+  const [copied, setCopied] = useState(false);
+  async function share() {
+    const result = await shareFoodInsight(insight);
+    if (result === 'copied') {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={share}
+      className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink"
+    >
+      {copied ? <Check size={15} style={{ color: 'var(--color-leger)' }} /> : <Share2 size={15} />}
+      {copied ? 'Fiche copiée' : 'Partager la fiche'}
+    </button>
   );
 }
 
