@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Loader2, RefreshCw, Settings2, Share2, Sparkles, Star, UserCheck } from 'lucide-react';
+import { Check, ImageDown, Loader2, RefreshCw, Settings2, Share2, Sparkles, Star, UserCheck } from 'lucide-react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { Sheet } from '../Sheet';
 import { AiBusy } from './AiBusy';
@@ -12,6 +12,7 @@ import { normalize } from '../../lib/foodClassifier';
 import { dateLabel } from '../../lib/dates';
 import { buildProfileContext, hasHealthInfo } from '../../lib/profile';
 import { shareFoodInsight } from '../../lib/foodInsightExport';
+import { shareFoodInsightImage } from '../../lib/foodInsightImage';
 import type { FoodInsight } from '../../types';
 
 interface FoodInsightSheetProps {
@@ -62,6 +63,7 @@ export function FoodInsightSheet({ open, name, onClose, onOpenAiSettings, detail
               </button>
             )}
             <ShareInsightButton insight={insight} />
+            <ShareImageButton insight={insight} />
           </div>
           {error && <p className="text-sm" style={{ color: 'var(--color-severe)' }}>{error}</p>}
         </div>
@@ -150,7 +152,45 @@ function ShareInsightButton({ insight }: { insight: FoodInsight }) {
       className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink"
     >
       {copied ? <Check size={15} style={{ color: 'var(--color-leger)' }} /> : <Share2 size={15} />}
-      {copied ? 'Fiche copiée' : 'Partager la fiche'}
+      {copied ? 'Texte copié' : 'Partager le texte'}
+    </button>
+  );
+}
+
+/**
+ * Partage la fiche en IMAGE (carte PNG) : feuille native de l'OS sur mobile,
+ * sinon téléchargement du PNG (avec retour « Image téléchargée »).
+ */
+function ShareImageButton({ insight }: { insight: FoodInsight }) {
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  async function share() {
+    setBusy(true);
+    try {
+      const result = await shareFoodInsightImage(insight);
+      if (result === 'downloaded') {
+        setDone(true);
+        setTimeout(() => setDone(false), 1800);
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={share}
+      disabled={busy}
+      className="inline-flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm text-muted hover:text-ink disabled:opacity-50"
+    >
+      {busy ? (
+        <Loader2 size={15} className="animate-spin" />
+      ) : done ? (
+        <Check size={15} style={{ color: 'var(--color-leger)' }} />
+      ) : (
+        <ImageDown size={15} />
+      )}
+      {done ? 'Image téléchargée' : "Partager l'image"}
     </button>
   );
 }
