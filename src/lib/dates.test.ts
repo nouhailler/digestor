@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   dayLongLabel,
+  dayMonthLabel,
   fromISODate,
   toISODate,
   weekDays,
@@ -59,5 +60,12 @@ describe('dayLongLabel', () => {
   it('capitalise le jour', () => {
     expect(dayLongLabel('2025-06-09')).toBe('Lundi 9 juin');
     expect(dayLongLabel('2025-06-10')).toBe('Mardi 10 juin');
+  });
+});
+
+describe('dayMonthLabel', () => {
+  it('jour + mois abrégé, sans point', () => {
+    expect(dayMonthLabel('2025-06-09')).toBe('9 juin');
+    expect(dayMonthLabel('2025-12-01')).toBe('1 déc');
   });
 });

@@ -66,6 +66,11 @@ export function dayShortLabel(iso: string): string {
   return format(fromISODate(iso), 'EEE d', { locale: fr });
 }
 
+/** "9 juin" (axes de graphes sur de longues périodes, où le jour de semaine est ambigu). */
+export function dayMonthLabel(iso: string): string {
+  return format(fromISODate(iso), 'd MMM', { locale: fr }).replace('.', '');
+}
+
 /** Abréviation du jour de semaine, ex. "lun" (agenda). */
 export function weekdayShort(iso: string): string {
   return format(fromISODate(iso), 'EEE', { locale: fr }).replace('.', '');

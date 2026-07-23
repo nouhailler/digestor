@@ -11,7 +11,6 @@ import { Onboarding } from './components/Onboarding';
 import { Tour } from './components/Tour';
 import { ImportMealsSheet } from './components/ImportMealsSheet';
 import { SatietyImportSheet } from './components/SatietyImportSheet';
-import { MedicalRecordSheet } from './components/MedicalRecordSheet';
 import { TreatmentsSheet } from './components/TreatmentsSheet';
 import { ReintroSheet } from './components/ReintroSheet';
 import { MealTemplatesSheet } from './components/MealTemplatesSheet';
@@ -28,6 +27,10 @@ import { useProfile } from './hooks/useProfile';
 // chargé à la demande (code-splitting) quand l'onglet est ouvert.
 const EvolutionView = lazy(() =>
   import('./views/EvolutionView').then((m) => ({ default: m.EvolutionView })),
+);
+// Le dossier médical embarque désormais des graphes Recharts : même traitement.
+const MedicalRecordSheet = lazy(() =>
+  import('./components/MedicalRecordSheet').then((m) => ({ default: m.MedicalRecordSheet })),
 );
 import { isEmpty, isOnboardingDone, setOnboardingDone, getSeenTours, markTourSeen, resetTours } from './lib/db';
 import { TOURS } from './lib/tour';
@@ -187,7 +190,12 @@ export default function App() {
         onOpenSearch={() => setSearchOpen(true)}
       />
       <AboutSheet open={aboutOpen} onClose={() => setAboutOpen(false)} />
-      <MedicalRecordSheet open={medicalRecordOpen} onClose={() => setMedicalRecordOpen(false)} />
+      {/* Monté seulement à l'ouverture : sinon lazy() chargerait le chunk recharts au démarrage. */}
+      {medicalRecordOpen && (
+        <Suspense fallback={null}>
+          <MedicalRecordSheet open onClose={() => setMedicalRecordOpen(false)} />
+        </Suspense>
+      )}
       <TreatmentsSheet open={treatmentsOpen} onClose={() => setTreatmentsOpen(false)} />
       <ReintroSheet open={reintroOpen} onClose={() => setReintroOpen(false)} />
       <MealTemplatesSheet open={mealTemplatesOpen} onClose={() => setMealTemplatesOpen(false)} />

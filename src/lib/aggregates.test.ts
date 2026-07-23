@@ -7,6 +7,7 @@ import {
   computeWeekStats,
   dayHasContent,
   effectiveDaySymptoms,
+  fillDayRange,
   hydrationByDay,
   latestActiveDate,
   mealSymptomPoints,
@@ -226,5 +227,29 @@ describe('latestActiveDate', () => {
   });
   it('renvoie undefined si tout est vide', () => {
     expect(latestActiveDate([emptyDay('2025-06-09'), emptyDay('2025-06-10')])).toBeUndefined();
+  });
+});
+
+describe('fillDayRange', () => {
+  it('comble les trous avec des jours vides et trie par date', () => {
+    const monday = { ...emptyDay('2025-06-09'), meals: [makeMeal('08:00', ['café'])] };
+    const thursday = { ...emptyDay('2025-06-12'), symptoms: sym({ gaz: 'modere' }) };
+    const filled = fillDayRange([thursday, monday]); // désordonné volontairement
+    expect(filled.map((d) => d.date)).toEqual(['2025-06-09', '2025-06-10', '2025-06-11', '2025-06-12']);
+    expect(filled[0]).toBe(monday);
+    expect(filled[3]).toBe(thursday);
+    expect(dayHasContent(filled[1])).toBe(false);
+    expect(dayHasContent(filled[2])).toBe(false);
+  });
+
+  it('franchit les fins de mois sans trou', () => {
+    const filled = fillDayRange([emptyDay('2025-06-29'), emptyDay('2025-07-02')]);
+    expect(filled.map((d) => d.date)).toEqual(['2025-06-29', '2025-06-30', '2025-07-01', '2025-07-02']);
+  });
+
+  it('liste vide → liste vide, jour unique → inchangé', () => {
+    expect(fillDayRange([])).toEqual([]);
+    const single = emptyDay('2025-06-09');
+    expect(fillDayRange([single])).toEqual([single]);
   });
 });

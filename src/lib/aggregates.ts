@@ -2,6 +2,9 @@ import type { DayEntry, Intensity, FoodCategory, SymptomKey } from '../types';
 import { INTENSITY_LABEL, INTENSITY_WEIGHT, SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
 import { isAddedSugarOrAlcohol, normalize } from './foodClassifier';
 import { dayAmineLoad, type AmineLoadBand } from './biogenicAmines';
+import { emptyDay } from './factory';
+import { addDays } from 'date-fns';
+import { fromISODate, toISODate } from './dates';
 
 /** Itère tous les aliments d'un jour. */
 function* foodsOf(day: DayEntry) {
@@ -40,6 +43,24 @@ export function latestActiveDate(days: DayEntry[]): string | undefined {
     if (dayHasContent(d) && (!latest || d.date > latest)) latest = d.date;
   }
   return latest;
+}
+
+/**
+ * Comble les trous d'une liste de jours épars (ex. `getAllDays`) : renvoie une
+ * série contiguë du premier au dernier jour, jours manquants = `emptyDay`.
+ * Nécessaire pour un axe temporel honnête sur les graphes (dossier médical).
+ */
+export function fillDayRange(days: DayEntry[]): DayEntry[] {
+  if (days.length === 0) return [];
+  const byDate = new Map(days.map((d) => [d.date, d]));
+  const dates = [...byDate.keys()].sort();
+  const out: DayEntry[] = [];
+  let cur = fromISODate(dates[0]);
+  const last = dates[dates.length - 1];
+  for (let iso = toISODate(cur); iso <= last; cur = addDays(cur, 1), iso = toISODate(cur)) {
+    out.push(byDate.get(iso) ?? emptyDay(iso));
+  }
+  return out;
 }
 
 export interface WeekStats {

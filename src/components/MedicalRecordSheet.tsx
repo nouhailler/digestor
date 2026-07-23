@@ -3,6 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { Printer, Stethoscope, X } from 'lucide-react';
 import type { RecordFood, RecordSymptom } from '../lib/medicalRecord';
 import { buildMedicalRecord } from '../lib/medicalRecord';
+import { MedicalRecordCharts } from './MedicalRecordCharts';
 import { getAllDays } from '../lib/db';
 import { useFoodInsightMap } from '../hooks/useFoodInsightMap';
 import { useProfile } from '../hooks/useProfile';
@@ -225,6 +226,11 @@ export function MedicalRecordSheet({ open, onClose }: { open: boolean; onClose: 
                   </tbody>
                 </table>
               )}
+            </Section>
+
+            {/* 2b. Graphes d'évolution (axe temporel continu via fillDayRange) */}
+            <Section title="Évolution sur la période">
+              <MedicalRecordCharts days={days ?? []} />
             </Section>
 
             {/* 3. Transit & hydratation */}
