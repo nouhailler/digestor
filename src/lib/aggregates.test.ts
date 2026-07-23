@@ -2,13 +2,17 @@ import { describe, expect, it } from 'vitest';
 import type { DayEntry, Intensity, SymptomKey } from '../types';
 import { emptyDay, emptySymptoms, makeMeal } from './factory';
 import {
+  amineLoadByDay,
   categoryCountsByDay,
   computeWeekStats,
   dayHasContent,
   effectiveDaySymptoms,
   hydrationByDay,
   latestActiveDate,
+  mealSymptomPoints,
   severityByDay,
+  stoolBand,
+  stoolByDay,
   topSymptoms,
 } from './aggregates';
 import { weekDays, fromISODate } from './dates';
@@ -98,6 +102,74 @@ describe('hydrationByDay', () => {
     const pts = hydrationByDay(buildWeek());
     expect(pts[0].hydration).toBe(1.2);
     expect(pts[2].hydration).toBeNull();
+  });
+});
+
+describe('amineLoadByDay', () => {
+  it('renvoie null pour les jours sans repas, score + bande sinon', () => {
+    const days: DayEntry[] = [
+      // Charge élevée : parmesan (high +3) + saucisson (high +3) → score ≥ 5.
+      { ...emptyDay('2025-06-09'), meals: [makeMeal('12:30', ['parmesan', 'saucisson'])] },
+      // Charge faible : le riz n'a pas de profil amines notable.
+      { ...emptyDay('2025-06-10'), meals: [makeMeal('12:30', ['riz'])] },
+      emptyDay('2025-06-11'), // vide → point absent
+    ];
+    const pts = amineLoadByDay(days);
+    expect(pts[0].band).toBe('eleve');
+    expect(pts[0].score!).toBeGreaterThanOrEqual(5);
+    expect(pts[1].band).toBe('faible');
+    expect(pts[2]).toMatchObject({ score: null, band: null });
+  });
+});
+
+describe('mealSymptomPoints', () => {
+  it('un point par repas, avec intensité max et symptômes actifs', () => {
+    const day: DayEntry = {
+      ...emptyDay('2025-06-09'),
+      meals: [
+        { ...makeMeal('07:30', ['café']) }, // sans symptôme
+        { ...makeMeal('19:30', ['pizza']), symptoms: sym({ ballonnements: 'severe', gaz: 'leger' }) },
+        { id: 'vide', time: '16:00', foods: [] }, // ni aliment ni symptôme → ignoré
+      ],
+    };
+    const pts = mealSymptomPoints([day]);
+    expect(pts).toHaveLength(2);
+    expect(pts[0]).toMatchObject({ time: '07:30', hour: 7.5, max: null, actifs: [] });
+    expect(pts[1].max).toBe('severe');
+    expect(pts[1].hour).toBe(19.5);
+    expect(pts[1].actifs).toEqual(['Ballonnements (sévère)', 'Gaz / flatulences (léger)']);
+  });
+
+  it('heure invalide → 12 h (repli)', () => {
+    const day: DayEntry = {
+      ...emptyDay('2025-06-09'),
+      meals: [{ ...makeMeal('??', ['riz']) }],
+    };
+    expect(mealSymptomPoints([day])[0].hour).toBe(12);
+  });
+});
+
+describe('stoolByDay / stoolBand', () => {
+  it('mappe le type de Bristol, « aucune selle » → 0, non renseigné → null', () => {
+    const days: DayEntry[] = [
+      { ...emptyDay('2025-06-09'), stool: { bristol: 6, label: 'Selles molles, déchiquetées (type 6)', count: 3 } },
+      { ...emptyDay('2025-06-10'), stool: { label: 'Aucune selle' } },
+      emptyDay('2025-06-11'), // non renseigné
+      { ...emptyDay('2025-06-12'), stool: { label: 'Selles molles' } }, // label libre sans type → pas plaçable
+    ];
+    const pts = stoolByDay(days);
+    expect(pts[0]).toMatchObject({ bristol: 6, count: 3 });
+    expect(pts[1].bristol).toBe(0);
+    expect(pts[2].bristol).toBeNull();
+    expect(pts[3].bristol).toBeNull();
+  });
+
+  it('classe les types par zone', () => {
+    expect(stoolBand(0)).toBe('constipation');
+    expect(stoolBand(2)).toBe('constipation');
+    expect(stoolBand(4)).toBe('normal');
+    expect(stoolBand(6)).toBe('diarrhee');
+    expect(stoolBand(7)).toBe('diarrhee');
   });
 });
 

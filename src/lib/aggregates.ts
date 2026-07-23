@@ -1,6 +1,6 @@
 import type { DayEntry, Intensity, FoodCategory, SymptomKey } from '../types';
-import { INTENSITY_WEIGHT, SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
-import { isAddedSugarOrAlcohol } from './foodClassifier';
+import { INTENSITY_LABEL, INTENSITY_WEIGHT, SYMPTOM_LABELS, SYMPTOM_ORDER } from './constants';
+import { isAddedSugarOrAlcohol, normalize } from './foodClassifier';
 import { dayAmineLoad, type AmineLoadBand } from './biogenicAmines';
 
 /** Itère tous les aliments d'un jour. */
@@ -176,6 +176,95 @@ export function hydrationByDay(days: DayEntry[]): HydrationPoint[] {
     date: day.date,
     hydration: typeof day.hydrationL === 'number' ? day.hydrationL : null,
   }));
+}
+
+export interface AmineLoadPoint {
+  date: string;
+  /** Score de charge amines du jour (null si aucun aliment renseigné). */
+  score: number | null;
+  band: AmineLoadBand | null;
+}
+
+/** Charge en amines biogènes par jour (courbe de tendance de l'Évolution). */
+export function amineLoadByDay(days: DayEntry[]): AmineLoadPoint[] {
+  return days.map((day) => {
+    const names = [...foodsOf(day)].map((f) => f.name);
+    if (names.length === 0) return { date: day.date, score: null, band: null };
+    const load = dayAmineLoad(names);
+    return { date: day.date, score: load.score, band: load.band };
+  });
+}
+
+export interface MealSymptomPoint {
+  date: string;
+  time: string; // "HH:MM"
+  hour: number; // heure décimale (axe vertical du nuage de points)
+  /** Intensité max des symptômes après ce repas (null = aucun symptôme). */
+  max: Exclude<Intensity, 'absent'> | null;
+  /** Symptômes actifs après ce repas : « Ballonnements (sévère) ». */
+  actifs: string[];
+}
+
+/**
+ * Un point par repas pour le nuage « Symptômes après les repas » de l'Évolution :
+ * quel jour, à quelle heure, et avec quelle intensité maximale de symptômes.
+ * Les repas vides (ni aliment ni symptôme) sont ignorés.
+ */
+export function mealSymptomPoints(days: DayEntry[]): MealSymptomPoint[] {
+  const out: MealSymptomPoint[] = [];
+  for (const day of days) {
+    for (const meal of day.meals) {
+      if (meal.foods.length === 0 && !meal.symptoms) continue;
+      const [h, m] = meal.time.split(':').map(Number);
+      const hour = (Number.isFinite(h) ? h : 12) + (Number.isFinite(m) ? m : 0) / 60;
+      let max: MealSymptomPoint['max'] = null;
+      const actifs: string[] = [];
+      const ms = meal.symptoms;
+      if (ms) {
+        for (const k of SYMPTOM_ORDER) {
+          const v = ms[k] ?? 'absent';
+          if (v === 'absent') continue;
+          actifs.push(`${SYMPTOM_LABELS[k]} (${INTENSITY_LABEL[v].toLowerCase()})`);
+          if (INTENSITY_WEIGHT[v] > (max ? INTENSITY_WEIGHT[max] : 0)) max = v;
+        }
+      }
+      out.push({ date: day.date, time: meal.time, hour, max, actifs });
+    }
+  }
+  return out;
+}
+
+export interface StoolPoint {
+  date: string;
+  /** Type de Bristol (1..7), 0 = « aucune selle », null = non renseigné. */
+  bristol: number | null;
+  stoolLabel?: string;
+  count?: number;
+}
+
+/** Selles par jour (échelle de Bristol) pour le graphe d'Évolution. */
+export function stoolByDay(days: DayEntry[]): StoolPoint[] {
+  return days.map((day) => {
+    const s = day.stool;
+    if (!s) return { date: day.date, bristol: null };
+    if (typeof s.bristol === 'number') {
+      return { date: day.date, bristol: s.bristol, stoolLabel: s.label, count: s.count };
+    }
+    // « Aucune selle » (label sans type) → 0 ; autre label sans type : pas plaçable.
+    if (s.label && normalize(s.label).includes('aucune')) {
+      return { date: day.date, bristol: 0, stoolLabel: s.label };
+    }
+    return { date: day.date, bristol: null };
+  });
+}
+
+export type StoolBand = 'constipation' | 'normal' | 'diarrhee';
+
+/** Zone de l'échelle de Bristol : 0-2 constipation, 3-5 normal, 6-7 diarrhée. */
+export function stoolBand(bristol: number): StoolBand {
+  if (bristol <= 2) return 'constipation';
+  if (bristol >= 6) return 'diarrhee';
+  return 'normal';
 }
 
 export interface TopSymptom {
