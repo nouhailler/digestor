@@ -84,7 +84,7 @@ export function ReperesView({ onAbout, onOpenAiSettings }: ReperesViewProps) {
       <h2 className="mb-3 text-xl font-semibold text-ink">Repères</h2>
 
       {/* Sous-onglets */}
-      <div className="mb-4 inline-flex max-w-full rounded-full border border-border p-1 text-xs sm:text-sm">
+      <div className="mb-4 inline-flex max-w-full rounded-full border border-border p-1 text-xs sm:text-sm" data-tour="reperes-tabs">
         <SubTabButton active={tab === 'reperes'} onClick={() => setTab('reperes')} icon={<Table2 size={15} />}>
           Repères
         </SubTabButton>

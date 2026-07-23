@@ -96,6 +96,7 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
               type="button"
               onClick={() => setAnalysisOpen(true)}
               title="Demande à l'IA un bilan de la journée : verdict global, déclencheurs probables et pistes d'amélioration. Nécessite une clé OpenRouter."
+              data-tour="journal-analyze"
               className="no-print mt-3 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted hover:text-ink"
             >
               <Sparkles size={15} style={{ color: 'var(--color-leger)' }} /> Analyser ma journée avec l'IA

@@ -127,7 +127,7 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
 
       <h3 className="mb-3 text-xl font-semibold text-ink">Récapitulatif de la semaine</h3>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3" data-tour="week-stats">
         <StatCard
           label="Jours difficiles"
           value={`${stats.hardDays} / ${stats.totalDays}`}
@@ -181,7 +181,7 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
       </div>
 
       {/* Corrélations personnalisées : sur tout l'historique, à partir des données réelles */}
-      <div className="mt-6 rounded-2xl border border-border bg-surface p-5">
+      <div className="mt-6 rounded-2xl border border-border bg-surface p-5" data-tour="week-correlations">
         <h3 className="text-base font-semibold text-ink">Corrélations personnalisées</h3>
         <p className="mb-3 text-xs text-muted">
           Calculées sur l'ensemble de votre journal ({personal.analyzedDays} jour

@@ -309,7 +309,7 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
       </p>
 
       {/* Portée : mes repas vs catalogue complet */}
-      <div className="mb-3 inline-flex rounded-full border border-border p-1 text-xs">
+      <div className="mb-3 inline-flex rounded-full border border-border p-1 text-xs" data-tour="aliments-scope">
         <button
           type="button"
           onClick={() => setScope('repas')}
@@ -429,13 +429,14 @@ export function AlimentsView({ onOpenAiSettings, date, onOpenDay }: AlimentsView
         type="button"
         onClick={() => setScanOpen(true)}
         title="Scannez le code-barres d'un produit pour savoir s'il est déconseillé (FODMAP, SIBO, candidose)."
+        data-tour="aliments-scan"
         className="mb-3 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm text-ink hover:border-leger"
       >
         <ScanLine size={16} className="text-muted" /> Scanner un produit (code-barres)
       </button>
 
       {/* Actions : idées de repas + analyse en masse */}
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="mb-5 flex flex-wrap gap-2" data-tour="aliments-actions">
         <button
           type="button"
           onClick={() => setSuggestionsOpen(true)}
