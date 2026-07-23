@@ -9,7 +9,7 @@ candidose intestinale / SIBO / SII. Saisie jour par jour → récap hebdo → co
 graphes d'évolution. Aucun backend, données locales (IndexedDB), export/import JSON.
 Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d'intensité).
 
-## État actuel — v0.14.0 (suivi de la satiété : relevés VAS 0-100 [faim / énergie / envie de sucre] aux checkpoints immédiat/+1h/+2h/+3h + type de satiété, saisie vocale → JSON [projet Claude Web dédié, rattachement au repas par date+heure], composant VasSlider réutilisable, édition manuelle par repas [`Meal.satiety` imbriqué, sans migration], corrélation locale [courbe moyenne + regroupement catégorie/FODMAP] dans Évolution, durée de satiété mesurée [retour de la faim] + attendue [composition, affinée par les tags repas protéiné/fibres/sucré, import vocal v3] reportée dans les Notes du jour, expliquée via un bouton Aide (zone Satiété) + l'aide « ? » du Journal (SATIETY_HELP) ; + récupération de l'analyse de journée : partage natif OS + repli presse-papiers + téléchargement texte ; visite guidée par écran avec bulles ancrées, quantité « nombre seul » sans unité, détection des doublons d'aliments + suppression définitive + aliments récents en tête de l'autocomplétion, démarrage robuste ; + facteurs contextuels stress/sommeil/cycle, modèles de repas, rapport IA de période + tendances, recherche dans le journal, suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris, scan de produit par code-barres, quantités d'aliments, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 209 tests)
+## État actuel — v0.15.0 (amines biogènes de bout en bout : profil détaillé par amine [histamine / tyramine / putrescine + mécanismes libérateur / inhibiteur DAO-MAO / fermenté / dépendant fraîcheur], charge du jour globale + par amine, pastille amines sur chaque aliment [Journal / Aliments / scan], bandeau « Amines » du Journal cliquable, corrélations amines↔symptômes à garde-fous conservateurs, dimension amines dans le dossier médical + analyses IA de journée/période, Repères enrichis [référence des amines, tableau des plus problématiques, fiches détaillées, catégorie Encyclopédie], enrichissement IA dédié [progression/Stop, décompte honnête « à enrichir »] ; référentiel d'aliments échangé avec Claude Web [export du catalogue + prompt « patch amines » + import fusionnant] ; partage de la fiche d'un aliment [texte + carte PNG] ; détection de carence CIQUAL [lib pure] ; Semaine retravaillée + retrait des corrélations heuristiques codées en dur ; + suivi de la satiété : relevés VAS 0-100 [faim / énergie / envie de sucre] aux checkpoints immédiat/+1h/+2h/+3h + type de satiété, saisie vocale → JSON [projet Claude Web dédié, rattachement au repas par date+heure], composant VasSlider réutilisable, édition manuelle par repas [`Meal.satiety` imbriqué, sans migration], corrélation locale [courbe moyenne + regroupement catégorie/FODMAP] dans Évolution, durée de satiété mesurée [retour de la faim] + attendue [composition, affinée par les tags repas protéiné/fibres/sucré, import vocal v3] reportée dans les Notes du jour, expliquée via un bouton Aide (zone Satiété) + l'aide « ? » du Journal (SATIETY_HELP) ; + récupération de l'analyse de journée : partage natif OS + repli presse-papiers + téléchargement texte ; visite guidée par écran avec bulles ancrées, quantité « nombre seul » sans unité, détection des doublons d'aliments + suppression définitive + aliments récents en tête de l'autocomplétion, démarrage robuste ; + facteurs contextuels stress/sommeil/cycle, modèles de repas, rapport IA de période + tendances, recherche dans le journal, suivi des traitements & compléments, réintroductions FODMAP, corrélations personnalisées pilotées par les données, dossier médical imprimable, aliments favoris, scan de produit par code-barres, quantités d'aliments, mode clair en option, symptômes par repas, Aliments enrichi, activité IA en arrière-plan, guide système digestif + fiches d'organes, autocomplétion d'aliments, pistes d'amélioration justifiées, couleur d'aliment IA répercutée dans les repas, 328 tests)
 
 ✅ Scaffold Vite + React 19 + TS + Tailwind v4 + PWA (manifest, SW autoUpdate, icônes).
 ✅ Modèle de données (`types.ts`) + Dexie (`db.ts`) avec export/import/clear.
@@ -69,6 +69,101 @@ Rendu visuel fidèle à 4 maquettes (thème sombre, chips colorées, pastilles d
    (`parseMealsImport`) : JSON entouré de prose/fences, jour unique, heure invalide → 12:00, jour
    sans repas mais avec symptômes accepté. Prompt copiable + guide `docs/claude-web-repas-prompt.md`.
    100 % local (pas d'API). Total 80 tests.
+
+## v0.15.0 — amines biogènes, référentiel Claude Web & partage de fiche
+
+- **Amines biogènes de bout en bout** :
+  - `lib/biogenicAmines.ts` : `classifyAmines` — profil détaillé par amine (histamine / tyramine /
+    putrescine) + mécanismes (`liberator`, `daoBlocker`, `maoInhibitor`, `fermented`,
+    `freshnessDependent`) ; charge du jour globale (`dayAmineLoad`) + par amine (`dayAmineByType`)
+    + effet de combinaison. La coercition ponte les noms **publics** de l'export (`daoInhibitor`,
+    `histamineLiberator`) vers les noms internes (`daoBlocker`, `liberator`).
+  - `lib/amineCorrelation.ts` : corrélations charge amines ↔ symptômes — globale
+    (`amineSymptomCorrelation`) + fine par type (`amineTypeCorrelation`, patterns histaminique /
+    tyraminique via `typicalAmine`) — seuils conservateurs (règle d'honnêteté).
+  - `lib/symptomCatalog.ts` : catalogue des symptômes par système + méta amine (`typicalAmine`,
+    `urgent`, `onset`) + groupement (`symptomsByCategory`) — socle du croisement amine↔symptôme.
+  - **UI** : pastille amines sur chaque aliment (Journal, Aliments, produit scanné), bandeau
+    « Amines » du Journal cliquable avec détail, carte amines dans **Semaine** ; dimension amines
+    injectée dans le **dossier médical** et les analyses IA de **journée** et de **période**.
+  - **Repères** : référence de **toutes** les amines (pas que l'histamine), tableau des plus
+    problématiques, fiches détaillées cliquables (`lib/amineArticles.ts`, contenu statique markdown)
+    avec bloc « Quelle quantité tolérer », catégorie « Amines biogènes » dans l'Encyclopédie.
+  - **Enrichissement du cache** : bouton IA dédié (portion tolérée par amine) avec progression +
+    Stop propres ; **décompte honnête « à enrichir »** ; légumineuses ajoutées au dictionnaire.
+- **Référentiel d'aliments (échange Claude Web)** : `lib/foodReference.ts` (`buildFoodReference` +
+  `downloadFoodReference` — export du catalogue au format `type: "food-reference"`, amines incluses) ;
+  `lib/foodReferenceImport.ts` (import **fusionnant** — jamais de purge — qui refond les fiches dans
+  `foodInsights` via `buildFoodInsight`) ; `lib/foodReferenceImportPrompt.ts`
+  (`CLAUDE_WEB_AMINES_PROMPT` : Claude Web renvoie un JSON « patch » nom + amines uniquement).
+  Guide `docs/claude-web-amines-prompt.md`. Les référentiels exportés sont ignorés par git.
+- **Partage de la fiche d'un aliment** : `lib/foodInsightExport.ts` (texte markdown léger, accroche
+  personnelle « me convient / à limiter », partage natif + repli presse-papiers + téléchargement,
+  même mécanique que l'analyse de journée) et `lib/foodInsightImage.ts` (carte **PNG** via canvas —
+  `buildShareCardModel` pur/testé ; palette hex miroir du thème, comme Recharts).
+- **Détection de carence (socle)** : `lib/nutrition.ts` — fonctions **pures** comparant les apports
+  (table **CIQUAL**, Anses 2025) aux ANR, bandes de statut, **garde-fou de couverture** (statut
+  « indéterminé » si trop d'aliments sans composition connue — pas de faux manque) +
+  `rankSourcesFor` (meilleures sources d'un nutriment). La couche appelante fournit les données.
+- **Honnêteté renforcée** : retrait des **corrélations heuristiques codées en dur** — section
+  « Corrélations identifiées cette semaine » (Semaine) et équivalent du dossier médical (dont
+  « sans céréales ») ; ne restent que les corrélations calculées sur les données réelles
+  (`personalCorrelations`, `contextCorrelations`, `amineCorrelation`).
+- **Semaine** : récapitulatif retravaillé (bloc amines découplé des corrélations, couleurs,
+  cartes cliquables).
+- **Évolution** : le graphe « Tendance hydratation » (jamais renseignée) est remplacé par
+  « **Tendance amines biogènes** » — courbe du score de charge du jour (`amineLoadByDay`,
+  `aggregates.ts` ; null les jours sans repas), seuils pointillés modéré (≥ 2) / élevé (≥ 5),
+  points colorés par bande (vert/ambre/rouge), légende explicative sous le graphe.
+  `hydrationByDay` reste dans `aggregates.ts` (réutilisable).
+- **Évolution — graphe des selles** : « Évolution des selles (échelle de Bristol) »
+  (`stoolByDay`/`stoolBand`, `aggregates.ts`) — type de Bristol par jour, « Aucune selle » → 0
+  (tick « ∅ »), non renseigné → null (label libre sans type : pas plaçable). Zones ombrées
+  constipation (0-2, ambre) et diarrhée (6-7, rouge) via `ReferenceArea`, points colorés par zone,
+  tooltip = libellé Bristol + nb de selles. Affiché seulement si au moins une selle renseignée.
+- **Évolution — nuage « Symptômes après les repas (jour × heure) »** : `mealSymptomPoints`
+  (`aggregates.ts`, pur/testé) — un point par repas (jour en X, heure du repas en Y, axe inversé
+  façon planning, heure invalide → 12 h). Point vert/ambre/rouge (taille croissante) = intensité
+  max des symptômes **par repas** (`Meal.symptoms`), petit point gris = repas sans symptôme (donne
+  le contexte). `Scatter` Recharts sur axe catégories partagé (`allowDuplicatedCategory=false`),
+  tooltip maison listant les repas du jour survolé avec leurs symptômes (« Repas de 19 h 30 :
+  Ballonnements (sévère)… »). C'est la vue qui montre *quel repas de la journée* déclenche —
+  complémentaire de la sévérité globale (qui agrège jour + repas). Affiché seulement si au moins
+  un repas de la période porte des symptômes.
+- **Évolution — tableau « Aliment suspect par symptôme (après repas) »** :
+  `lib/mealCorrelations.ts` (pur, testé) — corrélations aliment → symptôme au niveau du **repas**
+  (`Meal.symptoms`), plus fines que `personalCorrelations` (niveau jour). Deux signaux :
+  1) **récurrent** — l'aliment apparaît dans ≥ 3 repas, taux de symptôme « après » ≥ 50 % et
+  lift ≥ 0,3 vs repas sans (mêmes garde-fous que personalCorrelations) ; 2) **ponctuel
+  (différentiel)** — dans un repas symptomatique, les aliments **habituels** (vus dans ≥ 2 autres
+  repas jamais suivis de ce symptôme, ou dont les repas symptomatiques sont **expliqués** par un
+  aliment nouveau) sont **disculpés** ; s'il reste ≤ 2 suspects, ils sont signalés « à confirmer ».
+  C'est le cas « œufs + jambon d'habitude sans symptôme, + une figue → diarrhée ; + un jus
+  d'orange le lendemain → diarrhée » : figue et jus d'orange suspectés, œufs/jambon disculpés.
+  Un repas déjà expliqué par un déclencheur récurrent n'accuse pas ses accompagnements rares ;
+  un repas trop ambigu (3+ inconnus) n'attribue rien. Chaque lien porte le **profil amines** de
+  l'aliment (`classifyAmines` + `amineBadge`) et un « ✓ » quand ce profil est **cohérent** avec
+  l'amine typique du symptôme (`amineMatchesSymptom` × `SYMPTOM_AMINE_META`). UI : tableau compact
+  (Symptôme / Aliment / Repas n/m / Amines / Fiabilité récurrent·à confirmer), taux avec/sans et
+  dates au survol, messages d'honnêteté sous les seuils (< 6 repas, ou rien de net).
+- **Évolution — synthèse des analyses IA sauvegardées** : `lib/dayAnalysisAggregate.ts` (pur,
+  testé) — relit les `dayAnalyses` en cache de la période (**aucun nouvel appel IA**) et regroupe
+  1) tous les **déclencheurs probables** 2) toutes les **pistes d'amélioration**. Regroupement
+  « flou » par similarité de tokens (accents/casse via `normalize`, parenthèses et mots-outils
+  français écartés ; inclusion ou Jaccard ≥ 0,6 pour les déclencheurs / ≥ 0,5 pour les phrases) →
+  les variantes (« pain blanc » / « Pain blanc (fructanes) ») sont résumées sous le libellé le plus
+  cité, avec **×N = nombre de journées** (dates au survol) et une justification représentative.
+  UI : section « Synthèse des analyses IA (N journées) » entre Top symptômes et Satiété — chips
+  rouges pour les déclencheurs (top 12), liste action + « Pourquoi : … » pour les pistes (top 8),
+  « + N autres » au-delà. Tolère l'ancien format en cache (piste = simple chaîne).
+- **Confort UI** : sections repliables (légende du bandeau mémorisée, satiété repliable aussi en
+  lecture, symptômes « hors repas » repliés par défaut), lisibilité mobile des amines, fix des
+  débordements horizontaux (Journal, Repères), fix des clés de symptômes manquantes sur les jours
+  antérieurs à l'ajout d'un symptôme.
+- Total **328 tests** (41 fichiers) — nouveaux : `biogenicAmines`, `amineCorrelation`,
+  `symptomCatalog`, `nutrition`, `foodReference`, `foodReferenceImport`, `foodInsightExport`,
+  `foodInsightImage`, `dayAnalysisAggregate`, `mealCorrelations` (+ `amineLoadByDay`, `stoolByDay`,
+  `mealSymptomPoints` dans `aggregates`).
 
 ## v0.9 — symptômes par repas & écran Aliments enrichi
 

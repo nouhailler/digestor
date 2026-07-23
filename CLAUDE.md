@@ -19,10 +19,12 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 209 tests : `foodClassifier`, `dates`,
+et appellent `afterEach(cleanup)` localement (pas de setup global). 328 tests : `foodClassifier`, `dates`,
 `quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
 `dayAnalysisExport`, `satiety`, `satietyImport`, `satietyCorrelation`, `satietyDuration`, `mealTags`,
 `contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`,
+`biogenicAmines`, `amineCorrelation`, `symptomCatalog`, `nutrition`, `foodReference`,
+`foodReferenceImport`, `foodInsightExport`, `foodInsightImage`, `dayAnalysisAggregate`, `mealCorrelations`,
 `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
 `VasSlider`, `TipBanner`, … `npm run build` typecheck aussi les tests.
 
@@ -60,12 +62,14 @@ src/
     foodSuggestions.ts# suggestions d'aliments (favoris d'abord) pour l'ajout à un repas
     medicalRecord.ts  # buildMedicalRecord : synthèse complète du journal (dossier médical imprimable)
     personalCorrelations.ts # corrélations aliment→symptôme calculées sur les données réelles (déclencheurs / aliments sûrs)
+    mealCorrelations.ts # corrélations aliment→symptôme au niveau du REPAS : signal récurrent + différentiel (aliments habituels disculpés, le nouveau suspecté) + cohérence amine↔symptôme (Évolution)
     contextCorrelations.ts # facteurs contextuels (stress/sommeil/règles) → jours à symptômes
     treatments.ts     # libellés/types de traitements & compléments + helpers (actif, tri)
     reintro.ts        # libellés groupes/verdicts FODMAP + tri (tests de réintroduction)
     mealTemplates.ts  # modèles de repas : repas↔modèle (instanciation avec id neufs)
     periodReport.ts   # tendances (1re vs 2de moitié) + describePeriod (résumé pour l'IA)
     dayAnalysisExport.ts # formatDayAnalysis (texte) + partage natif (repli presse-papiers) + téléchargement
+    dayAnalysisAggregate.ts # synthèse des analyses IA de journées en cache : déclencheurs + pistes regroupés par similarité (Évolution)
     journalSearch.ts  # recherche dans le journal (aliments / symptômes / notes)
     aggregates.ts     # stats hebdo + séries pour graphes
     biogenicAmines.ts # amines biogènes : classifyAmines (profil détaillé par amine histamine/tyramine/putrescine + daoBlocker/maoInhibitor/liberator/fermented/freshnessDependent), charge globale dayAmineLoad + par amine dayAmineByType + combinaison
