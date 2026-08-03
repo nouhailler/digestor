@@ -156,27 +156,27 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
           <span className="text-xs text-muted">{formatTime(meal.time)}</span>
         )}
         {editing && (
-          <>
+          <div className="ml-auto flex items-center gap-2">
             {onSaveAsTemplate && meal.foods.length > 0 && (
               <button
                 type="button"
                 onClick={() => onSaveAsTemplate(meal)}
-                aria-label="Enregistrer comme modèle"
-                title="Enregistrer ce repas comme modèle réutilisable"
-                className="text-muted hover:text-leger"
+                title="Enregistrer ce repas comme modèle réutilisable (ex. petit-déjeuner habituel), pour le rappeler en un geste un autre jour."
+                className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-leger hover:bg-leger/10"
               >
-                <BookmarkPlus size={14} />
+                <BookmarkPlus size={14} /> Enregistrer comme modèle
               </button>
             )}
             <button
               type="button"
               onClick={onRemove}
               aria-label="Supprimer le repas"
-              className="text-muted hover:text-severe"
+              title="Supprimer le repas"
+              className="shrink-0 text-muted hover:text-severe"
             >
               <Trash2 size={14} />
             </button>
-          </>
+          </div>
         )}
       </div>
 
