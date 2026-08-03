@@ -541,6 +541,16 @@ export async function importAll(payload: ExportPayload): Promise<void> {
   });
 }
 
+// Efface le journal (jours + analyses IA qui en dépendent) sans toucher au profil,
+// aux traitements, aux favoris ni aux réglages.
+export async function clearJournal(): Promise<void> {
+  await db.transaction('rw', [db.days, db.dayAnalyses, db.periodAnalyses], async () => {
+    await db.days.clear();
+    await db.dayAnalyses.clear();
+    await db.periodAnalyses.clear();
+  });
+}
+
 export async function clearAll(): Promise<void> {
   await db.transaction(
     'rw',

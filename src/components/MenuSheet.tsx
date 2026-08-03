@@ -15,11 +15,12 @@ import {
   Sparkles,
   Stethoscope,
   Sun,
+  Trash2,
   Upload,
   UserCog,
 } from 'lucide-react';
 import { Sheet } from './Sheet';
-import { importAll, type ExportPayload } from '../lib/db';
+import { clearJournal, importAll, type ExportPayload } from '../lib/db';
 import { downloadBackup } from '../lib/backup';
 import { loadSeed } from '../lib/seed';
 import { useTheme } from '../hooks/useTheme';
@@ -84,6 +85,17 @@ export function MenuSheet({
       return;
     await loadSeed();
     setMsg('Données de démo réinitialisées.');
+  }
+
+  async function handleClearJournal() {
+    if (
+      !confirm(
+        'Effacer tout le journal (tous les jours, repas et symptômes) ? Cette action est irréversible. Pensez à sauvegarder vos données avant si besoin.',
+      )
+    )
+      return;
+    await clearJournal();
+    setMsg('Journal effacé.');
   }
 
   return (
@@ -239,6 +251,16 @@ export function MenuSheet({
           className="flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-muted hover:text-ink"
         >
           <Info size={16} /> À propos & avertissement médical
+        </button>
+
+        <button
+          type="button"
+          onClick={handleClearJournal}
+          title="Supprime tous les jours, repas et symptômes du journal. Le profil, les traitements et les réglages sont conservés."
+          className="flex w-full items-center gap-2 rounded-lg border px-3 py-2.5 text-sm"
+          style={{ borderColor: 'var(--color-severe)', color: 'var(--color-severe)' }}
+        >
+          <Trash2 size={16} /> Effacer le journal
         </button>
       </div>
     </Sheet>
