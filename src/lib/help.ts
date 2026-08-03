@@ -36,7 +36,7 @@ export const HELP: Record<Tab, HelpEntry> = {
     title: 'Journal',
     intro: 'Saisissez votre journée : repas, symptômes, transit et notes. Tout est enregistré automatiquement.',
     tips: [
-      'Touchez le crayon en haut de la carte pour passer en mode édition.',
+      'Touchez le bouton vert « Modifier » en haut de la carte pour passer en mode édition.',
       'Chaque repas a sa zone « Symptômes après ce repas » : touchez une pastille pour faire varier son intensité (absent → léger → modéré → sévère).',
       'Chaque repas a aussi une zone « Satiété » (faim, énergie, envie de sucre à plusieurs moments). Le détail « durée tenue vs attendue » est expliqué juste en dessous.',
       "En lecture, touchez une chip d'aliment pour lancer son analyse FODMAP / SIBO / candidose.",

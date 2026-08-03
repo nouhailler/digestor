@@ -131,11 +131,17 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
           <button
             type="button"
             onClick={() => setEditing((e) => !e)}
-            className="no-print rounded-full border border-border p-1.5 text-muted hover:text-ink"
-            aria-label={editing ? 'Terminer' : 'Modifier'}
-            title={editing ? 'Terminer' : 'Modifier'}
+            className="no-print inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium"
+            aria-label={editing ? 'Terminer la modification du journal' : 'Modifier le journal : ajouter un repas, des symptômes…'}
+            title={editing ? 'Terminer' : 'Modifier (ajouter un repas, des symptômes…)'}
+            style={
+              editing
+                ? { backgroundColor: 'var(--color-surface-2)', color: 'var(--color-ink)', border: '1px solid var(--color-border)' }
+                : { backgroundColor: 'var(--color-leger)', color: '#0e0e0f' }
+            }
           >
             {editing ? <Check size={16} /> : <Pencil size={15} />}
+            {editing ? 'Terminer' : 'Modifier'}
           </button>
         </div>
       </div>

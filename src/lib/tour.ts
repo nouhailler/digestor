@@ -35,7 +35,7 @@ export const TOURS: Record<Tab, TourStep[]> = {
     {
       target: 'journal-edit',
       title: 'Saisissez repas & symptômes',
-      body: "Le crayon passe la fiche en édition : ajoutez des aliments à chaque repas (chips colorées), notez l'heure, les symptômes ressentis après chaque repas et votre satiété. Plus bas : transit (échelle de Bristol), hydratation et contexte du jour (stress, sommeil, règles). Le badge à gauche résume la qualité du jour. En lecture, touchez une chip d'aliment pour son analyse FODMAP / SIBO / candidose.",
+      body: "Le bouton vert « Modifier » passe la fiche en édition : ajoutez des aliments à chaque repas (chips colorées), notez l'heure, les symptômes ressentis après chaque repas et votre satiété. Plus bas : transit (échelle de Bristol), hydratation et contexte du jour (stress, sommeil, règles). Le badge à gauche résume la qualité du jour. En lecture, touchez une chip d'aliment pour son analyse FODMAP / SIBO / candidose.",
     },
     {
       target: 'journal-analyze',

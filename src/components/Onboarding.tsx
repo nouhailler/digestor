@@ -25,7 +25,7 @@ const STEPS: Step[] = [
   {
     Icon: BookOpen,
     title: 'Saisissez votre journée',
-    body: "Dans le Journal : ajoutez vos repas (chips d'aliments colorées), faites varier l'intensité des symptômes d'un toucher, notez transit et hydratation. Le crayon bascule en mode édition ; la sauvegarde est automatique.",
+    body: "Dans le Journal : ajoutez vos repas (chips d'aliments colorées), faites varier l'intensité des symptômes d'un toucher, notez transit et hydratation. Le bouton vert « Modifier » bascule en mode édition ; la sauvegarde est automatique.",
   },
   {
     Icon: LineChart,
