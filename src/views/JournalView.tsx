@@ -28,9 +28,10 @@ interface JournalViewProps {
   date: string;
   onDateChange: (iso: string) => void;
   onOpenAiSettings: () => void;
+  onOpenMealTemplates: () => void;
 }
 
-export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalViewProps) {
+export function JournalView({ date, onDateChange, onOpenAiSettings, onOpenMealTemplates }: JournalViewProps) {
   const { day, update } = useDay(date);
   const knownFoods = useKnownFoods();
   const recentFoods = useRecentFoods();
@@ -90,7 +91,7 @@ export function JournalView({ date, onDateChange, onOpenAiSettings }: JournalVie
 
       {day ? (
         <>
-          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} onSymptomInfo={openSymptom} knownFoods={knownFoods} recentFoods={recentFoods} favorites={favoriteNames} insights={insights} />
+          <DayCard day={day} update={update} onFoodInfo={setFoodInfo} onSymptomInfo={openSymptom} knownFoods={knownFoods} recentFoods={recentFoods} favorites={favoriteNames} insights={insights} onManageTemplates={onOpenMealTemplates} />
           {dayHasContent(day) && (
             <button
               type="button"

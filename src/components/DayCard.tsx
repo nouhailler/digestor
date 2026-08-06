@@ -52,9 +52,11 @@ interface DayCardProps {
   favorites?: string[];
   /** Analyses IA des aliments (par nom normalisé) : colore les chips dynamiquement. */
   insights?: Map<string, FoodInsight>;
+  /** Ouvre l'écran de gestion des modèles de repas (créer/modifier/supprimer). */
+  onManageTemplates?: () => void;
 }
 
-export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, recentFoods, favorites, insights }: DayCardProps) {
+export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSymptomInfo, knownFoods, recentFoods, favorites, insights, onManageTemplates }: DayCardProps) {
   const [editing, setEditing] = useState(defaultEditing);
   const [tplOpen, setTplOpen] = useState(false);
   const [amineOpen, setAmineOpen] = useState(false);
@@ -258,6 +260,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
               insights={insights}
               onSaveAsTemplate={saveMealAsTemplate}
               templates={templates}
+              onManageTemplates={onManageTemplates}
             />
           ))}
         </div>
@@ -297,6 +300,20 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
                         </button>
                       </li>
                     ))}
+                    {onManageTemplates && (
+                      <li className="mt-1 border-t border-border pt-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTplOpen(false);
+                            onManageTemplates();
+                          }}
+                          className="flex w-full items-center gap-1.5 px-3 py-1.5 text-left text-sm text-muted hover:text-ink"
+                        >
+                          <Pencil size={13} /> Modifier les modèles…
+                        </button>
+                      </li>
+                    )}
                   </ul>
                 )}
               </div>

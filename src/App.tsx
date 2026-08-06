@@ -136,7 +136,12 @@ export default function App() {
       <main>
         <ErrorBoundary key={tab}>
         {tab === 'journal' && (
-          <JournalView date={date} onDateChange={setDate} onOpenAiSettings={() => setAiSettingsOpen(true)} />
+          <JournalView
+            date={date}
+            onDateChange={setDate}
+            onOpenAiSettings={() => setAiSettingsOpen(true)}
+            onOpenMealTemplates={() => setMealTemplatesOpen(true)}
+          />
         )}
         {tab === 'aliments' && (
           <AlimentsView

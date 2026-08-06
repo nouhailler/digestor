@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { BookmarkPlus, Candy, ChevronDown, ClipboardList, Egg, Plus, Scale, Star, Trash2, Wheat, X } from 'lucide-react';
+import { BookmarkPlus, Candy, ChevronDown, ClipboardList, Egg, Pencil, Plus, Scale, Star, Trash2, Wheat, X } from 'lucide-react';
 import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, MealTag, MealTemplate, SymptomKey } from '../types';
 import { Chip } from './Chip';
 import { FoodQuantityEditor } from './FoodQuantityEditor';
@@ -50,10 +50,12 @@ interface MealEditorProps {
   onSaveAsTemplate?: (meal: Meal) => void;
   /** Modèles disponibles pour remplir ce repas, quelle que soit son heure. */
   templates?: MealTemplate[];
+  /** Ouvre l'écran de gestion des modèles de repas (créer/modifier/supprimer). */
+  onManageTemplates?: () => void;
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], recentFoods = [], favorites = [], insights, onSaveAsTemplate, templates = [] }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], recentFoods = [], favorites = [], insights, onSaveAsTemplate, templates = [], onManageTemplates }: MealEditorProps) {
   const [draft, setDraft] = useState('');
   // Saisie d'aliment focalisée : permet d'afficher les favoris (ajout rapide) tant
   // que rien n'est tapé, sans laisser la liste ouverte au rendu initial.
@@ -347,6 +349,20 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
                     </button>
                   </li>
                 ))}
+                {onManageTemplates && (
+                  <li className="mt-1 border-t border-border pt-1">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setTplOpen(false);
+                        onManageTemplates();
+                      }}
+                      className="flex w-full items-center gap-1.5 px-3 py-1.5 text-left text-sm text-muted hover:text-ink"
+                    >
+                      <Pencil size={13} /> Modifier les modèles…
+                    </button>
+                  </li>
+                )}
               </ul>
             )}
           </span>
