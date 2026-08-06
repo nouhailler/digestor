@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { Meal } from '../types';
-import { mealFromTemplate, mealFoodsToTemplate, templateFromMeal } from './mealTemplates';
+import { applyTemplateToMeal, mealFromTemplate, mealFoodsToTemplate, templateFromMeal } from './mealTemplates';
 
 const meal: Meal = {
   id: 'm1',
@@ -43,5 +43,28 @@ describe('mealTemplates', () => {
   it('utilise l’heure du modèle si aucune n’est fournie', () => {
     const t = templateFromMeal('X', meal);
     expect(mealFromTemplate(t).time).toBe('08:00');
+  });
+
+  it('applique un modèle à un repas existant : heure et id du repas conservés', () => {
+    const t = templateFromMeal('Petit-déj', meal);
+    const target: Meal = { id: 'target', time: '19:30', foods: [] };
+    const out = applyTemplateToMeal(target, t);
+    expect(out.id).toBe('target');
+    expect(out.time).toBe('19:30');
+    expect(out.foods.map((f) => f.name)).toEqual(['Flocons avoine', 'Banane']);
+    // id des aliments régénérés
+    expect(out.foods.every((f) => f.id)).toBe(true);
+  });
+
+  it('applique un modèle sans dupliquer les aliments déjà présents', () => {
+    const t = templateFromMeal('Petit-déj', meal);
+    const target: Meal = {
+      id: 'target',
+      time: '08:00',
+      foods: [{ id: 'x', name: 'banane', category: 'beneficial' }],
+    };
+    const out = applyTemplateToMeal(target, t);
+    // « banane » déjà présent (insensible à la casse) → seul « Flocons avoine » ajouté
+    expect(out.foods.map((f) => f.name)).toEqual(['banane', 'Flocons avoine']);
   });
 });

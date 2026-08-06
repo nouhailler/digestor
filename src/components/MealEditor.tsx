@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { BookmarkPlus, Candy, ChevronDown, Egg, Plus, Scale, Star, Trash2, Wheat, X } from 'lucide-react';
-import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, MealTag, SymptomKey } from '../types';
+import { BookmarkPlus, Candy, ChevronDown, ClipboardList, Egg, Plus, Scale, Star, Trash2, Wheat, X } from 'lucide-react';
+import type { FoodCategory, FoodInsight, FoodItem, FoodQuantity, Meal, MealTag, MealTemplate, SymptomKey } from '../types';
 import { Chip } from './Chip';
 import { FoodQuantityEditor } from './FoodQuantityEditor';
 import { formatQuantity } from '../lib/quantity';
@@ -14,6 +14,7 @@ import {
 } from '../lib/constants';
 import { emptySymptoms, makeFood } from '../lib/factory';
 import { MEAL_TAGS, MEAL_TAG_COLOR, MEAL_TAG_LABEL } from '../lib/mealTags';
+import { applyTemplateToMeal } from '../lib/mealTemplates';
 import { normalize } from '../lib/foodClassifier';
 import { amineBadge, classifyAmines } from '../lib/biogenicAmines';
 import { foodSuggestions } from '../lib/foodSuggestions';
@@ -47,16 +48,20 @@ interface MealEditorProps {
   insights?: Map<string, FoodInsight>;
   /** En édition, enregistrer ce repas comme modèle réutilisable. */
   onSaveAsTemplate?: (meal: Meal) => void;
+  /** Modèles disponibles pour remplir ce repas, quelle que soit son heure. */
+  templates?: MealTemplate[];
 }
 
 /** Un repas : heure (gris) + chips aliments qui s'enroulent. */
-export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], recentFoods = [], favorites = [], insights, onSaveAsTemplate }: MealEditorProps) {
+export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSymptomInfo, knownFoods = [], recentFoods = [], favorites = [], insights, onSaveAsTemplate, templates = [] }: MealEditorProps) {
   const [draft, setDraft] = useState('');
   // Saisie d'aliment focalisée : permet d'afficher les favoris (ajout rapide) tant
   // que rien n'est tapé, sans laisser la liste ouverte au rendu initial.
   const [foodInputFocused, setFoodInputFocused] = useState(false);
   // Id de l'aliment dont le popover de quantité est ouvert (un seul à la fois).
   const [qtyOpen, setQtyOpen] = useState<string | null>(null);
+  // Liste déroulante « depuis un modèle » (remplir ce repas), fermée par défaut.
+  const [tplOpen, setTplOpen] = useState(false);
   // La grille des symptômes du repas est repliée par défaut (la plupart des repas
   // n'en ont aucun) ; on la déplie à la demande pour gagner de la place.
   const [symptomsOpen, setSymptomsOpen] = useState(false);
@@ -100,6 +105,12 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
     if (!trimmed) return;
     onChange({ ...meal, foods: [...meal.foods, makeFood(trimmed)] });
     setDraft('');
+  }
+
+  function applyTemplate(id: string) {
+    setTplOpen(false);
+    const tpl = templates.find((t) => t.id === id);
+    if (tpl) onChange(applyTemplateToMeal(meal, tpl));
   }
 
   function cycleFood(id: string) {
@@ -299,6 +310,40 @@ export function MealEditor({ meal, editing, onChange, onRemove, onFoodInfo, onSy
                         <Star size={13} fill="currentColor" className="shrink-0" style={{ color: 'var(--color-modere)' }} />
                       )}
                       <span className="truncate">{s.name}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </span>
+        )}
+
+        {editing && templates.length > 0 && (
+          <span className="relative inline-flex">
+            <button
+              type="button"
+              onClick={() => setTplOpen((o) => !o)}
+              title="Remplir ce repas à partir d'un modèle enregistré (ex. petit-déjeuner habituel), quelle que soit l'heure du repas."
+              className="inline-flex items-center gap-1 rounded-full border border-dashed border-border px-2.5 py-1 text-sm text-muted hover:border-leger hover:text-leger"
+            >
+              <ClipboardList size={15} /> Depuis un modèle
+            </button>
+            {tplOpen && (
+              <ul
+                className="absolute left-0 top-full z-10 mt-1 max-h-56 w-56 overflow-auto rounded-lg border border-border bg-surface-2 py-1 shadow-lg"
+                aria-label="Modèles de repas"
+              >
+                {templates.map((t) => (
+                  <li key={t.id}>
+                    <button
+                      type="button"
+                      onClick={() => applyTemplate(t.id)}
+                      className="block w-full px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
+                    >
+                      {t.name}
+                      <span className="block truncate text-xs text-muted">
+                        {t.foods.map((f) => f.name).join(', ')}
+                      </span>
                     </button>
                   </li>
                 ))}

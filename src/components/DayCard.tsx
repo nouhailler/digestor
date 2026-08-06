@@ -257,6 +257,7 @@ export function DayCard({ day, update, defaultEditing = false, onFoodInfo, onSym
               favorites={favorites}
               insights={insights}
               onSaveAsTemplate={saveMealAsTemplate}
+              templates={templates}
             />
           ))}
         </div>
