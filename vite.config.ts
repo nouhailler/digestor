@@ -21,6 +21,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Enregistrement fait à la main dans main.tsx (nécessaire pour le polling
+      // périodique de mise à jour) plutôt que par le script auto-injecté.
+      injectRegister: false,
       includeAssets: [
         'favicon.svg',
         'icons/icon-192.png',
