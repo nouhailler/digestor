@@ -6,9 +6,11 @@ import {
   Gauge,
   GraduationCap,
   Info,
+  Loader2,
   Mic,
   Moon,
   Pill,
+  RefreshCw,
   RotateCcw,
   Save,
   Search,
@@ -25,6 +27,8 @@ import { downloadBackup } from '../lib/backup';
 import { loadSeed } from '../lib/seed';
 import { useTheme } from '../hooks/useTheme';
 import type { Theme } from '../lib/theme';
+import { APP_VERSION, BUILD_DATE, checkForUpdate } from '../lib/pwaUpdate';
+import { dateTimeLabel } from '../lib/dates';
 
 interface MenuSheetProps {
   open: boolean;
@@ -59,7 +63,22 @@ export function MenuSheet({
 }: MenuSheetProps) {
   const fileRef = useRef<HTMLInputElement>(null);
   const [msg, setMsg] = useState<string | null>(null);
+  const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [updateMsg, setUpdateMsg] = useState<string | null>(null);
   const { theme, setTheme } = useTheme();
+
+  async function handleCheckUpdate() {
+    setCheckingUpdate(true);
+    setUpdateMsg(null);
+    try {
+      const result = await checkForUpdate();
+      if (result === 'updating') setUpdateMsg('Nouvelle version trouvée, installation…');
+      else if (result === 'up-to-date') setUpdateMsg('Vous avez déjà la dernière version.');
+      else setUpdateMsg('Vérification indisponible (app non installée hors-ligne).');
+    } finally {
+      setCheckingUpdate(false);
+    }
+  }
 
   async function handleExport() {
     await downloadBackup();
@@ -252,6 +271,22 @@ export function MenuSheet({
         >
           <Info size={16} /> À propos & avertissement médical
         </button>
+
+        <div className="rounded-lg border border-border px-3 py-2.5 text-sm">
+          <p className="text-muted">
+            Version {APP_VERSION} · mise à jour le {dateTimeLabel(BUILD_DATE)}
+          </p>
+          <button
+            type="button"
+            onClick={handleCheckUpdate}
+            disabled={checkingUpdate}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2 text-sm text-ink hover:border-leger disabled:opacity-60"
+          >
+            {checkingUpdate ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+            Vérifier les mises à jour
+          </button>
+          {updateMsg && <p className="mt-2 text-xs text-muted">{updateMsg}</p>}
+        </div>
 
         <button
           type="button"
