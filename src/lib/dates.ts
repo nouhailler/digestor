@@ -61,6 +61,11 @@ export function dateLabel(iso: string): string {
   return format(parseISO(iso), 'd MMMM yyyy', { locale: fr });
 }
 
+/** "20 juin 2026, 8 h 05" à partir d'un datetime ISO (ex. horodatage de build). */
+export function dateTimeLabel(iso: string): string {
+  return format(parseISO(iso), "d MMMM yyyy, H 'h' mm", { locale: fr });
+}
+
 /** "lun. 9" (axes de graphes). */
 export function dayShortLabel(iso: string): string {
   return format(fromISODate(iso), 'EEE d', { locale: fr });

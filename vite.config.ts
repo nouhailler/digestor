@@ -2,8 +2,15 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import pkg from './package.json';
 
 export default defineConfig({
+  // Version affichée dans le menu (À propos des mises à jour) + date de ce build,
+  // utilisée comme « date de dernière mise à jour » de l'app.
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString()),
+  },
   build: {
     rollupOptions: {
       output: {
@@ -21,8 +28,9 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Enregistrement fait à la main dans main.tsx (nécessaire pour le polling
-      // périodique de mise à jour) plutôt que par le script auto-injecté.
+      // Enregistrement fait à la main dans lib/pwaUpdate.ts (nécessaire pour le
+      // polling périodique + la vérification manuelle) plutôt que par le script
+      // auto-injecté.
       injectRegister: false,
       includeAssets: [
         'favicon.svg',

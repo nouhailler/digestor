@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  dateTimeLabel,
   dayLongLabel,
   dayMonthLabel,
   fromISODate,
@@ -67,5 +68,12 @@ describe('dayMonthLabel', () => {
   it('jour + mois abrégé, sans point', () => {
     expect(dayMonthLabel('2025-06-09')).toBe('9 juin');
     expect(dayMonthLabel('2025-12-01')).toBe('1 déc');
+  });
+});
+
+describe('dateTimeLabel', () => {
+  it('date longue + heure', () => {
+    expect(dateTimeLabel('2025-06-09T08:05:00')).toBe('9 juin 2025, 8 h 05');
+    expect(dateTimeLabel('2025-06-09T14:30:00')).toBe('9 juin 2025, 14 h 30');
   });
 });
