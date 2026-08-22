@@ -132,7 +132,7 @@ export function WeekView({ date, onDateChange, onOpenDay }: WeekViewProps) {
           label="Jours difficiles"
           value={`${stats.hardDays} / ${stats.totalDays}`}
           color={countColor(stats.hardDays)}
-          description="Nombre de jours de la semaine dont la qualité globale est « difficile » (badge rouge) — que vous l'ayez choisie vous-même ou qu'elle soit suggérée d'après vos symptômes. 0 jour difficile = vert ; 1 à 2 = ambre ; 3 et plus = rouge."
+          description="Nombre de jours de la semaine dont vous avez vous-même forcé le badge sur « difficile » (en touchant le badge dans le Journal). Les journées classées « difficile » automatiquement d'après vos symptômes apparaissent bien en rouge dans l'agenda ci-dessus et sur leur fiche, mais ne sont pas comptées ici : ce compteur ne retient que votre appréciation. 0 jour difficile = vert ; 1 à 2 = ambre ; 3 et plus = rouge."
           onInfo={setInfo}
         />
         <StatCard
