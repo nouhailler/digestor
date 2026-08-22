@@ -4,6 +4,59 @@ Toutes les évolutions notables de Digestor. Format inspiré de
 [Keep a Changelog](https://keepachangelog.com/fr/), versions en
 [SemVer](https://semver.org/lang/fr/) (pré-1.0 : l'app évolue rapidement).
 
+## [0.15.2] — Visites guidées remises à niveau
+
+- **Visites guidées à jour sur les 5 écrans** : `lib/tour.ts` réécrit pour couvrir les
+  fonctions arrivées depuis leur création (amines biogènes, satiété, échelle de Bristol,
+  saisie vocale repas & satiété, partage de fiche en carte PNG, référentiel d'aliments,
+  dossier médical avec graphes).
+- **Nouvelles étapes ancrées** (`data-tour`) : `journal-analyze` (bilan IA du jour) ;
+  `aliments-scope` / `aliments-scan` / `aliments-actions` ; `week-stats` /
+  `week-correlations` ; `evo-report` ; `reperes-tabs`.
+- Les cibles absentes (rendu conditionnel) se replient en bulle centrée. Les visites déjà
+  vues ne se relancent pas (`meta.toursSeen`) ; rejouables via menu ⋯ → « Revoir le
+  tutoriel & les visites guidées ». **332 tests.**
+
+## [0.15.1] — Graphes d'évolution dans le dossier médical
+
+- **Section « Évolution sur la période »** dans le dossier médical : sévérité des symptômes
+  par jour (barres empilées léger/modéré/sévère) et transit (Bristol, zones
+  constipation/diarrhée), imprimables (`components/MedicalRecordCharts.tsx`).
+- **Axe temporel honnête** : `fillDayRange` comble les trous d'une série de jours épars ;
+  les jours vides autosauvés n'étirent pas l'axe, un trou de saisie reste un trou. Labels
+  `dayMonthLabel`.
+- **Code-splitting préservé** : `MedicalRecordSheet` en `React.lazy`, monté seulement à
+  l'ouverture (sinon le chunk recharts partirait au démarrage).
+- **Impression** : règles `@media print` pour les SVG (axes lisibles, remplissages
+  sémantiques préservés). **332 tests.**
+
+## [0.15.0] — Amines biogènes, référentiel Claude Web & partage de fiche
+
+- **Amines biogènes de bout en bout** : profil détaillé par amine (histamine / tyramine /
+  putrescine) + mécanismes (libérateur, freineur de DAO, inhibiteur de MAO, fermenté,
+  dépendant de la fraîcheur) ; charge du jour globale et par amine, avec effet de
+  combinaison ; corrélations amine ↔ symptôme à garde-fous conservateurs
+  (`lib/biogenicAmines.ts`, `lib/amineCorrelation.ts`, `lib/symptomCatalog.ts`).
+- **UI amines** : pastille sur chaque aliment (Journal, Aliments, produit scanné), bandeau
+  « Amines » cliquable du Journal, carte « Amines (note /10) » dans Semaine, dimension
+  amines dans le dossier médical et les analyses IA de journée / période.
+- **Repères enrichis** : référence de toutes les amines biogènes, tableau des plus
+  problématiques, fiches détaillées (`lib/amineArticles.ts`), catégorie « Amines biogènes »
+  dans l'Encyclopédie.
+- **Référentiel d'aliments (échange Claude Web)** : export du catalogue
+  (`lib/foodReference.ts`), import **fusionnant** (`lib/foodReferenceImport.ts`) et prompt
+  « patch amines » (`docs/claude-web-amines-prompt.md`). Les référentiels exportés sont
+  ignorés par git.
+- **Partage de la fiche d'un aliment** : en texte (partage natif + repli presse-papiers +
+  téléchargement) et en **carte PNG** (`lib/foodInsightExport.ts`, `lib/foodInsightImage.ts`).
+- **Enrichissement des amines par l'IA** : bouton dédié avec progression et Stop, décompte
+  honnête des aliments « à enrichir » ; légumineuses ajoutées au dictionnaire.
+- **Détection de carence (socle)** : `lib/nutrition.ts` — fonctions pures CIQUAL vs ANR,
+  avec garde-fou de couverture (pas de faux manque).
+- **Honnêteté renforcée** : retrait des **corrélations heuristiques codées en dur**
+  (Semaine et dossier médical, dont « sans céréales »). Ne restent que les corrélations
+  calculées sur les données réelles.
+
 ## [0.14.0] — Suivi de la satiété (faim / énergie / envie de sucre)
 
 Nouveau suivi temporel de la satiété après chaque repas, corrélé localement à la composition.

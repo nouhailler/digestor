@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import {
+  BookMarked,
   ClipboardList,
   FileText,
   FlaskConical,
@@ -260,6 +261,17 @@ export function MenuSheet({
         >
           <Stethoscope size={16} /> Dossier médical
         </button>
+
+        <a
+          href="/docs/index.html"
+          target="_blank"
+          rel="noreferrer"
+          onClick={onClose}
+          title="Documentation complète : guide des écrans, fonctionnalités, paramètres, données, dépannage et FAQ."
+          className="flex w-full items-center gap-2 rounded-lg border border-border px-3 py-2.5 text-sm text-muted hover:text-ink"
+        >
+          <BookMarked size={16} /> Aide & documentation
+        </a>
 
         <button
           type="button"

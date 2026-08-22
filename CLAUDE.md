@@ -2,6 +2,11 @@
 
 Guide pour travailler dans ce dépôt. Voir `CONTEXT.md` pour l'état détaillé / décisions / TODO.
 
+> **Documentation** : suivre `DOCUMENTATION_SPEC.md` (racine). Une tâche n'est « done » que si
+> la doc est à jour. Les pages vivent dans `docs/` (Markdown) ; `npm run docs` régénère le site
+> statique `public/docs/index.html` (accordéons, recherche, contrôle des liens — le build échoue
+> sur un lien cassé). `npm run dev` et `npm run build` le régénèrent automatiquement.
+
 ## Nature du projet
 
 PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire & symptômes
@@ -19,10 +24,10 @@ PWA React 19 + TypeScript, **100 % offline**, sans backend. Journal alimentaire 
 
 Tests : **Vitest**. Par défaut environnement **Node** (fonctions pures de `src/lib`). Les tests de
 **composants** (`*.test.tsx`, RTL + jsdom) déclarent `// @vitest-environment jsdom` en tête de fichier
-et appellent `afterEach(cleanup)` localement (pas de setup global). 332 tests : `foodClassifier`, `dates`,
+et appellent `afterEach(cleanup)` localement (pas de setup global). 340 tests : `foodClassifier`, `dates`,
 `quality`, `quantity`, `openFoodFacts`, `foodSuggestions`, `medicalRecord`, `personalCorrelations`,
 `dayAnalysisExport`, `satiety`, `satietyImport`, `satietyCorrelation`, `satietyDuration`, `mealTags`,
-`contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `aggregates`,
+`contextCorrelations`, `mealTemplates`, `periodReport`, `journalSearch`, `foodRecurrence`, `aggregates`,
 `biogenicAmines`, `amineCorrelation`, `symptomCatalog`, `nutrition`, `foodReference`,
 `foodReferenceImport`, `foodInsightExport`, `foodInsightImage`, `dayAnalysisAggregate`, `mealCorrelations`,
 `ai/foodInsight`, `ai/dayAnalysis`, `ai/mealSuggestions`, `Chip`, `SymptomGrid`, `MultiChipSelect`,
@@ -71,6 +76,7 @@ src/
     dayAnalysisExport.ts # formatDayAnalysis (texte) + partage natif (repli presse-papiers) + téléchargement
     dayAnalysisAggregate.ts # synthèse des analyses IA de journées en cache : déclencheurs + pistes regroupés par similarité (Évolution)
     journalSearch.ts  # recherche dans le journal (aliments / symptômes / notes)
+    foodRecurrence.ts # récurrence des aliments sur 30 jours glissants : mentions, jours distincts, rythme, 1re → dernière date (tableau Évolution)
     aggregates.ts     # stats hebdo + séries pour graphes
     biogenicAmines.ts # amines biogènes : classifyAmines (profil détaillé par amine histamine/tyramine/putrescine + daoBlocker/maoInhibitor/liberator/fermented/freshnessDependent), charge globale dayAmineLoad + par amine dayAmineByType + combinaison
     amineCorrelation.ts # corrélations charge amines ↔ symptômes : globale (amineSymptomCorrelation) + fine par type (amineTypeCorrelation, patterns histaminique/tyraminique via typicalAmine) — garde-fous conservateurs

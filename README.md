@@ -11,7 +11,7 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 ![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=000)
 ![Vite](https://img.shields.io/badge/Vite-6-646cff?logo=vite&logoColor=fff)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=fff)
-![Tests](https://img.shields.io/badge/tests-209%20✓-5fbf6f)
+![Tests](https://img.shields.io/badge/tests-340%20✓-5fbf6f)
 
 [![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/nouhailler/digestor)
 
@@ -48,11 +48,14 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
   d'aide. Sauvegarde auto.
 - 🗓️ **Semaine** — **agenda cliquable** des 7 jours (couleur = qualité, clic → ouvre le jour) +
   récapitulatif calculé en direct (jours difficiles, ballonnements sévères, diarrhée, jours sans sucre
-  ajouté, hydratation moyenne, score énergie) + **corrélations** aliment → symptôme. **Corrélations
+  ajouté, note amines /10, score énergie) + **corrélations** aliment → symptôme. **Corrélations
   personnalisées** calculées sur tout l'historique : déclencheurs suspectés (taux de symptôme les jours
   « avec » vs « sans ») et aliments fréquents bien tolérés — détection conservatrice, jamais inventée.
-- 📈 **Évolution** — graphes (sévérité par jour, hydratation vs cible 1,5 L, catégories d'aliments,
-  top symptômes) sur semaine / 4 semaines / tout, + **rapport de période** : tendances calculées
+- 📈 **Évolution** — graphes sur semaine / 4 semaines / tout : sévérité par jour, symptômes après les
+  repas (jour × heure), aliment suspect par symptôme, tendance des amines biogènes, selles (Bristol),
+  catégories d'aliments, top symptômes, courbes de satiété, et la **synthèse des analyses IA de
+  journées**. Plus un tableau de **récurrence des aliments** (30 derniers jours : mentions, jours
+  distincts, rythme, plage de dates) et un **rapport de période** : tendances calculées
   (début vs fin) et **synthèse IA** optionnelle (verdict, déclencheurs récurrents, pistes).
 - 🍎 **Aliments** *(IA, optionnel)* — analyse FODMAP (global + par groupe), verdicts SIBO & candidose,
   portion tolérée, conseils. **Catalogue de ~267 aliments**, **analyse en masse**, recherche combobox
@@ -134,10 +137,44 @@ npm run dev      # serveur de dev (http://localhost:5173)
 npm run build    # build de production (typecheck + bundle → dist/)
 npm run preview  # prévisualiser le build
 npm test         # tests unitaires + composants (Vitest)
+npm run docs     # regénère le site de documentation → public/docs/index.html
+```
+
+Captures d'écran de la documentation (nécessite un serveur lancé, p. ex. `npm run preview`) :
+
+```bash
+npm run build && npm run preview -- --port 4173   # dans un terminal
+npm run screenshots                               # dans un autre → docs/screenshots/*.png
 ```
 
 Au premier lancement, l'app pré-remplit **Lundi 9 et Mardi 10 juin 2025** (données de démo).
 Bouton « Données de démo » dans le menu `⋯` pour réinitialiser.
+
+## 📚 Documentation
+
+La documentation utilisateur vit dans [`docs/`](./docs) (Markdown, versionnée avec le code) et
+suit le standard [`DOCUMENTATION_SPEC.md`](./DOCUMENTATION_SPEC.md) : **toute fonctionnalité
+visible doit être documentée, et une tâche n'est « done » que si sa doc est à jour**.
+
+`npm run docs` (appelé automatiquement par `npm run dev` et `npm run build`) génère un site
+statique autonome dans `public/docs/index.html` — sommaire en accordéons, recherche client,
+thème clair/sombre, disponible **hors connexion** (précaché par le service worker) et accessible
+depuis l'app via menu `⋯` → **Aide & documentation**.
+
+Le générateur ([`scripts/build-docs.mjs`](./scripts/build-docs.mjs)) **échoue** si un lien interne
+ou une ancre est cassé, ou si un motif de secret apparaît dans la doc — le contrôle tourne donc
+en CI à chaque build.
+
+Les captures de l'aperçu ci-dessus sont régénérées par
+[`scripts/screenshots.mjs`](./scripts/screenshots.mjs), qui injecte un **jeu de démonstration
+entièrement fictif** (5 semaines de journal, profil « Camille (démo) ») : aucune donnée réelle
+n'apparaît dans la documentation.
+
+Points d'entrée : [Bien démarrer](./docs/getting-started/index.md) ·
+[Guide](./docs/guide/index.md) · [Fonctionnalités](./docs/features/index.md) ·
+[Paramètres](./docs/settings/index.md) · [Données](./docs/data/index.md) ·
+[Dépannage](./docs/troubleshooting/index.md) · [FAQ](./docs/faq/index.md) ·
+[Référence](./docs/reference/index.md)
 
 ## ☁️ Déploiement Netlify
 

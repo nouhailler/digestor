@@ -66,6 +66,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,ico,woff2}'],
         cleanupOutdatedCaches: true,
         navigateFallback: '/index.html',
+        // La documentation statique (public/docs/, générée par `npm run docs`) est
+        // une vraie page : sans cette exclusion, le repli de navigation servirait
+        // le shell de l'app à sa place.
+        navigateFallbackDenylist: [/^\/docs\//],
       },
     }),
   ],

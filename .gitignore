@@ -13,3 +13,6 @@ dist-ssr
 # Référentiel d'aliments exporté depuis Digestor (donnée personnelle, non versionnée)
 /digestor-aliments-reference-*.json
 .~lock.*#
+
+# Documentation générée depuis docs/ par `npm run docs` (voir scripts/build-docs.mjs)
+/public/docs/
