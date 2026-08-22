@@ -69,8 +69,8 @@ export const HELP: Record<Tab, HelpEntry> = {
     intro: 'Suivez vos tendances dans le temps.',
     tips: [
       'Changez la plage : semaine, 4 semaines ou tout.',
-      "La ligne d'hydratation se compare à la cible de 1,5 L.",
       '« Plus de rouge » (aliments pro) et sévérité des symptômes se lisent en parallèle.',
+      'Le tableau « Récurrence des aliments » couvre toujours les 30 derniers jours : mentions, jours distincts, rythme et plage de dates.',
     ],
   },
   reperes: {

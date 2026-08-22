@@ -117,7 +117,7 @@ export const TOURS: Record<Tab, TourStep[]> = {
   evolution: [
     {
       title: 'Vos tendances dans le temps',
-      body: "Des graphes pour voir évoluer vos symptômes, vos aliments « rouges », la charge en amines biogènes, vos selles (échelle de Bristol), votre satiété et votre hydratation.",
+      body: "Des graphes pour voir évoluer vos symptômes, vos aliments « rouges », la charge en amines biogènes, vos selles (échelle de Bristol) et votre satiété.",
     },
     {
       target: 'evo-range',
@@ -128,6 +128,11 @@ export const TOURS: Record<Tab, TourStep[]> = {
       target: 'evo-report',
       title: 'Le rapport de période',
       body: "Un bilan de la plage affichée : tendances calculées (1re vs 2de moitié) et, si l'IA est configurée, une synthèse avec verdict, déclencheurs récurrents et pistes.",
+    },
+    {
+      target: 'evo-recurrence',
+      title: 'La récurrence de vos aliments',
+      body: "Sur les 30 derniers jours : combien de fois chaque aliment revient, sur combien de jours différents, à quel rythme et de quelle date à quelle date. Utile pour repérer ce que vous mangez le plus souvent.",
     },
     {
       title: 'Des graphes qui apparaissent avec vos données',

@@ -31,6 +31,8 @@ import {
   type StoolBand,
 } from '../lib/aggregates';
 import { AMINE_LOAD_LABEL, amineBadge, type AmineLoadBand } from '../lib/biogenicAmines';
+import { foodRecurrence, RECURRENCE_WINDOW_DAYS, type FoodRecurrenceRow } from '../lib/foodRecurrence';
+import { CATEGORY_COLOR, CATEGORY_LABEL } from '../lib/constants';
 import { aggregateImprovements, aggregateTriggers } from '../lib/dayAnalysisAggregate';
 import { mealCorrelations } from '../lib/mealCorrelations';
 import { CHECKPOINT_SHORT } from '../lib/satiety';
@@ -42,7 +44,7 @@ import {
   MIN_SATIETY_MEALS,
   overallAverages,
 } from '../lib/satietyCorrelation';
-import { dayShortLabel, fromISODate, toISODate } from '../lib/dates';
+import { dayMonthLabel, dayShortLabel, fromISODate, toISODate } from '../lib/dates';
 import { dayHasContent } from '../lib/aggregates';
 import { TipBanner } from '../components/TipBanner';
 import { PeriodReportSheet } from '../components/ai/PeriodReportSheet';
@@ -53,6 +55,9 @@ import { Sparkles } from 'lucide-react';
 type Range = 'week' | '4weeks' | 'all';
 
 const RANGE_LABEL: Record<Range, string> = { week: 'Semaine', '4weeks': '4 semaines', all: 'Tout' };
+
+/** Lignes de récurrence affichées avant le bouton « voir tout ». */
+const RECURRENCE_PREVIEW = 12;
 
 // La palette sémantique est identique sur les deux thèmes (cf. index.css).
 const COL = {
@@ -95,6 +100,7 @@ interface EvolutionViewProps {
 export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
   const [range, setRange] = useState<Range>('4weeks');
   const [reportOpen, setReportOpen] = useState(false);
+  const [allRecurrence, setAllRecurrence] = useState(false);
   const { theme } = useTheme();
   const insights = useFoodInsightMap();
   const chrome = CHROME[theme];
@@ -130,6 +136,17 @@ export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
 
   // Analyses IA de journées en cache (petite table) : filtrées par période plus bas.
   const allAnalyses = useLiveQuery(() => db.dayAnalyses.toArray(), []);
+
+  // Fenêtre fixe de 30 jours pour le tableau de récurrence des aliments
+  // (indépendante du sélecteur de période, cf. titre de la carte).
+  const recurrenceWindow = useLiveQuery(async () => {
+    const anchor = (await getLatestActiveDate()) ?? date;
+    const end = fromISODate(anchor);
+    const start = addDays(end, -(RECURRENCE_WINDOW_DAYS - 1));
+    const dates = Array.from({ length: RECURRENCE_WINDOW_DAYS }, (_, i) => toISODate(addDays(start, i)));
+    const rows = await db.days.bulkGet(dates);
+    return { from: dates[0], to: dates[dates.length - 1], days: rows.filter((d) => d !== undefined) };
+  }, [date]);
 
   if (!days) return <div className="mx-auto max-w-3xl px-4 pt-10 text-center text-muted">Chargement…</div>;
 
@@ -170,6 +187,10 @@ export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
     const a = overallAverages(b.meals);
     return { label: b.label, hungerIntensity: a.hungerIntensity, sugarCraving: a.sugarCraving };
   });
+
+  // --- Récurrence des aliments sur 30 jours (tableau factuel, sans conclusion) ---
+  const recurrence = recurrenceWindow ? foodRecurrence(recurrenceWindow.days, recurrenceWindow.to) : [];
+  const recurrenceShown = allRecurrence ? recurrence : recurrence.slice(0, RECURRENCE_PREVIEW);
 
   // Plage réelle (jours renseignés) pour la clé de cache du rapport de période.
   const recorded = days.filter(dayHasContent);
@@ -489,6 +510,88 @@ export function EvolutionView({ date, onOpenAiSettings }: EvolutionViewProps) {
             </ResponsiveContainer>
           </ChartCard>
 
+          <ChartCard
+            title={`Récurrence des aliments (${RECURRENCE_WINDOW_DAYS} derniers jours)`}
+            tour="evo-recurrence"
+          >
+            {!recurrenceWindow ? (
+              <p className="text-sm text-muted">Chargement…</p>
+            ) : recurrence.length === 0 ? (
+              <p className="text-sm text-muted">
+                Aucun aliment renseigné sur les {RECURRENCE_WINDOW_DAYS} derniers jours.
+              </p>
+            ) : (
+              <>
+                <p className="mb-3 text-xs text-muted">
+                  Du {dayMonthLabel(recurrenceWindow.from)} au {dayMonthLabel(recurrenceWindow.to)} —{' '}
+                  {recurrence.length} aliment{recurrence.length > 1 ? 's' : ''} distinct
+                  {recurrence.length > 1 ? 's' : ''} (indépendant du filtre de période ci-dessus).
+                </p>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-left text-muted">
+                        <th className="pb-2 pr-2 font-medium">Aliment</th>
+                        <th className="pb-2 pr-2 font-medium" title="Nombre de fois où l'aliment apparaît dans un repas">
+                          Mentions
+                        </th>
+                        <th className="pb-2 pr-2 font-medium" title="Nombre de jours différents où l'aliment apparaît">
+                          Jours
+                        </th>
+                        <th className="pb-2 pr-2 font-medium" title="Écart moyen entre deux jours de consommation">
+                          Rythme
+                        </th>
+                        <th className="pb-2 font-medium">De … à …</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recurrenceShown.map((r) => (
+                        <tr key={r.key} className="border-t border-border align-top" title={recurrenceTitle(r)}>
+                          <td className="py-2 pr-2">
+                            <span className="inline-flex items-center gap-1.5">
+                              <span
+                                className="inline-block h-2 w-2 shrink-0 rounded-full"
+                                style={{ backgroundColor: CATEGORY_COLOR[r.category] }}
+                                title={CATEGORY_LABEL[r.category]}
+                              />
+                              <span className="font-medium text-ink">{r.name}</span>
+                            </span>
+                          </td>
+                          <td className="py-2 pr-2 whitespace-nowrap text-ink">×{r.mentions}</td>
+                          <td className="py-2 pr-2 whitespace-nowrap text-muted">{r.dates.length} j</td>
+                          <td className="py-2 pr-2 whitespace-nowrap text-muted">
+                            {r.avgIntervalDays === null ? '—' : `tous les ~${formatInterval(r.avgIntervalDays)} j`}
+                          </td>
+                          <td className="py-2 whitespace-nowrap text-muted">
+                            {r.first === r.last
+                              ? dayMonthLabel(r.first)
+                              : `${dayMonthLabel(r.first)} → ${dayMonthLabel(r.last)}`}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {recurrence.length > RECURRENCE_PREVIEW && (
+                  <button
+                    type="button"
+                    onClick={() => setAllRecurrence((v) => !v)}
+                    className="mt-3 rounded-lg border border-border px-3 py-1.5 text-xs text-muted hover:border-leger hover:text-ink"
+                  >
+                    {allRecurrence
+                      ? 'Réduire'
+                      : `Voir les ${recurrence.length - RECURRENCE_PREVIEW} autres aliments`}
+                  </button>
+                )}
+                <p className="mt-2 text-xs text-muted">
+                  Simple décompte du journal : « ×4 · 3 j » = 4 mentions réparties sur 3 jours différents.
+                  Les pluriels sont regroupés (« Tomate » / « Tomates »). Survolez une ligne pour voir toutes
+                  les dates. Pastille : catégorie de l'aliment (rouge pro · gris neutre · vert bénéfique).
+                </p>
+              </>
+            )}
+          </ChartCard>
+
           <ChartCard title="Top symptômes sur la période">
             <ResponsiveContainer width="100%" height={Math.max(160, tops.length * 30)}>
               <BarChart
@@ -717,11 +820,35 @@ function MealSymptomTooltip({
   );
 }
 
-function ChartCard({ title, children }: { title: string; children: React.ReactNode }) {
+function ChartCard({
+  title,
+  tour,
+  children,
+}: {
+  title: string;
+  /** Ancre de visite guidée (`data-tour`), optionnelle. */
+  tour?: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-surface p-4">
+    <div className="rounded-2xl border border-border bg-surface p-4" data-tour={tour}>
       <h3 className="mb-3 text-sm font-medium text-ink">{title}</h3>
       {children}
     </div>
   );
+}
+
+/** "4" ou "3,5" (écart moyen entre deux consommations). */
+function formatInterval(days: number): string {
+  return days.toFixed(days < 10 && !Number.isInteger(days) ? 1 : 0).replace('.', ',');
+}
+
+/** Infobulle d'une ligne de récurrence : toutes les dates + dernière mention. */
+function recurrenceTitle(r: FoodRecurrenceRow): string {
+  const dates = r.dates.map(dayMonthLabel).join(', ');
+  const last =
+    r.daysSinceLast === 0
+      ? 'dernière mention le dernier jour renseigné'
+      : `dernière mention il y a ${r.daysSinceLast} jour${r.daysSinceLast > 1 ? 's' : ''}`;
+  return `Mentionné les : ${dates} · ${last}`;
 }
