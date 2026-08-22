@@ -179,9 +179,15 @@ l'application. La suppression est définitive.
 
 ### Comment réinitialiser l'application ?
 
-Il n'y a pas de bouton « tout effacer » dans l'interface. **Menu `⋯` → Données de démo**
-recharge les deux journées d'exemple (et écrase ces dates uniquement). Pour repartir
-totalement de zéro, effacez les données du site.
+Trois niveaux, du plus doux au plus radical :
+
+| Ce que vous voulez | Comment | Ce qui disparaît |
+|---|---|---|
+| Repartir d'un journal vide | Menu `⋯` → **Effacer le journal** | Toutes les journées, les analyses de journées et les rapports de période. Profil, aliments, favoris, traitements, réintroductions et modèles sont **conservés** |
+| Retrouver les journées d'exemple | Menu `⋯` → **Données de démo** | Rien d'autre : seules les deux dates de démonstration sont écrasées |
+| Tout remettre à zéro | Effacer les données du site dans le navigateur | **Tout**, sans exception |
+
+Sauvegardez avant : aucune de ces actions n'est réversible.
 
 ### Que reçoit Open Food Facts ?
 

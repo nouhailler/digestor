@@ -16,7 +16,7 @@ diagnostic, solution, et quoi faire si le problème persiste.
 
 ## Informations à fournir au support
 
-Quel que soit le problème, préparez : la **version** de l'application (0.15.2),
-l'**appareil**, le **système**, le **navigateur** et sa version, le **message d'erreur**
+Quel que soit le problème, préparez : la **version** de l'application (affichée dans
+**Menu `⋯`**, au-dessus de « Vérifier les mises à jour »), l'**appareil**, le **système**, le **navigateur** et sa version, le **message d'erreur**
 exact, l'**état du réseau**, et les **étapes** qui reproduisent le problème.
 Voir [Support](../support/index.md).

@@ -15,6 +15,20 @@ Présent dans le code mais non encore publié sous un numéro de version :
 - **Récurrence des aliments** — tableau de l'écran Évolution sur une fenêtre glissante de
   30 jours (mentions, jours distincts, rythme, première → dernière date), avec regroupement
   des variantes proches. Voir [Récurrence des aliments](../features/recurrence-aliments.md).
+- **Effacer le journal** — Menu `⋯` : supprime toutes les journées et les analyses
+  associées, en conservant profil, aliments, favoris, traitements et modèles. Voir
+  [Sauvegarde & restauration](../features/sauvegarde-restauration.md#effacer-le-journal).
+- **Vérification des mises à jour** — version et date de mise à jour affichées dans le
+  menu, bouton **Vérifier les mises à jour**, et revérification automatique toutes les
+  heures pour un onglet resté ouvert. Voir
+  [Bien démarrer](../getting-started/index.md#mise-à-jour-de-lapplication).
+- **Bouton « Modifier » visible** dans le Journal, à la place du crayon discret.
+- **Modèles de repas** — un modèle peut désormais **remplir un repas déjà ouvert**, quelle
+  que soit son heure (sans dupliquer les aliments déjà présents), et la liste déroulante
+  donne un accès direct à **« Modifier les modèles… »**. Voir
+  [Modèles de repas](../features/modeles-de-repas.md).
+- **Documentation** — cette documentation et son moteur de génération
+  (`DOCUMENTATION_SPEC.md`, `docs/`, `npm run docs`).
 
 ---
 

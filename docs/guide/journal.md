@@ -27,7 +27,7 @@ démarrage.
 | Élément | Rôle |
 |---|---|
 | **Badge de qualité** (à gauche du titre) | 🟢 bonne / 🟠 correcte / 🔴 difficile. Proposé automatiquement d'après le cumul des symptômes, **modifiable d'un toucher** |
-| **Crayon** (à droite) | Bascule lecture ⇄ édition |
+| **Modifier** / **Terminer** (bouton vert, à droite) | Bascule lecture ⇄ édition |
 | **Charge en amines** | Résumé du jour (faible / modérée / élevée), avec le détail des aliments concernés au toucher |
 | **Repas du jour** | Un bloc par repas |
 | **Symptômes** | Symptômes de niveau *journée* (indépendants des repas) + champ « Moment » |
@@ -55,7 +55,7 @@ démarrage.
 
 | Action | Résultat |
 |---|---|
-| Toucher le crayon | La carte passe en édition ; les champs deviennent modifiables |
+| Toucher **Modifier** | La carte passe en édition ; les champs deviennent modifiables. Le bouton devient **Terminer** |
 | Ajouter/modifier n'importe quoi | **Sauvegarde automatique** (écriture différée dans IndexedDB), pas de bouton *Enregistrer* |
 | Toucher une chip d'aliment **en lecture** | Ouvre la [fiche d'analyse de l'aliment](../features/analyse-aliment-ia.md) |
 | Toucher une chip d'aliment **en édition** | Change sa catégorie de couleur |

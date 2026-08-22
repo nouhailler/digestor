@@ -61,6 +61,8 @@ Toutes les fonctions transverses sont regroupées dans le menu de l'en-tête.
 | **Restaurer (JSON)** | Remplace toutes les données par un fichier de sauvegarde |
 | **Exporter PDF** | Impression de l'écran courant (`window.print()`) |
 | **Données de démo** | Recharge les 2 journées d'exemple (écrase ces dates) |
+| **Effacer le journal** | Supprime **toutes** les journées et les analyses associées — [détail](../features/sauvegarde-restauration.md#effacer-le-journal) |
+| **Vérifier les mises à jour** | Force la recherche d'une nouvelle version ; la ligne au-dessus affiche la version installée et sa date |
 | **Assistant IA (OpenRouter)** | [Paramètres IA](../settings/index.md#assistant-ia-openrouter) |
 | **Revoir le tutoriel & les visites guidées** | Réinitialise tutoriel et visites guidées |
 | **Dossier médical** | [Dossier médical imprimable](../features/dossier-medical.md) |

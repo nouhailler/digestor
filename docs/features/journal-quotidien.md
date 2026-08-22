@@ -17,7 +17,8 @@ Aucun. Ni compte, ni réseau, ni clé IA.
 ## Comment l'utiliser
 
 1. Onglet **Journal**, choisissez la date.
-2. Touchez le **crayon** pour passer en édition.
+2. Touchez le bouton vert **Modifier** en haut de la carte pour passer en édition
+   (il devient **Terminer** une fois en édition).
 3. **Ajouter un repas** → réglez l'heure (`HH:MM`).
 4. Tapez un aliment dans **« ajouter un aliment… »** puis `Entrée`.
    L'autocomplétion propose d'abord vos **favoris ★**, puis les aliments **récents**

@@ -73,6 +73,7 @@ les conserve. Digestor ne supprime jamais de journée de lui-même.
 | Une analyse d'aliment | Écran Aliments → icône **gomme** |
 | Un aliment partout (analyse, favori, **et toutes ses occurrences dans les repas**) | Écran Aliments → icône **corbeille** (confirmation explicite) |
 | Un repas, un traitement, une réintroduction, un modèle | Icône corbeille de la ligne |
+| **Tout le journal** (journées + analyses de journées + rapports de période) | Menu `⋯` → **Effacer le journal** (confirmation, irréversible) |
 | **Tout** | Effacez les données du site dans les réglages du navigateur, ou désinstallez l'application |
 
 ⚠️ La suppression est **définitive** : il n'y a pas de corbeille ni de restauration

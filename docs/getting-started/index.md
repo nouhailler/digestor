@@ -96,7 +96,8 @@ Aucune permission n'est demandée au démarrage. Voir [Permissions](../permissio
 
 ## Première utilisation
 
-1. Onglet **Journal** → touchez le **crayon** en haut de la carte pour passer en édition.
+1. Onglet **Journal** → touchez le bouton vert **Modifier** en haut de la carte pour
+   passer en édition.
 2. **Ajouter un repas** → réglez l'heure, tapez un aliment puis `Entrée`.
    La couleur (🔴 pro‑candidose/SIBO, 🟢 bénéfique, ⚪ neutre) est devinée
    automatiquement et se change d'un toucher sur la chip.
@@ -113,11 +114,22 @@ Tout est enregistré automatiquement (pas de bouton « Enregistrer » pour le jo
 ## Mise à jour de l'application
 
 L'application se met à jour toute seule : le service worker télécharge la nouvelle
-version en arrière-plan et l'applique au prochain lancement complet
-(`registerType: 'autoUpdate'`). Vos données ne sont pas touchées par une mise à jour.
+version en arrière-plan et l'applique automatiquement. Vos données ne sont jamais
+touchées par une mise à jour.
 
-Si une nouvelle fonction annoncée n'apparaît pas : fermez complètement l'app puis
-rouvrez-la. Voir [Dépannage](../troubleshooting/mise-a-jour-bloquee.md).
+Trois déclencheurs :
+
+| Déclencheur | Quand |
+|---|---|
+| Ouverture de l'application | À chaque lancement |
+| Vérification périodique | Toutes les **heures**, pour un onglet resté ouvert longtemps |
+| **Menu `⋯` → Vérifier les mises à jour** | À votre demande |
+
+La ligne juste au-dessus de ce bouton affiche la **version installée** et sa **date de
+mise à jour** — utile pour vérifier que vous avez bien la dernière.
+
+Si une nouvelle fonction annoncée n'apparaît pas, voir
+[Dépannage](../troubleshooting/mise-a-jour-bloquee.md).
 
 ## Désinstallation
 

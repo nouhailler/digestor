@@ -110,7 +110,9 @@ PWA mobile-first, **100 % hors-ligne**, installable sur téléphone, déployable
 - 💡 **Aide & visite guidée** — bouton `?` par écran, astuces contextuelles, tutoriel au 1er lancement,
   et **visite guidée par écran** : des bulles explicatives **ancrées aux éléments** se lancent à la
   première arrivée sur chaque écran (rejouables depuis l'aide).
-- 💾 **Export / Import JSON** complet, **export PDF** de la semaine.
+- 💾 **Export / Import JSON** complet, **export PDF** de la semaine, **« Effacer le journal »**
+  (journées + analyses, le reste conservé) et **vérification des mises à jour** (version + date
+  affichées dans le menu, revérification automatique toutes les heures).
 
 ## 🤖 Assistant IA (OpenRouter) — optionnel
 

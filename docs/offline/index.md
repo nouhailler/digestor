@@ -30,6 +30,7 @@ l'application entière et elle démarre sans réseau.
 | **Idées de repas**, fiches IA, enrichissement d'encyclopédie | ❌ | ✅ | — |
 | **Enrichir les amines avec l'IA** | ❌ | ✅ | — |
 | **Scan de produit** (Open Food Facts) | ❌ | ✅ | — |
+| **Vérifier les mises à jour** | ❌ | ✅ | — |
 | Recherche des modèles gratuits OpenRouter | ❌ | ✅ | — |
 
 ## Ce qui est mis en cache

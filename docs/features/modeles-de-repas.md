@@ -21,13 +21,23 @@ Aucun.
 - Depuis zéro : **Menu `⋯` → Modèles de repas** → nom du modèle, heure suggérée
   (facultative), aliments.
 
-**Utiliser un modèle** : Journal → mode édition → **Depuis un modèle** sous la section
-Repas → choisissez le modèle. Le repas est inséré avec des identifiants neufs : le
-modifier ensuite ne touche pas au modèle.
+**Créer un modèle** depuis un repas existant : en mode édition, le bouton
+**« Enregistrer comme modèle »** sous le repas.
+
+**Utiliser un modèle** — deux façons :
+
+| Voie | Effet |
+|---|---|
+| **Depuis un modèle**, sous la section Repas | Ajoute un **nouveau repas** à la journée, à l'heure suggérée du modèle |
+| **Depuis un modèle**, dans un repas déjà ouvert | **Remplit le repas courant** avec les aliments du modèle, **quelle que soit son heure**. L'heure du repas est conservée, et les aliments déjà présents ne sont pas dupliqués |
+
+Dans les deux cas, les aliments sont copiés avec des identifiants neufs : les modifier
+ensuite ne touche pas au modèle.
 
 ## Options
 
-- Modifier ou supprimer un modèle depuis **Menu `⋯` → Modèles de repas**.
+- Modifier ou supprimer un modèle depuis **Menu `⋯` → Modèles de repas**, ou directement
+  via **« Modifier les modèles… »** au bas de la liste déroulante « Depuis un modèle ».
 - Dans l'éditeur de modèle, un toucher sur une chip change sa catégorie de couleur.
 
 ## Paramètres associés

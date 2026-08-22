@@ -41,6 +41,16 @@ jamais eu lieu). Il propose un bouton **Sauvegarder** et une croix pour le masqu
 **Menu `⋯` → Exporter PDF** lance l'impression de l'écran courant. Pour un document
 structuré, préférez le [dossier médical](dossier-medical.md).
 
+### Effacer le journal
+
+**Menu `⋯` → Effacer le journal** supprime **toutes les journées**, ainsi que les
+**analyses IA de journées** et les **rapports de période** en cache. Une confirmation
+prévient que l'action est irréversible et invite à sauvegarder d'abord.
+
+Ce qui **reste** : votre profil santé, vos fiches d'aliments analysées, vos favoris, vos
+traitements, vos réintroductions, vos modèles de repas et vos réglages. Pour tout
+supprimer, effacez les données du site dans le navigateur.
+
 ### Données de démo
 
 **Menu `⋯` → Données de démo** recharge les deux journées d'exemple (9 juin 2025).

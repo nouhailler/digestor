@@ -80,6 +80,14 @@ Voir [Un import JSON est refusé](../troubleshooting/import-json-refuse.md).
 |---|---|---|
 | `Un problème est survenu au démarrage (tes données restent en sécurité). Détail : <nom> : <message>` | Erreur pendant l'initialisation de la base | [Erreur au démarrage](../troubleshooting/erreur-au-demarrage.md) |
 
+## Vérification des mises à jour
+
+| Message | Signification | Solution |
+|---|---|---|
+| `Nouvelle version trouvée, installation…` | Une mise à jour a été détectée ; elle s'installe et s'applique seule | Rien à faire |
+| `Vous avez déjà la dernière version.` | Aucune mise à jour disponible | Rien à faire |
+| `Vérification indisponible (app non installée hors-ligne).` | Le service worker n'est pas actif (page non rechargée depuis l'installation, ou navigateur sans service worker) | Rechargez la page ; voir [La mise à jour ne s'applique pas](../troubleshooting/mise-a-jour-bloquee.md) |
+
 ## Messages informatifs (pas des erreurs)
 
 | Message | Contexte |
@@ -93,3 +101,4 @@ Voir [Un import JSON est refusé](../troubleshooting/import-json-refuse.md).
 | `Sauvegarde téléchargée. Conservez ce fichier en lieu sûr.` | Menu |
 | `Import réussi. Données remplacées.` | Menu |
 | `Données de démo réinitialisées.` | Menu |
+| `Journal effacé.` | Menu — après **Effacer le journal** |

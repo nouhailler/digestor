@@ -25,7 +25,7 @@ Un signalement utile contient :
 
 | Information | Exemple |
 |---|---|
-| **Version de l'application** | 0.15.2 |
+| **Version de l'application** | Lisible dans **Menu `⋯`**, au-dessus de « Vérifier les mises à jour » (version + date de mise à jour) |
 | **Appareil** | iPhone 13 / Pixel 7 / PC portable |
 | **Système et version** | iOS 18.2 / Android 15 / Windows 11 |
 | **Navigateur et version** | Safari 18 / Chrome 131 |
